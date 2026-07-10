@@ -132,10 +132,10 @@ if uploaded_file is not None:
             # 7. Calcular el total de pérdidas
             perdidas = bad + miss
 
-     # --- UI DE CONFIRMACIÓN (Fuote del spinner, alineado a la izquierda) ---
-    st.write(f"Bad detectados: {bad}")
-    st.write(f"Miss detectados: {miss}")
-    st.write(f"Total Pérdidas: {perdidas}")
+           # --- UI DE CONFIRMACIÓN (Fuote del spinner, alineado a la izquierda) ---
+        st.write(f"Bad detectados: {bad}")
+        st.write(f"Miss detectados: {miss}")
+        st.write(f"Total Pérdidas: {perdidas}")
        
         
         
