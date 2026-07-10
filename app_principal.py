@@ -28,48 +28,34 @@ mx_tz = pytz.timezone('America/Mexico_City')
 def load_songs():
     with open("phigros_songs.json", "r", encoding="utf-8-sig") as f:
         return json.load(f)
-
 songs = load_songs()
 
 st.title("🎵 Canción del Día - Phigros")
 
 today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
-
-# === NUEVO: Seleccionar 2 canciones distintas ===
 daily_song = random.choice(songs)
-alternative_song = random.choice([s for s in songs if s["title"] != daily_song["title"]])
-
 CANCION_DAILY = daily_song["title"]
-CANCION_ALT = alternative_song["title"]
 
-# Guardar backup
 with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
-    json.dump({"daily": daily_song, "alternative": alternative_song}, f, ensure_ascii=False, indent=2)
+    json.dump(daily_song, f, ensure_ascii=False, indent=2)
 
-st.subheader(f"🎵 Canciones del día {today}")
-col1, col2 = st.columns(2)
+st.subheader(f"La canción elegida para hoy, {today}, es:")
+diff_parts = []
+if daily_song.get("IN") is not None: diff_parts.append(f"IN: {daily_song['IN']}")
+if daily_song.get("AT") is not None: diff_parts.append(f"AT: {daily_song['AT']}")
+diff_string = " - ".join(diff_parts)
+st.info(f"👉 **{daily_song['title']} / ({diff_string})**")
 
-with col1:
-    st.info(f"**Daily**\n**{daily_song['title']}**")
-    diff_parts = []
-    if daily_song.get("IN"): diff_parts.append(f"IN: {daily_song['IN']}")
-    if daily_song.get("AT"): diff_parts.append(f"AT: {daily_song['AT']}")
-    st.caption(" - ".join(diff_parts))
-
-with col2:
-    st.info(f"**Alternative**\n**{alternative_song['title']}**")
-    diff_parts = []
-    if alternative_song.get("IN"): diff_parts.append(f"IN: {alternative_song['IN']}")
-    if alternative_song.get("AT"): diff_parts.append(f"AT: {alternative_song['AT']}")
-    st.caption(" - ".join(diff_parts))
-
-# OCR
 @st.cache_resource
 def inicializar_ocr():
-    return easyocr.Reader(['en'])
+    return easyocr.Reader(['en']) # 'en' suele ser suficiente para nombres de usuario
 
 reader = inicializar_ocr()
+
+# Variables de estado
+cancion_objetivo = daily_song["title"]
+constante_activa = daily_song.get("IN") # Ajustar según dificultad si es necesario
 
 st.title("🏆 Sube tu mejor puntaje")
 
@@ -80,19 +66,18 @@ if uploaded_file is not None:
     ancho, alto = imagen_completa.size
     
     with st.spinner("Analizando captura..."):
-        # === OCR Usuario ===
+        # 📌 1. Área del Usuario (Esquina superior derecha)
         box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
         img_usuario = np.array(imagen_completa.crop(box_usuario))
         ocr_user = reader.readtext(img_usuario, detail=0)
-        usuario_final = " ".join(ocr_user).strip() or "Usuario_Desconocido"
-
-        # === OCR Canción ===
+        usuario_final = " ".join(ocr_user).strip() if ocr_user else "Usuario_Desconocido"
+        
+        # 📌 2. Área de la Canción (Esquina inferior izquierda)
         box_cancion = (int(ancho * 0.05), int(alto * 0.65), int(ancho * 0.40), int(alto * 0.80))
         img_cancion = np.array(imagen_completa.crop(box_cancion))
         ocr_cancion = reader.readtext(img_cancion, detail=0)
-        cancion_detectada = " ".join(ocr_cancion).strip()
-
-        # === OCR Score y Accuracy ===
+        
+        # 📌 3. Área del Score (Centro derecho superior)
         box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
         img_score = np.array(imagen_completa.crop(box_score))
         ocr_score = reader.readtext(img_score, detail=0)
@@ -102,7 +87,8 @@ if uploaded_file is not None:
             if nums:
                 score_detectado = int("".join(nums))
                 break
-
+                
+        # 📌 4. Área de la Accuracy (Centro derecho medio)
         box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
         img_acc = np.array(imagen_completa.crop(box_acc))
         ocr_acc = reader.readtext(img_acc, detail=0)
@@ -112,65 +98,40 @@ if uploaded_file is not None:
             if match:
                 accuracy_detectada = float(match.group(1))
                 break
-
-        # Correcciones de nombres
-        corrections = {
-            "crafi": "craftyy!", "Evz": "Evanii", "Shadom": "Shadow",
-            "3 MathyPop": "MathyPop", ">OMathyPop": "MathyPop"
-        }
-        usuario_final = corrections.get(usuario_final, usuario_final)
-
-        # === VALIDACIÓN DE CANCIÓN ===
-        canciones_validas = {CANCION_DAILY.lower(), CANCION_ALT.lower()}
-        cancion_lower = cancion_detectada.lower()
+                
+        #Los que se leyeron mal
+        if usuario_final== "crafi": usuario_final= "craftyy!"
+        if usuario_final== "Evz": usuario_final= "Evanii"
+        if usuario_final== "Shadom": usuario_final= "Shadow"
+        if usuario_final== "3 MathyPop": usuario_final= "MathyPop"
+        if usuario_final== ">OMathyPop": usuario_final= "MathyPop"
         
-        es_daily = any(difflib.SequenceMatcher(None, cancion_lower, title.lower()).ratio() > 0.75 
-                      for title in [CANCION_DAILY])
-        es_alt = any(difflib.SequenceMatcher(None, cancion_lower, title.lower()).ratio() > 0.75 
-                    for title in [CANCION_ALT])
-
-       ### if not (es_daily or es_alt):
-            ###st.error(f"❌ La canción detectada (**{cancion_detectada}**) no corresponde al Daily ni al Alternative de hoy.")
-            ###st.stop()
-
-        # Determinar cuál es
-        if es_daily:
-            cancion_objetivo = CANCION_DAILY
-            constante_activa = daily_song.get("IN")
-            tipo = "Daily"
-        else:
-            cancion_objetivo = CANCION_ALT
-            constante_activa = alternative_song.get("IN")
-            tipo = "Alternative"
-
-        st.success(f"✅ Canción detectada: **{cancion_objetivo}** ({tipo})")
-
-        # Mostrar datos
+        # UI de confirmación
         st.subheader("📝 Datos Extraídos")
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         col1.metric("Usuario", usuario_final)
-        col2.metric("Canción", cancion_objetivo)
-        col3.metric("Score", f"{score_detectado:,}")
-        col4.metric("Acc", f"{accuracy_detectada}%")
-
+        col2.metric("Score", f"{score_detectado:,}")
+        col3.metric("Acc", f"{accuracy_detectada}%")
+    
         if st.button("Registrar Puntaje"):
-            def calcular_rks(acc, const): 
-                return round((((acc - 55) / 45) ** 2) * const, 2)
-            
-            rks = calcular_rks(accuracy_detectada, constante_activa)
+        # Lógica de cálculo (reutilizando tus funciones previas)
+            def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
+        rks= calcular_rks(accuracy_detectada, constante_activa)
+        
+        rks_final=rks
+    
+        nuevo_score = {
+            "usuario": usuario_final,
+             "cancion": cancion_objetivo,
+             "score": score_detectado,
+             "accuracy": accuracy_detectada,
+             "rks": rks_final,
+             "fecha": today,
+        }
+        db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+        st.success("¡Registrado con éxito!")
+    
 
-            nuevo_score = {
-                "usuario": usuario_final,
-                "cancion": cancion_objetivo,
-                "tipo": tipo,                    # Nuevo campo
-                "score": score_detectado,
-                "accuracy": accuracy_detectada,
-                "rks": rks,
-                "fecha": today,
-            }
-            db.collection("scores").document(f"{usuario_final}_{today}_{tipo}").set(nuevo_score)
-            st.success(f"¡Registrado con éxito en **{tipo}**!")
-   
 #=============================================================================
 # 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
 # =============================================================================
