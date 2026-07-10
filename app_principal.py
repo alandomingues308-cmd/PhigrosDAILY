@@ -152,8 +152,8 @@ if uploaded_file is not None:
              "fecha": today,
              "bad": bad_detectados
         }
-          db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-          st.success("¡Registrado con éxito!")
+         db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+         st.success("¡Registrado con éxito!")
     
 
 #=============================================================================
