@@ -39,6 +39,7 @@ today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 # y para que cambie automáticamente al llegar a las 00:00
 random.seed(today)
 daily_song = random.choice(songs)
+CANCION_DAILY= daily_song["title"]
 
 with open("daily_backup.json","w",encoding="utf-8-sig") as f:
     json.dump(daily_song,f,ensure_ascii=False,indent=2)
