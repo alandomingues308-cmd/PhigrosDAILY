@@ -19,7 +19,9 @@ def init_firestore():
 # Uso de la conexión
 db = init_firestore()
 
-with open(K,"r",encoding="utf-8-sig") as f:
+K= "daily_backup.json"
+if os.path.exists(K):
+    with open(K,"r",encoding="utf-8-sig") as f:
         datos_daily= json.load(f)
         CANCION_DAILY= datos_daily.get("title")
 # =============================================================================
