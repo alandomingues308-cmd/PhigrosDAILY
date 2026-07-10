@@ -45,7 +45,6 @@ diff_parts = []
 if daily_song.get("IN") is not None: diff_parts.append(f"IN: {daily_song['IN']}")
 if daily_song.get("AT") is not None: diff_parts.append(f"AT: {daily_song['AT']}")
 diff_string = " - ".join(diff_parts)
-st.info(f"👉 **{daily_song['title']} / ({diff_string})**")
 
 @st.cache_resource
 def inicializar_ocr():
@@ -55,6 +54,7 @@ reader = inicializar_ocr()
 
 # Variables de estado
 cancion_objetivo = daily_song["title"]
+usuario_final= st.text_input("usuario: ")
 
 st.title("🏆 Sube tu mejor puntaje")
 
@@ -125,7 +125,7 @@ if uploaded_file is not None:
         if usuario_final== ">OMathyPop": usuario_final= "MathyPop"
         if usuario_final== "MalenaF": usuario_final= "MalenaPop"
         if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
-        usuario_final= st.text_input("usuario: ")
+        
         
         # UI de confirmación
         st.subheader("📝 Datos Extraídos")
