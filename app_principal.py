@@ -105,28 +105,40 @@ if uploaded_file is not None:
         st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
     
     #Identificar el usuario
-       
         with st.spinner("Analizando imagen..."):
-            perdidas= 0
-            img_array = np.array(image)
-            lineas_texto = reader.readtext(img_array, detail=0)
+        # 1. Obtener dimensiones de la imagen cargada
+        ancho, alto = image.size
+        
+        # 2. Definir las coordenadas exactas para BAD y MISS (un poco más amplias para asegurar)
+        box_bad = (int(ancho * 0.60), int(alto * 0.66), int(ancho * 0.67), int(alto * 0.78))
+        box_miss = (int(ancho * 0.69), int(alto * 0.66), int(ancho * 0.76), int(alto * 0.78))
+        
+        # 3. Recortar los fragmentos de la imagen
+        img_bad = image.crop(box_bad)
+        img_miss = image.crop(box_miss)
+        
+        # 4. Pasar los recortes a escala de grises (mejora drásticamente la lectura de números delgados)
+        img_bad_gray = img_bad.convert('L')
+        img_miss_gray = img_miss.convert('L')
+        
+        # 5. Ejecutar el OCR solo en esos pequeños cuadros obligando a buscar números
+        res_bad = reader.readtext(np.array(img_bad_gray), detail=0, allowlist='0123456789')
+        res_miss = reader.readtext(np.array(img_miss_gray), detail=0, allowlist='0123456789')
+        
+        # 6. Asignar los valores de forma segura (si no detecta nada, se vuelve 0 automáticamente)
+        bad = int(res_bad[0]) if res_bad and res_bad[0].isdigit() else 0
+        miss = int(res_miss[0]) if res_miss and res_miss[0].isdigit() else 0
+        
+        # 7. Calcular el total de pérdidas
+        perdidas = bad + miss
 
-        desglose_encontrado = False
-        for elemento in lineas_texto:
-            texto_limpio = elemento.strip()
-        # Buscamos una secuencia de números separados por espacios (ej: "1257 0 0 0")
-            numeros_linea =  re.findall(r'\b\d+ \d+ \d+ \d+\b', texto_limpio)
-            if numeros_linea:
-                valores = [int(n) for n in numeros_linea[0]]
-                perfect_detectado = valores[0]
-                good_detectado = valores[1]
-                bad = valores[2]
-                miss = valores[3]
-                desglose_encontrado = True
-                perdidas= bad + miss
-                break
-            st.write("Contenido de lineas_texto detectado:")
-            st.write(lineas_texto)
+    # --- UI DE CONFIRMACIÓN (Fuote del spinner, alineado a la izquierda) ---
+    st.write(f"Bad detectados: {bad}")
+    st.write(f"Miss detectados: {miss}")
+    st.write(f"Total Pérdidas: {perdidas}")
+       
+        
+        
         #Los que se leyeron mal
         if usuario_final== "crafi": usuario_final= "craftyy!"
         if usuario_final== "Evz": usuario_final= "Evanii"
