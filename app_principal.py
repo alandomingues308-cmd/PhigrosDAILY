@@ -1,9 +1,11 @@
+import os
+import re
+import numpy as np
+import pandas as pd
 import streamlit as st
-import random
-import json
-import pytz
+import easyocr
+from PIL import Image
 from datetime import datetime
-
 from google.cloud import firestore
 from google.oauth2 import service_account
 
