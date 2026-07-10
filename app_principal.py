@@ -120,6 +120,7 @@ if uploaded_file is not None:
                 bad = valores[2]
                 miss = valores[3]
                 desglose_encontrado = True
+                perdidas= bad + miss
                 break
             
         #Los que se leyeron mal
@@ -137,7 +138,6 @@ if uploaded_file is not None:
         # Lógica de cálculo (reutilizando tus funciones previas)
             def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
             rks= calcular_rks(accuracy_detectada, constante_activa)
-        perdidas= bad + miss
         
         if score_detectado == 1000000: bono= 2
         elif perdidas== 0: bono= 1.5
