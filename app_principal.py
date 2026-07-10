@@ -105,17 +105,18 @@ if uploaded_file is not None:
         st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
 
         with st.spinner("Analizando imagen..."):
-        # 1. Definimos una franja horizontal que cubra el área de Bad y Miss
+            # 1. Definimos una franja que empieza después de los 'Good' para ignorar el 35
             ancho, alto = image.size
-            franja_box = (int(ancho * 0.60), int(alto * 0.65), int(ancho * 0.80), int(alto * 0.78))
+            # Ajuste de coordenadas: inicia en 0.66 para saltar los 'Good'
+            franja_box = (int(ancho * 0.66), int(alto * 0.65), int(ancho * 0.78), int(alto * 0.78))
             img_franja = image.crop(franja_box).convert('L')
         
-        # 2. Aumentamos el contraste para facilitar la lectura del '1'
+        # 2. Aumentamos contraste
             from PIL import ImageEnhance
             enhancer = ImageEnhance.Contrast(img_franja)
             img_franja = enhancer.enhance(2.0)
         
-        # 3. Leemos con parámetros agresivos para detectar números delgados
+        # 3. Lectura con parámetros agresivos
             resultados = reader.readtext(
                 np.array(img_franja), 
                 detail=1, 
@@ -125,28 +126,25 @@ if uploaded_file is not None:
                 text_threshold=0.3
             )
         
-        # 4. Clasificamos los números detectados por su posición X
+        # 4. Lógica de asignación por posición X
             bad = 0
             miss = 0
         
             for (bbox, texto, prob) in resultados:
                 pos_x = bbox[0][0]
-                 # Convertimos a entero asegurando que sea un número
                 if texto.isdigit():
                     valor = int(texto)
-                # Según la posición en la franja, asignamos a Bad o Miss
-                if pos_x < 60: 
-                    bad = valor
-                else:
-                    miss = valor
+                    # Si está al principio de esta nueva franja es Bad, si está más a la derecha es Miss
+                    if pos_x < 30: 
+                        bad = valor
+                    else:
+                        miss = valor
         
-            perdidas = bad + miss
-            st.write(f"Depuración - OCR detectó: {resultados}")
-            st.write(f"Bad detectados: {bad} | Miss detectados: {miss} | Total: {perdidas}")
-    
+        perdidas = bad + miss
+        st.write(f"Depuración - OCR detectó: {resultados}")
+        st.write(f"Bad detectados: {bad} | Miss detectados: {miss} | Total: {perdidas}")
 
-      
-       
+        
         
         
         #Los que se leyeron mal
