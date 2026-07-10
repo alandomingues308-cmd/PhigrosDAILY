@@ -165,7 +165,7 @@ if todos_los_scores:
         df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
         if not df_hoy.empty:
             st.subheader(f"Top del Día - {CANCION_DAILY}")
-            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
+            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks","bad_detectados"]], use_container_width=True)
         else:
             st.info("Aún no hay scores subidos para el desafío de hoy.")
             
