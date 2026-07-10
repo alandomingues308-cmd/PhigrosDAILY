@@ -155,7 +155,6 @@ if uploaded_file is not None:
              "accuracy": accuracy_detectada,
              "rks": rks_final,
              "fecha": today,
-             "bad": bad_detectados
         }
         db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
         st.success("¡Registrado con éxito!")
