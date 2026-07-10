@@ -137,7 +137,7 @@ if uploaded_file is not None:
         rks= calcular_rks(accuracy_detectada, constante_activa)
 
         if score_detectado == 1000000: bono= 2
-        elif bad_detectados + miss detectados== 0: 1.5
+        elif bad_detectados + miss_detectados== 0: 1.5
         elif score_detectado >= 960000: bono= 1
         elif score_detectado >= 920000: bono= 0.5
         elif score_detectado >= 880000: bono= 0.2
