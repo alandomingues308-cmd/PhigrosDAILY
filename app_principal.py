@@ -11,6 +11,7 @@ from google.oauth2 import service_account
 import pytz
 import random
 import json
+import difflib
 
 @st.cache_resource
 def init_firestore():
@@ -111,6 +112,13 @@ today = st.session_state.get("daily_fecha", datetime.now().strftime("%Y-%m-%d"))
 # 3. INTERFAZ DE USUARIO (Streamlit)
 # =============================================================================
 
+try:
+    with open("phigros_songs.json", "r", encoding="utf-8") as f:
+        datos_canciones = json.load(f)
+        lista_nombres_canciones = [c["title"] for c in datos_canciones if "title" in c]
+except:
+    lista_nombres_canciones = []
+    
 st.title("🏆 Sube tu mejor puntaje")
 
 usuario_activo = st.text_input("Ingresa tu nombre de usuario del juego:", "").strip()
@@ -184,14 +192,24 @@ if uploaded_file is not None and usuario_activo != "":
     col4.metric("Bad / Miss", f"{bad_detectados} / {miss_detectados}")
 
     # --- BOTÓN DE PROCESAMIENTO Y VALIDACIÓN ---
-    if st.button("Validar y Registrar Puntaje"):
-        def son_similares(texto1, texto2):
-            limpiar = lambda t: re.sub(r'[/|lI]', '1', t.lower().replace(" ", ""))
-            return limpiar(texto1) == limpiar(texto2)
-        if not son_similares(cancion_detectada, CANCION_DAILY):
-           st.error(f"❌ La canción leída '{cancion_detectada}' no coincide con el Daily: '{CANCION_DAILY}'.")
-        else:
-            rks_base = calcular_rks_puro(accuracy_detectada, constante_activa)
+def obtener_cancion_mas_cercana(texto_ocr, lista_candidatos):
+    if not lista_candidatos: return texto_ocr
+    coincidencias = difflib.get_close_matches(texto_ocr, lista_candidatos, n=1, cutoff=0.6)
+    return coincidencias[0] if coincidencias else texto_ocr
+
+def son_similares(texto1, texto2):
+    limpiar = lambda t: re.sub(r'[/|lI]', '1', t.lower().replace(" ", ""))
+    return limpiar(texto1) == limpiar(texto2)
+    
+texto_leido = " ".join(ocr_cancion_res).strip()
+cancion_detectada = obtener_cancion_mas_cercana(texto_leido, lista_nombres_canciones
+                                                
+if st.button("Validar y Registrar Puntaje"):
+    if not son_similares(cancion_detectada, CANCION_DAILY):
+        st.error(f"❌ La canción detectada '{cancion_detectada}' no coincide con el Daily: '{CANCION_DAILY}'.")
+    else:
+        st.success(f"✅ Canción validada: {cancion_detectada}")
+        rks_base = calcular_rks_puro(accuracy_detectada, constante_activa)
             rango, bono = obtener_rango_y_bono(score_detectado, bad_detectados, miss_detectados)
             rks_final = round(rks_base + bono, 4)
             nuevo_score = {
@@ -203,8 +221,6 @@ if uploaded_file is not None and usuario_activo != "":
                 "rango": rango,
                 "fecha": today
             }
-
-
        
             
 
