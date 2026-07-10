@@ -54,9 +54,9 @@ reader = inicializar_ocr()
 
 # Variables de estado
 cancion_objetivo = daily_song["title"]
-usuario_final= st.text_input("usuario: ")
 
 st.title("🏆 Sube tu mejor puntaje")
+usuario_final= st.text_input("usuario: ")
 
 uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", type=["png", "jpg", "jpeg"])
 
