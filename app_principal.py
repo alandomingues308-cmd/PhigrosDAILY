@@ -81,7 +81,7 @@ if uploaded_file is not None:
                 constante_activa = daily_song.get("IN", 0)
                 dificultad_usada = "IN"
             
-            st.info(f"Dificultad detectada: {dificultad_usada}")
+        st.info(f"Dificultad detectada: {dificultad_usada}")
                 
         # 📌 1. Área del Usuario (Esquina superior derecha)
         box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
