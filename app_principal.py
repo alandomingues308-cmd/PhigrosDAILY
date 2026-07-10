@@ -202,7 +202,7 @@ def son_similares(texto1, texto2):
     return limpiar(texto1) == limpiar(texto2)
     
 texto_leido = " ".join(ocr_cancion_res).strip()
-cancion_detectada = obtener_cancion_mas_cercana(texto_leido, lista_nombres_canciones
+cancion_detectada = obtener_cancion_mas_cercana(texto_leido, lista_nombres_canciones)
                                                 
 if st.button("Validar y Registrar Puntaje"):
     if not son_similares(cancion_detectada, CANCION_DAILY):
