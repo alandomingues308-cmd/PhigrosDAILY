@@ -101,9 +101,9 @@ if uploaded_file is not None:
 
         # 📌 5. Área BAD/MISS
         for elemento in lineas_texto:
-        texto_limpio = elemento.strip()
+            texto_limpio = elemento.strip()
         # Buscamos una secuencia de números separados por espacios (ej: "1257 0 0 0")
-        numeros_linea = re.findall(r'\b\d+ \d+ \d+ \d+\b', texto_limpio)
+            numeros_linea = re.findall(r'\b\d+ \d+ \d+ \d+\b', texto_limpio)
         
         if numeros_linea:
             valores = [int(n) for n in numeros_linea[0].split()]
