@@ -129,7 +129,7 @@ if uploaded_file is not None:
 
     rks_final=(rks+bono)/2
     
-        nuevo_score = {
+    nuevo_score = {
              "usuario": usuario_final,
              "cancion": cancion_objetivo,
              "score": score_detectado,
