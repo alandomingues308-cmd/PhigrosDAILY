@@ -124,31 +124,31 @@ if usuario_final== "Evz": usuario_final= "Evanii"
 if usuario_final== "Shadom": usuario_final= "Shadow"
         
     # UI de confirmación
-    st.subheader("📝 Datos Extraídos")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Usuario", usuario_final)
-    col2.metric("Score", f"{score_detectado:,}")
-    col3.metric("Acc", f"{accuracy_detectada}%")
+st.subheader("📝 Datos Extraídos")
+col1, col2, col3 = st.columns(3)
+col1.metric("Usuario", usuario_final)
+col2.metric("Score", f"{score_detectado:,}")
+col3.metric("Acc", f"{accuracy_detectada}%")
 
     
-    if st.button("Registrar Puntaje"):
-        # Lógica de cálculo (reutilizando tus funciones previas)
-        def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
-        rks= calcular_rks(accuracy_detectada, constante_activa)
+if st.button("Registrar Puntaje"):
+     # Lógica de cálculo (reutilizando tus funciones previas)
+     def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
+     rks= calcular_rks(accuracy_detectada, constante_activa)
 
-        if score_detectado == 1000000: bono= 2
-        elif (bad_detectados + miss_detectados)== 0: bono= 1.5
-        elif score_detectado >= 960000: bono= 1
-        elif score_detectado >= 920000: bono= 0.5
-        elif score_detectado >= 880000: bono= 0.2
-        else: bono=0
+     if score_detectado == 1000000: bono= 2
+     elif (bad_detectados + miss_detectados)== 0: bono= 1.5
+     elif score_detectado >= 960000: bono= 1
+     elif score_detectado >= 920000: bono= 0.5
+     elif score_detectado >= 880000: bono= 0.2
+     else: bono=0
 
-        st.write(f"DEBUG: Bad detectados: {bad_detectados}, Miss detectados: {miss_detectados}")
-        st.write(f"DEBUG: Suma: {bad_detectados + miss_detectados}")
+     st.write(f"DEBUG: Bad detectados: {bad_detectados}, Miss detectados: {miss_detectados}")
+     st.write(f"DEBUG: Suma: {bad_detectados + miss_detectados}")
 
-        rks_final=(rks+bono)/2
+     rks_final=(rks+bono)/2
     
-        nuevo_score = {
+     nuevo_score = {
              "usuario": usuario_final,
              "cancion": cancion_objetivo,
              "score": score_detectado,
@@ -157,8 +157,8 @@ if usuario_final== "Shadom": usuario_final= "Shadow"
              "fecha": today,
              "bad": bad_detectados
         }
-        db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-        st.success("¡Registrado con éxito!")
+      db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+      st.success("¡Registrado con éxito!")
 
 #=============================================================================
 # 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
