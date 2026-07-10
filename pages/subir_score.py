@@ -173,7 +173,7 @@ if uploaded_file is not None and usuario_activo != "":
             # 🔥 GUARDAR DIRECTO EN LA BASE DE DATOS DE STREAMLIT
             # Crea un identificador único en la nube (Usuario_Cancion_Fecha) para no duplicar datos
             doc_id = f"{usuario_activo}_{cancion_objetivo}_{today}"
-            doc_ref = conn.collection("scores").document(doc_id)
+            doc_ref = db.collection("scores").document(doc_id)
             doc_ref.set(nuevo_score)
                 
             st.success(f"🏆 ¡Score registrado en la nube! RKS final logrado: {rks_final} ({rango})")
