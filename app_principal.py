@@ -110,8 +110,8 @@ if uploaded_file is not None:
             ancho, alto = image.size
         
             # 2. Definir las coordenadas exactas para BAD y MISS (un poco más amplias para asegurar)
-            box_bad = (int(ancho * 0.60), int(alto * 0.66), int(ancho * 0.67), int(alto * 0.78))
-            box_miss = (int(ancho * 0.69), int(alto * 0.66), int(ancho * 0.76), int(alto * 0.78))
+            box_bad = (int(ancho * 0.635), int(alto * 0.67), int(ancho * 0.67), int(alto * 0.77))
+            box_miss = (int(ancho * 0.71), int(alto * 0.67), int(ancho * 0.75), int(alto * 0.77))
         
             # 3. Recortar los fragmentos de la imagen
             img_bad = image.crop(box_bad)
