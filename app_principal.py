@@ -111,7 +111,7 @@ today = st.session_state.get("daily_fecha", datetime.now().strftime("%Y-%m-%d"))
 # 3. INTERFAZ DE USUARIO (Streamlit)
 # =============================================================================
 
-st.title("🏆 Phigros Score Tracker & Leaderboard")
+st.title("🏆 Sube tu mejor puntaje")
 
 usuario_activo = st.text_input("Ingresa tu nombre de usuario del juego:", "").strip()
 
