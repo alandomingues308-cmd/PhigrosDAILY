@@ -16,12 +16,9 @@ def init_firestore():
     creds = service_account.Credentials.from_service_account_info(key_dict)
     return firestore.Client(credentials=creds, project=key_dict["project_id"])
 
+# Uso de la conexión
 db = init_firestore()
 
-# =============================================================================
-# 0. CONEXIÓN NATIVA A LA BASE DE DATOS DE STREAMLIT
-# =============================================================================
-conn = st.connection("firestore", type="firestore")
 
 # =============================================================================
 # 1. FUNCIONES CORE (Cálculos y Lógica de Phigros)
