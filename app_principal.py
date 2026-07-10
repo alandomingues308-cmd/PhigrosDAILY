@@ -130,8 +130,8 @@ if uploaded_file is not None:
                     for title in [CANCION_ALT])
 
        ### if not (es_daily or es_alt):
-            st.error(f"❌ La canción detectada (**{cancion_detectada}**) no corresponde al Daily ni al Alternative de hoy.")
-            st.stop()
+            ###st.error(f"❌ La canción detectada (**{cancion_detectada}**) no corresponde al Daily ni al Alternative de hoy.")
+            ###st.stop()
 
         # Determinar cuál es
         if es_daily:
