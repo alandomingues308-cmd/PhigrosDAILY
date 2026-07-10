@@ -100,23 +100,25 @@ if uploaded_file is not None:
                 break
 
         # 📌 5. Área BAD/MISS
-def extraer_numero(img_crop):
-    # 'allowlist' fuerza al OCR a buscar solo números
-    res = reader.readtext(img_crop, detail=0, allowlist='0123456789')
-    for item in res:
-        if item.isdigit():
-            return int(item)
-    return 0
+       def extraer_numero(img_crop):
+           res = reader.readtext(img_crop, detail=0, allowlist='0123456789')
+           for item in res:
+              if item.isdigit():
+                 return int(item)
+                 return 0
+        # Box Bad
+        box_bad = (int(ancho * 0.61), int(alto * 0.67), int(ancho * 0.66), int(alto * 0.77))
+        img_bad = imagen_completa.crop(box_bad)
+        bad_detectados = extraer_numero(np.array(img_bad))
 
-# Box Bad
-box_bad = (int(ancho * 0.61), int(alto * 0.67), int(ancho * 0.66), int(alto * 0.77))
-img_bad = imagen_completa.crop(box_bad)
-bad_detectados = extraer_numero(np.array(img_bad))
+        # Box Miss
+        box_miss = (int(ancho * 0.71), int(alto * 0.67), int(ancho * 0.76), int(alto * 0.77))
+        img_miss = imagen_completa.crop(box_miss)
+        miss_detectados = extraer_numero(np.array(img_miss))
 
-# Box Miss
-box_miss = (int(ancho * 0.71), int(alto * 0.67), int(ancho * 0.76), int(alto * 0.77))
-img_miss = imagen_completa.crop(box_miss)
-miss_detectados = extraer_numero(np.array(img_miss))
+
+
+
     
     #Los que se leyeron mal
 if usuario_final== "crafi": usuario_final= "craftyy!"
