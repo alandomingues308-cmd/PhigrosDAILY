@@ -19,11 +19,6 @@ def init_firestore():
 # Uso de la conexión
 db = init_firestore()
 
-K= "daily_backup.json"
-if os.path.exists(K):
-    with open(K,"r",encoding="utf-8-sig") as f:
-        datos_daily= json.load(f)
-        CANCION_DAILY= datos_daily.get("title")
 # =============================================================================
 # 1. FUNCIONES CORE (Cálculos y Lógica de Phigros)
 # =============================================================================
@@ -140,14 +135,7 @@ if uploaded_file is not None and usuario_activo != "":
         box_miss = (int(ancho * 0.69), int(alto * 0.66), int(ancho * 0.77), int(alto * 0.77))
         img_miss = np.array(imagen_completa.crop(box_miss))
         ocr_miss_res = reader.readtext(img_miss, detail=0)
-
-        if cancion_detectada == CANCION_DAILY :
-             st.success(f"✨ Validación correcta. Los datos de la captura corresponden al Daily asignado.")
-            continue
-        else:
-            st.error(f"❌ *Captura Rechazada:* La canción identificada no coincide con el daily seleccionado)
-            break
-            
+    
         miss_detectados = 0
         numeros_miss = re.findall(r'\d+', " ".join(ocr_miss_res))
         if numeros_miss:
