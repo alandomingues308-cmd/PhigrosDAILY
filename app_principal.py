@@ -157,8 +157,8 @@ if st.button("Registrar Puntaje"):
              "fecha": today,
              "bad": bad_detectados
         }
-       db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-       st.success("¡Registrado con éxito!")
+      db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+      st.success("¡Registrado con éxito!")
 
 #=============================================================================
 # 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
