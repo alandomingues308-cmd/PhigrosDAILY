@@ -100,8 +100,16 @@ if uploaded_file is not None:
                 break
 
         # 📌 5. Área BAD/MISS
-        for elemento in lineas_texto:
-            texto_limpio = elemento.strip()
+
+          image = Image.open(uploaded_file)
+          st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
+    
+    #Identificar el usuario
+          with st.spinner("Analizando imagen..."):
+              img_array = np.array(image)
+              lineas_texto = reader.readtext(img_array, detail=0)
+          for elemento in lineas_texto:
+              texto_limpio = elemento.strip()
         # Buscamos una secuencia de números separados por espacios (ej: "1257 0 0 0")
             numeros_linea = re.findall(r'\b\d+ \d+ \d+ \d+\b', texto_limpio)
         
