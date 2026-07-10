@@ -140,7 +140,8 @@ if uploaded_file is not None:
              "score": score_detectado,
              "accuracy": accuracy_detectada,
              "rks": rks_final,
-             "fecha": today
+             "fecha": today,
+             "bad": bad_detectados
         }
         db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
         st.success("¡Registrado con éxito!")
@@ -165,7 +166,7 @@ if todos_los_scores:
         df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
         if not df_hoy.empty:
             st.subheader(f"Top del Día - {CANCION_DAILY}")
-            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks","bad_detectados"]], use_container_width=True)
+            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks","bad"]], use_container_width=True)
         else:
             st.info("Aún no hay scores subidos para el desafío de hoy.")
             
