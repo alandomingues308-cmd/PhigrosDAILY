@@ -56,7 +56,6 @@ reader = inicializar_ocr()
 cancion_objetivo = daily_song["title"]
 
 st.title("🏆 Sube tu mejor puntaje")
-usuario_final= st.text_input("usuario: ")
 
 uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", type=["png", "jpg", "jpeg"])
 
@@ -126,7 +125,7 @@ if uploaded_file is not None:
         if usuario_final== "MalenaF": usuario_final= "MalenaPop"
         if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
         
-        
+        usuario_final= st.text_input("¿Usuario incorrecto?, cambialo aquí: ")
         # UI de confirmación
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
