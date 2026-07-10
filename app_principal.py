@@ -98,55 +98,7 @@ if uploaded_file is not None:
             if match:
                 accuracy_detectada = float(match.group(1))
                 break
-
-        # 📌 5. Área BAD/MISS
-
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
-
-        with st.spinner("Analizando imagen..."):
-            # 1. Definimos una franja que empieza después de los 'Good' para ignorar el 35
-            ancho, alto = image.size
-            # Ajuste de coordenadas: inicia en 0.66 para saltar los 'Good'
-            franja_box = (int(ancho * 0.66), int(alto * 0.65), int(ancho * 0.78), int(alto * 0.78))
-            img_franja = image.crop(franja_box).convert('L')
-        
-        # 2. Aumentamos contraste
-            from PIL import ImageEnhance
-            enhancer = ImageEnhance.Contrast(img_franja)
-            img_franja = enhancer.enhance(2.0)
-        
-        # 3. Lectura con parámetros agresivos
-            resultados = reader.readtext(
-                np.array(img_franja), 
-                detail=1, 
-                allowlist='0123456789',
-                contrast_ths=0.2,
-                adjust_contrast=0.5,
-                text_threshold=0.3
-            )
-        
-        # 4. Lógica de asignación por posición X
-            bad = 0
-            miss = 0
-        
-            for (bbox, texto, prob) in resultados:
-                pos_x = bbox[0][0]
-                if texto.isdigit():
-                    valor = int(texto)
-                    # Si está al principio de esta nueva franja es Bad, si está más a la derecha es Miss
-                    if pos_x < 30: 
-                        bad = valor
-                    else:
-                        miss = valor
-        
-        perdidas = bad + miss
-        st.write(f"Depuración - OCR detectó: {resultados}")
-        st.write(f"Bad detectados: {bad} | Miss detectados: {miss} | Total: {perdidas}")
-
-        
-        
-        
+                
         #Los que se leyeron mal
         if usuario_final== "crafi": usuario_final= "craftyy!"
         if usuario_final== "Evz": usuario_final= "Evanii"
@@ -163,14 +115,7 @@ if uploaded_file is not None:
             def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
         rks= calcular_rks(accuracy_detectada, constante_activa)
         
-        if score_detectado == 1000000: bono= 2
-        elif perdidas== 0: bono= 1.5
-        elif score_detectado >= 960000: bono= 1
-        elif score_detectado >= 920000: bono= 0.5
-        elif score_detectado >= 880000: bono= 0.2
-        else: bono=0
-            
-        rks_final=(rks+bono)/2
+        rks_final=(rks)/1.5
     
         nuevo_score = {
             "usuario": usuario_final,
