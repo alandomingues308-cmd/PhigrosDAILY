@@ -110,10 +110,12 @@ if uploaded_file is not None:
             perdidas= 0
             img_array = np.array(image)
             lineas_texto = reader.readtext(img_array, detail=0)
+
+        desglose_encontrado = False
         for elemento in lineas_texto:
             texto_limpio = elemento.strip()
         # Buscamos una secuencia de números separados por espacios (ej: "1257 0 0 0")
-            numeros_linea = re.findall(r'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)', texto_limpio)
+            numeros_linea =  re.findall(r'\b\d+ \d+ \d+ \d+\b', texto_limpio)
             if numeros_linea:
                 valores = [int(n) for n in numeros_linea[0]]
                 perfect_detectado = valores[0]
