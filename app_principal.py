@@ -141,6 +141,19 @@ if uploaded_file is not None and usuario_activo != "":
         ocr_cancion_res = reader.readtext(img_cancion, detail=0)
         cancion_detectada = " ".join(ocr_cancion_res).strip() if ocr_cancion_res else "Desconocida"
         
+        def obtener_cancion_mas_cercana(texto_ocr, lista_candidatos):
+            if not lista_candidatos: return texto_ocr
+            coincidencias = difflib.get_close_matches(texto_ocr, lista_candidatos, n=1, cutoff=0.6)
+            return coincidencias[0] if coincidencias else texto_ocr
+
+        def son_similares(texto1, texto2):
+            limpiar = lambda t: re.sub(r'[/|lI]', '1', t.lower().replace(" ", ""))
+            return limpiar(texto1) == limpiar(texto2)
+
+        texto_leido = " ".join(ocr_cancion_res).strip()
+        cancion_detectada = obtener_cancion_mas_cercana(texto_leido, lista_nombres_canciones)
+                                                
+        
         # 📌 Recorte 2: Área del Score (Centro derecho superior)
         box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.80), int(alto * 0.50))
         img_score = np.array(imagen_completa.crop(box_score))
@@ -192,18 +205,6 @@ if uploaded_file is not None and usuario_activo != "":
     col4.metric("Bad / Miss", f"{bad_detectados} / {miss_detectados}")
 
     # --- BOTÓN DE PROCESAMIENTO Y VALIDACIÓN ---
-def obtener_cancion_mas_cercana(texto_ocr, lista_candidatos):
-    if not lista_candidatos: return texto_ocr
-    coincidencias = difflib.get_close_matches(texto_ocr, lista_candidatos, n=1, cutoff=0.6)
-    return coincidencias[0] if coincidencias else texto_ocr
-
-def son_similares(texto1, texto2):
-    limpiar = lambda t: re.sub(r'[/|lI]', '1', t.lower().replace(" ", ""))
-    return limpiar(texto1) == limpiar(texto2)
-
-texto_leido = " ".join(ocr_cancion_res).strip()
-cancion_detectada = obtener_cancion_mas_cercana(texto_leido, lista_nombres_canciones)
-                                                
 if st.button("Validar y Registrar Puntaje"):
     if not son_similares(cancion_detectada, CANCION_DAILY):
         st.error(f"❌ La canción detectada '{cancion_detectada}' no coincide con el Daily: '{CANCION_DAILY}'.")
