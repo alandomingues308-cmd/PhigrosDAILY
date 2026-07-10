@@ -109,12 +109,15 @@ if uploaded_file is not None:
         # Box Bad
         box_bad = (int(ancho * 0.61), int(alto * 0.67), int(ancho * 0.66), int(alto * 0.77))
         img_bad = imagen_completa.crop(box_bad)
-        bad_detectados = extraer_numero(np.array(img_bad))
-
+        bad = extraer_numero(np.array(img_bad))
+        bad_detectados= int(bad)
+    
         # Box Miss
         box_miss = (int(ancho * 0.71), int(alto * 0.67), int(ancho * 0.76), int(alto * 0.77))
         img_miss = imagen_completa.crop(box_miss)
-        miss_detectados = extraer_numero(np.array(img_miss))
+        miss = extraer_numero(np.array(img_miss))
+        miss_detectados= int(miss)
+        
         #Los que se leyeron mal
         if usuario_final== "crafi": usuario_final= "craftyy!"
         if usuario_final== "Evz": usuario_final= "Evanii"
