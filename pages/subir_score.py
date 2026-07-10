@@ -7,6 +7,17 @@ import easyocr
 from PIL import Image
 from datetime import datetime
 
+from google.cloud import firestore
+from google.oauth2 import service_account
+
+@st.cache_resource
+def init_firestore():
+    key_dict = dict(st.secrets["firestore"])
+    creds = service_account.Credentials.from_service_account_info(key_dict)
+    return firestore.Client(credentials=creds, project=key_dict["project_id"])
+
+db = init_firestore()
+
 # =============================================================================
 # 0. CONEXIÓN NATIVA A LA BASE DE DATOS DE STREAMLIT
 # =============================================================================
