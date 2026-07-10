@@ -138,8 +138,8 @@ if uploaded_file is not None:
         elif score_detectado >= 880000: bono= 0.2
         else: bono=0
 
-       st.write(f"DEBUG: Bad detectados: {bad_detectados}, Miss detectados: {miss_detectados}")
-       st.write(f"DEBUG: Suma: {bad_detectados + miss_detectados}")
+        st.write(f"DEBUG: Bad detectados: {bad_detectados}, Miss detectados: {miss_detectados}")
+        st.write(f"DEBUG: Suma: {bad_detectados + miss_detectados}")
 
      rks_final=(rks+bono)/2
     
