@@ -168,7 +168,7 @@ if uploaded_file is not None and usuario_activo != "":
     # --- BOTÓN DE PROCESAMIENTO Y VALIDACIÓN ---
     if st.button("Validar y Registrar Puntaje"):
         
-        if cancion_detectada.strip().lower() != cancion_objetivo.strip().lower():
+        if cancion_detectada != CANCION_DAILY:
             st.error(f"❌ La captura corresponde a '{cancion_detectada}', pero el Daily de hoy es '{cancion_objetivo}'.")
         else:
             rks_base = calcular_rks_puro(accuracy_detectada, constante_activa)
