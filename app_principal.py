@@ -115,15 +115,10 @@ if uploaded_file is not None:
         box_miss = (int(ancho * 0.71), int(alto * 0.67), int(ancho * 0.76), int(alto * 0.77))
         img_miss = imagen_completa.crop(box_miss)
         miss_detectados = extraer_numero(np.array(img_miss))
-
-
-
-
-    
-    #Los que se leyeron mal
-if usuario_final== "crafi": usuario_final= "craftyy!"
-if usuario_final== "Evz": usuario_final= "Evanii"
-if usuario_final== "Shadom": usuario_final= "Shadow"
+        #Los que se leyeron mal
+        if usuario_final== "crafi": usuario_final= "craftyy!"
+        if usuario_final== "Evz": usuario_final= "Evanii"
+        if usuario_final== "Shadom": usuario_final= "Shadow"
         
     # UI de confirmación
 st.subheader("📝 Datos Extraídos")
@@ -131,7 +126,6 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Usuario", usuario_final)
 col2.metric("Score", f"{score_detectado:,}")
 col3.metric("Acc", f"{accuracy_detectada}%")
-
     
 if st.button("Registrar Puntaje"):
      # Lógica de cálculo (reutilizando tus funciones previas)
