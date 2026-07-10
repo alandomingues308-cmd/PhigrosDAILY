@@ -187,7 +187,7 @@ st.write("---")
 st.header("📊 Tablas de Clasificación")
 
 # 🔥 LEER DIRECTO DESDE LA BASE DE DATOS DE STREAMLIT
-scores_ref = conn.collection("scores").stream()
+scores_ref = db.collection("scores").stream()
 todos_los_scores = [doc.to_dict() for doc in scores_ref]
 
 if todos_los_scores:
