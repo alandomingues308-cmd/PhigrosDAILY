@@ -196,7 +196,6 @@ else:
     rks_base = calcular_rks_puro(accuracy_detectada, constante_activa)
             rango, bono = obtener_rango_y_bono(score_detectado, bad_detectados, miss_detectados)
             rks_final = round(rks_base + bono, 4)
-            
             nuevo_score = {
                 "usuario": usuario_activo,
                 "cancion": cancion_objetivo,
