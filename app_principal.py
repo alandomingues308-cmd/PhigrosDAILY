@@ -112,7 +112,7 @@ if uploaded_file is not None:
             texto_limpio = elemento.strip()
         # Buscamos una secuencia de números separados por espacios (ej: "1257 0 0 0")
             numeros_linea = re.findall(r'\b\d+ \d+ \d+ \d+\b', texto_limpio)
-        
+            perdidas= 0
             if numeros_linea:
                 valores = [int(n) for n in numeros_linea[0].split()]
                 perfect_detectado = valores[0]
