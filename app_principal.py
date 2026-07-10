@@ -71,6 +71,7 @@ if uploaded_file is not None:
         img_diff = np.array(imagen_completa.crop(box_diff))
         ocr_diff = reader.readtext(img_diff, detail=0)
         diff_detectada = " ".join(ocr_diff).upper()
+        st.info(f"Dificultad detectada: {diff_detectada}")
         
         # Determinar qué constante usar basándonos en lo que detectó el OCR
         if "AT" in diff_detectada and daily_song.get("AT") is not None:
