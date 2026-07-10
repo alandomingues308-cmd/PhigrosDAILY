@@ -134,9 +134,9 @@ if uploaded_file is not None:
         if score_detectado == 1000000: bono= 2
         elif (bad_detectados + miss_detectados)== 0: bono= 1.5
         elif score_detectado >= 960000: bono= 1
-       elif score_detectado >= 920000: bono= 0.5
-       elif score_detectado >= 880000: bono= 0.2
-       else: bono=0
+        elif score_detectado >= 920000: bono= 0.5
+        elif score_detectado >= 880000: bono= 0.2
+        else: bono=0
 
        st.write(f"DEBUG: Bad detectados: {bad_detectados}, Miss detectados: {miss_detectados}")
        st.write(f"DEBUG: Suma: {bad_detectados + miss_detectados}")
