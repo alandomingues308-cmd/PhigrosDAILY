@@ -125,7 +125,8 @@ if uploaded_file is not None:
                 desglose_encontrado = True
                 perdidas= bad + miss
                 break
-            
+            st.write(miss)
+            st.write(bad)
         #Los que se leyeron mal
         if usuario_final== "crafi": usuario_final= "craftyy!"
         if usuario_final== "Evz": usuario_final= "Evanii"
