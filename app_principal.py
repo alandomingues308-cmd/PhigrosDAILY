@@ -119,9 +119,9 @@ img_miss = imagen_completa.crop(box_miss)
 miss_detectados = extraer_numero(np.array(img_miss))
     
     #Los que se leyeron mal
-    if usuario_final== "crafi": usuario_final= "craftyy!"
-    if usuario_final== "Evz": usuario_final= "Evanii"
-    if usuario_final== "Shadom": usuario_final= "Shadow"
+if usuario_final== "crafi": usuario_final= "craftyy!"
+if usuario_final== "Evz": usuario_final= "Evanii"
+if usuario_final== "Shadom": usuario_final= "Shadow"
         
     # UI de confirmación
     st.subheader("📝 Datos Extraídos")
