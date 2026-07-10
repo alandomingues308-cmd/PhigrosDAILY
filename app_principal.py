@@ -23,7 +23,7 @@ today = datetime.datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
 daily_song = random.choice(songs)
 
-with open("daily_actual_backup.json","w",encoding="utf-8-sig") as f:
+with open("daily_backup.json","w",encoding="utf-8-sig") as f:
     json.dump(daily_song,f,ensure_ascii=False,indent=2)
 
 st.subheader(f"La canción elegida para hoy, {today}, es:")
