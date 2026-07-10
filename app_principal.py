@@ -105,8 +105,9 @@ if uploaded_file is not None:
         st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
     
     #Identificar el usuario
-        perdidas= 0
+       
         with st.spinner("Analizando imagen..."):
+            perdidas= 0
             img_array = np.array(image)
             lineas_texto = reader.readtext(img_array, detail=0)
         for elemento in lineas_texto:
