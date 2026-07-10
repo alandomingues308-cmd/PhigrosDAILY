@@ -4,6 +4,18 @@ import json
 import pytz
 from datetime import datetime
 
+from google.cloud import firestore
+from google.oauth2 import service_account
+
+@st.cache_resource
+def init_firestore():
+    key_dict = dict(st.secrets["firestore"])
+    creds = service_account.Credentials.from_service_account_info(key_dict)
+    return firestore.Client(credentials=creds, project=key_dict["project_id"])
+
+db = init_firestore()
+
+
 # Configuración de zona horaria México
 mx_tz = pytz.timezone('America/Mexico_City')
 
