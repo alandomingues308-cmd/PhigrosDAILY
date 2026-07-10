@@ -110,13 +110,11 @@ if uploaded_file is not None:
         box_bad = (int(ancho * 0.61), int(alto * 0.67), int(ancho * 0.66), int(alto * 0.77))
         img_bad = imagen_completa.crop(box_bad)
         bad = extraer_numero(np.array(img_bad))
-        bad_detectados= int(bad)
     
         # Box Miss
         box_miss = (int(ancho * 0.71), int(alto * 0.67), int(ancho * 0.76), int(alto * 0.77))
         img_miss = imagen_completa.crop(box_miss)
         miss = extraer_numero(np.array(img_miss))
-        miss_detectados= int(miss)
         
         #Los que se leyeron mal
         if usuario_final== "crafi": usuario_final= "craftyy!"
@@ -133,7 +131,8 @@ if uploaded_file is not None:
         # Lógica de cálculo (reutilizando tus funciones previas)
             def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
         rks= calcular_rks(accuracy_detectada, constante_activa)
-        perdidas= bad_detectados + miss_detectados
+        perdidas= bad + miss
+        
         if score_detectado == 1000000: bono= 2
         elif perdidas== 0: bono= 1.5
         elif score_detectado >= 960000: bono= 1
