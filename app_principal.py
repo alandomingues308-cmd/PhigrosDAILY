@@ -125,7 +125,7 @@ if uploaded_file is not None:
         if usuario_final== ">OMathyPop": usuario_final= "MathyPop"
         if usuario_final== "MalenaF": usuario_final= "MalenaPop"
         if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
-        usuario_final= st.text.input("usuario: ")
+        usuario_final= st.text_input("usuario: ")
         
         # UI de confirmación
         st.subheader("📝 Datos Extraídos")
