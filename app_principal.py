@@ -72,7 +72,7 @@ else:
             constante_activa = daily_song.get("IN", 0)
             dificultad_usada = "IN"
             
-            st.info(f"Dificultad detectada: {dificultad_usada})"
+            st.info(f"Dificultad detectada: {dificultad_usada}")
                 
 
 st.title("🏆 Sube tu mejor puntaje")
