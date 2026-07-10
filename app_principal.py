@@ -8,6 +8,7 @@ from PIL import Image
 from datetime import datetime
 from google.cloud import firestore
 from google.oauth2 import service_account
+import pytz
 
 @st.cache_resource
 def init_firestore():
