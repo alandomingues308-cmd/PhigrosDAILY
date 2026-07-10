@@ -131,7 +131,7 @@ if uploaded_file is not None:
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
         usuario_final= st.text_input("¿Usuario incorrecto?, cambialo aquí: ")
-        st.rerun col1.metric("Usuario", usuario_final)
+        st.rerun st.columns(3)
     
         if st.button("Registrar Puntaje"):
         # Lógica de cálculo (reutilizando tus funciones previas)
