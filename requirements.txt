@@ -4,3 +4,5 @@ numpy
 pandas
 Pillow
 pytz
+google-cloud-firestore
+google-auth
