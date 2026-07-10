@@ -55,7 +55,7 @@ reader = inicializar_ocr()
 
 # Variables de estado
 cancion_objetivo = daily_song["title"]
-constante_activa = daily_song.get("IN") # Ajustar según dificultad si es necesario
+constante_activa = daily_song["IN"] # Ajustar según dificultad si es necesario
 
 st.title("🏆 Sube tu mejor puntaje")
 
