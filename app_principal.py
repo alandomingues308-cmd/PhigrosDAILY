@@ -55,7 +55,25 @@ reader = inicializar_ocr()
 
 # Variables de estado
 cancion_objetivo = daily_song["title"]
-constante_activa = daily_song.get("IN") # Ajustar según dificultad si es necesario
+
+        # 📌 2.5. Área de la Dificultad
+        # Ajustado según la posición en la imagen (esquina inferior derecha de la tarjeta)
+        box_diff = (int(ancho * 0.35), int(alto * 0.75), int(ancho * 0.45), int(alto * 0.82))
+        img_diff = np.array(imagen_completa.crop(box_diff))
+        ocr_diff = reader.readtext(img_diff, detail=0)
+        diff_detectada = " ".join(ocr_diff).upper()
+        
+        # Determinar qué constante usar basándonos en lo que detectó el OCR
+        if "AT" in diff_detectada and daily_song.get("AT") is not None:
+            constante_activa = daily_song["AT"]
+            dificultad_usada = "AT"
+        else:
+            # Por defecto, o si detecta IN, usa la constante de IN
+            constante_activa = daily_song.get("IN", 0)
+            dificultad_usada = "IN"
+            
+        st.info(f"Dificultad detectada: {dificultad_usada}"
+                
 
 st.title("🏆 Sube tu mejor puntaje")
 
