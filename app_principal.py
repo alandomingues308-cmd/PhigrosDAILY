@@ -70,7 +70,7 @@ if uploaded_file is not None:
         box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
         img_usuario = np.array(imagen_completa.crop(box_usuario))
         ocr_user = reader.readtext(img_usuario, detail=0)
-        usuario_detectado = " ".join(ocr_user).strip() if ocr_user else "Usuario_Desconocido"
+        usuario_final = " ".join(ocr_user).strip() if ocr_user else "Usuario_Desconocido"
         
         # 📌 2. Área de la Canción (Esquina inferior izquierda)
         box_cancion = (int(ancho * 0.05), int(alto * 0.65), int(ancho * 0.40), int(alto * 0.80))
