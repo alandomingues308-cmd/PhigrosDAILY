@@ -130,3 +130,49 @@ if uploaded_file is not None:
         }
         db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
         st.success("¡Registrado con éxito!")
+
+=============================================================================
+# 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
+# =============================================================================
+st.write("---")
+st.header("📊 Tablas de Clasificación")
+
+# 🔥 LEER DIRECTO DESDE LA BASE DE DATOS DE STREAMLIT
+scores_ref = db.collection("scores").stream()
+todos_los_scores = [doc.to_dict() for doc in scores_ref]
+
+if todos_los_scores:
+    df = pd.DataFrame(todos_los_scores)
+    tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+    
+    with tab_diaria:
+        # Filtrar por fecha y canción, ordenar de mayor a menor y conservar solo el mejor por usuario
+        df_hoy = df[(df["fecha"] == today) & (df["cancion"] == cancion_objetivo)]
+        df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
+        
+        if not df_hoy.empty:
+            st.subheader(f"Top del Día - {CANCION_DAILY}")
+            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks", "rango"]], use_container_width=True)
+        else:
+            st.info("Aún no hay scores subidos para el desafío de hoy.")
+            
+    with tab_general:
+        st.subheader("Tabla Global Histórica (RKS Acumulado)")
+        
+        # Lógica de acumulación por canciones distintas
+        df_mejores_por_cancion = df.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario", "cancion"], keep="first")
+        
+        df_acumulado = df_mejores_por_cancion.groupby("usuario").agg(
+            RKS_Total=("rks", "sum"),
+            Canciones_Jugadas=("cancion", "count")
+        ).reset_index()
+        
+        df_acumulado["RKS_Total"] = df_acumulado["RKS_Total"].round(4)
+        df_acumulado = df_acumulado.sort_values(by="RKS_Total", ascending=False)
+        
+        if not df_acumulado.empty:
+            st.dataframe(df_acumulado[["usuario", "RKS_Total", "Canciones_Jugadas"]], use_container_width=True)
+        else:
+            st.info("No hay datos suficientes para calcular la tabla global.")
+else:
+    st.info("No se ha creado ningún registro histórico en el servidor.")
