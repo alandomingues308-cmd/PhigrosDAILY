@@ -16,7 +16,7 @@ songs = load_songs()
 st.title("🎵 Canción del Día - Phigros")
 
 # Obtenemos la fecha actual en México
-today = datetime.datetime.now(mx_tz).strftime("%Y-%m-%d")
+today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 
 # Usamos la fecha como 'seed' para que todos vean la misma canción el mismo día
 # y para que cambie automáticamente al llegar a las 00:00
