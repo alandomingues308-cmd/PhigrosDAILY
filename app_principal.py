@@ -201,7 +201,6 @@ def son_similares(texto1, texto2):
     limpiar = lambda t: re.sub(r'[/|lI]', '1', t.lower().replace(" ", ""))
     return limpiar(texto1) == limpiar(texto2)
 
-ocr_cancion_res= reader.readtext(img_cancion,detail=0)
 texto_leido = " ".join(ocr_cancion_res).strip()
 cancion_detectada = obtener_cancion_mas_cercana(texto_leido, lista_nombres_canciones)
                                                 
