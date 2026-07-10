@@ -70,7 +70,6 @@ if uploaded_file is not None:
         img_diff = np.array(imagen_completa.crop(box_diff))
         ocr_diff = reader.readtext(img_diff, detail=0)
         diff_detectada = " ".join(ocr_diff).upper()
-        st.info(f"Dificultad detectada: {diff_detectada}")
         
         # Determinar qué constante usar basándonos en lo que detectó el OCR
         if "AT" in diff_detectada and daily_song.get("AT") is not None:
@@ -125,13 +124,14 @@ if uploaded_file is not None:
         if usuario_final== "MalenaF": usuario_final= "MalenaPop"
         if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
         
-        usuario_final= st.text_input("¿Usuario incorrecto?, cambialo aquí: ")
         # UI de confirmación
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
         col1.metric("Usuario", usuario_final)
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
+        usuario_final= st.text_input("¿Usuario incorrecto?, cambialo aquí: ")
+        col1.metric("Usuario", usuario_final)
     
         if st.button("Registrar Puntaje"):
         # Lógica de cálculo (reutilizando tus funciones previas)
