@@ -137,7 +137,7 @@ if uploaded_file is not None:
         if st.button("Registrar Puntaje"):
         # Lógica de cálculo (reutilizando tus funciones previas)
             def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
-            rks= calcular_rks(accuracy_detectada, constante_activa)
+        rks= calcular_rks(accuracy_detectada, constante_activa)
         
         if score_detectado == 1000000: bono= 2
         elif perdidas== 0: bono= 1.5
