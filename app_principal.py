@@ -108,7 +108,7 @@ if uploaded_file is not None:
         miss_detectados = int(nums_bm[1]) if len(nums_bm) > 1 else 0
 
     #Los que se leyeron mal
-    if usuario_final== crafi: usuario_final= craftyy!
+    if usuario_final== crafi: usuario_final= "craftyy!"
     # UI de confirmación
     st.subheader("📝 Datos Extraídos")
     col1, col2, col3 = st.columns(3)
