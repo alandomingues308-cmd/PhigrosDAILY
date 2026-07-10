@@ -150,9 +150,10 @@ if todos_los_scores:
         df_hoy = df[(df["fecha"] == today) & (df["cancion"] == cancion_objetivo)]
         
         if not df_hoy.empty:
-            df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
+            df_final = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
             st.subheader(f"Top del Día - {CANCION_DAILY}")
-            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks", "rango"]], use_container_width=True)
+            columnas_a_mostrar= ["usuario","score","accuracy","rks","rango"]
+            st.dataframe(df_final[["usuario", "score", "accuracy", "rks", "rango"]], use_container_width=True)
         else:
             st.info("Aún no hay scores subidos para el desafío de hoy.")
             
