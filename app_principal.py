@@ -148,9 +148,9 @@ if todos_los_scores:
     with tab_diaria:
         # Filtrar por fecha y canción, ordenar de mayor a menor y conservar solo el mejor por usuario
         df_hoy = df[(df["fecha"] == today) & (df["cancion"] == cancion_objetivo)]
-        df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
         
         if not df_hoy.empty:
+            df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first"
             st.subheader(f"Top del Día - {CANCION_DAILY}")
             st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks", "rango"]], use_container_width=True)
         else:
