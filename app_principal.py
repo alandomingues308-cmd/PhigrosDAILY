@@ -127,9 +127,9 @@ if uploaded_file is not None:
         elif score_detectado >= 880000: bono= 0.2
         else: bono=0
 
-    rks_final=(rks+bono)/2
+        rks_final=(rks+bono)/2
     
-    nuevo_score = {
+        nuevo_score = {
              "usuario": usuario_final,
              "cancion": cancion_objetivo,
              "score": score_detectado,
@@ -137,8 +137,8 @@ if uploaded_file is not None:
              "rks": rks_final,
              "fecha": today
         }
-    db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-    st.success("¡Registrado con éxito!")
+        db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+        st.success("¡Registrado con éxito!")
 
 #=============================================================================
 # 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
