@@ -123,14 +123,15 @@ if uploaded_file is not None:
         if usuario_final== ">OMathyPop": usuario_final= "MathyPop"
         if usuario_final== "MalenaF": usuario_final= "MalenaPop"
         if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
+        st.session_state.usuario= usuario_final
         
         # UI de confirmación
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Usuario", usuario_final)
+        col1.metric("Usuario", st.session_state.usuario)
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
-        usuario_final= st.text_input("¿Usuario incorrecto?, cambialo aquí: ")
+        st.session_state.usuario= st.text_input("¿Usuario incorrecto?, cambialo aquí: ",value=st.session_state.usuario)
         
     
         if st.button("Registrar Puntaje"):
@@ -141,7 +142,7 @@ if uploaded_file is not None:
         rks_final=rks
     
         nuevo_score = {
-            "usuario": usuario_final,
+            "usuario": st.session_state.usuario,
              "cancion": cancion_objetivo,
              "score": score_detectado,
              "accuracy": accuracy_detectada,
