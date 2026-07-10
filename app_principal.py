@@ -125,8 +125,7 @@ if uploaded_file is not None:
         def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
         rks= calcular_rks(accuracy_detectada, constante_activa)
 
-        if score_detectado == 1000000: bono= 2
-        elif bad_detectados + miss_detectados== 0: bono= 1.5
+        if score_detectado == 1000000: bono= 1.5
         elif score_detectado >= 960000: bono= 1
         elif score_detectado >= 920000: bono= 0.5
         elif score_detectado >= 880000: bono= 0.2
@@ -166,7 +165,7 @@ if todos_los_scores:
         df_hoy = df_hoy.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
         if not df_hoy.empty:
             st.subheader(f"Top del Día - {CANCION_DAILY}")
-            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks" ], use_container_width=True)
+            st.dataframe(df_hoy[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
         else:
             st.info("Aún no hay scores subidos para el desafío de hoy.")
             
