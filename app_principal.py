@@ -109,6 +109,7 @@ if uploaded_file is not None:
 
     #Los que se leyeron mal
     if usuario_final== "crafi": usuario_final= "craftyy!"
+    if usuario_final== "Evz": usuario_final= "Evanii"
     # UI de confirmación
     st.subheader("📝 Datos Extraídos")
     col1, col2, col3 = st.columns(3)
