@@ -117,8 +117,8 @@ if uploaded_file is not None:
                 valores = [int(n) for n in numeros_linea[0].split()]
                 perfect_detectado = valores[0]
                 good_detectado = valores[1]
-                bad_detectado = valores[2]
-                miss_detectado = valores[3]
+                bad = valores[2]
+                miss = valores[3]
                 desglose_encontrado = True
                 break
             
