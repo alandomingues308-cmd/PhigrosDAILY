@@ -100,7 +100,7 @@ if uploaded_file is not None:
                 break
 
         # 📌 5. Área BAD/MISS
-       def extraer_numero(img_crop):
+        def extraer_numero(img_crop):
 		   res = reader.readtext(img_crop, detail=0, allowlist='0123456789')
            for item in res:
 			   if item.isdigit():
