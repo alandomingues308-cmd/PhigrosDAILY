@@ -141,9 +141,9 @@ if uploaded_file is not None:
         st.write(f"DEBUG: Bad detectados: {bad_detectados}, Miss detectados: {miss_detectados}")
         st.write(f"DEBUG: Suma: {bad_detectados + miss_detectados}")
 
-     rks_final=(rks+bono)/2
+        rks_final=(rks+bono)/2
     
-     nuevo_score = {
+        nuevo_score = {
              "usuario": usuario_final,
              "cancion": cancion_objetivo,
              "score": score_detectado,
@@ -152,8 +152,8 @@ if uploaded_file is not None:
              "fecha": today,
              "bad": bad_detectados
         }
-     db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-     st.success("¡Registrado con éxito!")
+          db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+          st.success("¡Registrado con éxito!")
     
 
 #=============================================================================
