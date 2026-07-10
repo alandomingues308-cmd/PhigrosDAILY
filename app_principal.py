@@ -131,7 +131,7 @@ if uploaded_file is not None:
         db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
         st.success("¡Registrado con éxito!")
 
-=============================================================================
+#=============================================================================
 # 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
 # =============================================================================
 st.write("---")
