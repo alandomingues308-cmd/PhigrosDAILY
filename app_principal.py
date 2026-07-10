@@ -137,8 +137,8 @@ if uploaded_file is not None:
              "rks": rks_final,
              "fecha": today
         }
-        db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-        st.success("¡Registrado con éxito!")
+    db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+    st.success("¡Registrado con éxito!")
 
 #=============================================================================
 # 4. RENDERS DE LAS TABLAS DE POSICIONES (Desde Base de Datos)
