@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 import easyocr
 from PIL import Image
-from datetime import datetime
+import datetime
 
 from google.cloud import firestore
 from google.oauth2 import service_account
