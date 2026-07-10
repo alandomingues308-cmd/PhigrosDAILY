@@ -115,7 +115,7 @@ if uploaded_file is not None:
             def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
         rks= calcular_rks(accuracy_detectada, constante_activa)
         
-        rks_final=(rks)/1.5
+        rks_final=(rks)/1.8
     
         nuevo_score = {
             "usuario": usuario_final,
