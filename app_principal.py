@@ -117,9 +117,18 @@ if uploaded_file is not None:
 
     if st.button("Registrar Puntaje"):
         # Lógica de cálculo (reutilizando tus funciones previas)
-        def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 4)
-        rks_final = calcular_rks(accuracy_detectada, constante_activa)
-        
+        def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
+        rks= calcular_rks(accuracy_detectada, constante_activa)
+
+        if score_detectado == 1000000: bono= 2
+        elif bad_detectados + miss_detectados== 0: bono= 1.5
+        elif score_detectado >= 960000: bono= 1
+        elif score_detectado >= 920000: bono= 0.5
+        elif score_detectado >= 880000: bono= 0.2
+        else: bono=0
+
+    rks_final=(rks+bono)/2
+    
         nuevo_score = {
              "usuario": usuario_final,
              "cancion": cancion_objetivo,
