@@ -103,8 +103,8 @@ if uploaded_file is not None:
         def extraer_numero(img_crop):
             res = reader.readtext(img_crop, detail=0, allowlist='0123456789')
             for item in res:
-			    if item.isdigit():
-				    return int(item)
+				if item.isdigit():
+					return int(item)
                     return 0
         # Box Bad
         box_bad = (int(ancho * 0.61), int(alto * 0.67), int(ancho * 0.66), int(alto * 0.77))
