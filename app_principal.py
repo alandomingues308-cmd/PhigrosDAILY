@@ -226,12 +226,12 @@ if st.button("Validar y Registrar Puntaje"):
 
             # 🔥 GUARDAR DIRECTO EN LA BASE DE DATOS DE STREAMLIT
             # Crea un identificador único en la nube (Usuario_Cancion_Fecha) para no duplicar datos
-            doc_id = f"{usuario_activo}_{cancion_objetivo}_{today}"
-            doc_ref = db.collection("scores").document(doc_id)
-            doc_ref.set(nuevo_score)
+doc_id = f"{usuario_activo}_{cancion_objetivo}_{today}"
+doc_ref = db.collection("scores").document(doc_id)
+doc_ref.set(nuevo_score)
                 
-            st.success(f"🏆 ¡Score registrado en la nube! RKS final logrado: {rks_final} ({rango})")
-            st.balloons()
+st.success(f"🏆 ¡Score registrado en la nube! RKS final logrado: {rks_final} ({rango})")
+st.balloons()
 
 
 # =============================================================================
