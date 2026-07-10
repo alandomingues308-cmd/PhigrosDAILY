@@ -101,8 +101,8 @@ if uploaded_file is not None:
 
         # 📌 5. Área BAD/MISS
 
-          image = Image.open(uploaded_file)
-          st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Captura de pantalla cargada", use_container_width=True)
     
     #Identificar el usuario
           with st.spinner("Analizando imagen..."):
