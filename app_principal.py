@@ -106,33 +106,33 @@ if uploaded_file is not None:
     
     #Identificar el usuario
         with st.spinner("Analizando imagen..."):
-        # 1. Obtener dimensiones de la imagen cargada
-        ancho, alto = image.size
+            # 1. Obtener dimensiones de la imagen cargada
+            ancho, alto = image.size
         
-        # 2. Definir las coordenadas exactas para BAD y MISS (un poco más amplias para asegurar)
-        box_bad = (int(ancho * 0.60), int(alto * 0.66), int(ancho * 0.67), int(alto * 0.78))
-        box_miss = (int(ancho * 0.69), int(alto * 0.66), int(ancho * 0.76), int(alto * 0.78))
+            # 2. Definir las coordenadas exactas para BAD y MISS (un poco más amplias para asegurar)
+            box_bad = (int(ancho * 0.60), int(alto * 0.66), int(ancho * 0.67), int(alto * 0.78))
+            box_miss = (int(ancho * 0.69), int(alto * 0.66), int(ancho * 0.76), int(alto * 0.78))
         
-        # 3. Recortar los fragmentos de la imagen
-        img_bad = image.crop(box_bad)
-        img_miss = image.crop(box_miss)
+            # 3. Recortar los fragmentos de la imagen
+            img_bad = image.crop(box_bad)
+            img_miss = image.crop(box_miss)
         
-        # 4. Pasar los recortes a escala de grises (mejora drásticamente la lectura de números delgados)
-        img_bad_gray = img_bad.convert('L')
-        img_miss_gray = img_miss.convert('L')
+            # 4. Pasar los recortes a escala de grises (mejora drásticamente la lectura de números delgados)
+            img_bad_gray = img_bad.convert('L')
+            img_miss_gray = img_miss.convert('L')
         
-        # 5. Ejecutar el OCR solo en esos pequeños cuadros obligando a buscar números
-        res_bad = reader.readtext(np.array(img_bad_gray), detail=0, allowlist='0123456789')
-        res_miss = reader.readtext(np.array(img_miss_gray), detail=0, allowlist='0123456789')
+            # 5. Ejecutar el OCR solo en esos pequeños cuadros obligando a buscar números
+            res_bad = reader.readtext(np.array(img_bad_gray), detail=0, allowlist='0123456789')
+            res_miss = reader.readtext(np.array(img_miss_gray), detail=0, allowlist='0123456789')
         
-        # 6. Asignar los valores de forma segura (si no detecta nada, se vuelve 0 automáticamente)
-        bad = int(res_bad[0]) if res_bad and res_bad[0].isdigit() else 0
-        miss = int(res_miss[0]) if res_miss and res_miss[0].isdigit() else 0
+            # 6. Asignar los valores de forma segura (si no detecta nada, se vuelve 0 automáticamente)
+            bad = int(res_bad[0]) if res_bad and res_bad[0].isdigit() else 0
+            miss = int(res_miss[0]) if res_miss and res_miss[0].isdigit() else 0
         
-        # 7. Calcular el total de pérdidas
-        perdidas = bad + miss
+            # 7. Calcular el total de pérdidas
+            perdidas = bad + miss
 
-    # --- UI DE CONFIRMACIÓN (Fuote del spinner, alineado a la izquierda) ---
+     # --- UI DE CONFIRMACIÓN (Fuote del spinner, alineado a la izquierda) ---
     st.write(f"Bad detectados: {bad}")
     st.write(f"Miss detectados: {miss}")
     st.write(f"Total Pérdidas: {perdidas}")
