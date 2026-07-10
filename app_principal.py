@@ -107,13 +107,16 @@ if uploaded_file is not None:
         bad_detectados = int(nums_bm[0]) if len(nums_bm) > 0 else 0
         miss_detectados = int(nums_bm[1]) if len(nums_bm) > 1 else 0
 
+    #Los que se leyeron mal
+    if usuario_final== crafi: usuario_final= craftyy!
     # UI de confirmación
     st.subheader("📝 Datos Extraídos")
-    usuario_final = st.text_input("Usuario:", value=usuario_detectado)
     col1, col2, col3 = st.columns(3)
     col1.metric("Usuario", usuario_final)
     col2.metric("Score", f"{score_detectado:,}")
     col3.metric("Acc", f"{accuracy_detectada}%")
+
+    
 
     if st.button("Registrar Puntaje"):
         # Lógica de cálculo (reutilizando tus funciones previas)
