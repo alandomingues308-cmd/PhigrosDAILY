@@ -55,7 +55,7 @@ with col2:
 def inicializar_ocr():
     return easyocr.Reader(['en'])
 
-reader = inicializar_
+reader = inicializar_ocr()
 
 
 # =============================================================================
