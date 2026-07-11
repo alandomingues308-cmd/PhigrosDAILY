@@ -135,7 +135,6 @@ if uploaded_file is not None:
         col1.metric("Usuario", st.session_state.usuario)
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
-        st.session_state.usuario= st.text_input("¿Usuario incorrecto?, cambialo aquí: ",value=st.session_state.usuario)
         
         st.text_input(
             "¿Usuario incorrecto?, cámbialo aquí:", 
