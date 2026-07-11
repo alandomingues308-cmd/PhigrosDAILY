@@ -31,7 +31,7 @@ songs = load_songs()
 
 today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
-st.title("🎵 Canción del Día {today} - Phigros")
+st.title(f"🎵 Canción del Día {today} - Phigros")
 
 # Selección de dos canciones
 daily_song = random.choice(songs)
@@ -43,12 +43,10 @@ CANCION_ALT = alternative_song["title"]
 with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
     json.dump({"daily": daily_song, "alternative": alternative_song}, f, ensure_ascii=False, indent=2)
 
-col1, col2 = st.columns(2)
-with col1:
-    st.success(f"**Daily: **\n**{CANCION_DAILY} ({daily_song["IN"]})**")
+
+st.info(f"**Daily: **\n**{CANCION_DAILY} ({daily_song["IN"]})**")
 st.subheader(f"🎵 Cancion Alternativa {today}")
-with col2:
-    st.info(f"**Alternative: **\n**{CANCION_ALT} ({alternative_song["IN"]})**")
+st.info(f"**Alternative: **\n**{CANCION_ALT} ({alternative_song["IN"]})**")
 
 @st.cache_resource
 def inicializar_ocr():
