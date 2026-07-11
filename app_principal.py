@@ -42,9 +42,6 @@ random.seed(today)
 daily_song = random.choice(songs)
 CANCION_DAILY = daily_song["title"]
 
-with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
-    json.dump(daily_song, f, ensure_ascii=False, indent=2)
-
 st.subheader(f"La canción elegida para hoy, {today}, es:")
 diff_parts = []
 if daily_song.get("IN") is not None: diff_parts.append(f"IN: {daily_song['IN']}")
