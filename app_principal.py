@@ -101,7 +101,7 @@ if uploaded_file is not None:
         
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Usuario (detectado)", usuario_detectado)
+        col1.metric("Usuario (detectado)", usuario_final)
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
 
