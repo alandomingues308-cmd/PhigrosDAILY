@@ -29,10 +29,9 @@ def load_songs():
 
 songs = load_songs()
 
-st.title("🎵 Canción del Día - Phigros")
-
 today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
+st.title("🎵 Canción del Día {today} - Phigros")
 
 # Selección de dos canciones
 daily_song = random.choice(songs)
@@ -44,10 +43,10 @@ CANCION_ALT = alternative_song["title"]
 with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
     json.dump({"daily": daily_song, "alternative": alternative_song}, f, ensure_ascii=False, indent=2)
 
-st.subheader(f"🎵 Canciones del día {today}")
 col1, col2 = st.columns(2)
 with col1:
     st.success(f"**Daily: **\n**{CANCION_DAILY} ({daily_song["IN"]})**")
+st.subheader(f"🎵 Cancion Alternativa {today}")
 with col2:
     st.info(f"**Alternative: **\n**{CANCION_ALT} ({alternative_song["IN"]})**")
 
