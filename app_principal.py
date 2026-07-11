@@ -106,11 +106,11 @@ if uploaded_file is not None:
         col3.metric("Acc", f"{accuracy_detectada}%")
 
         # === Editar Usuario ===
-        st.subheader("✏️ Corregir Nombre de Usuario")
-        st.warning("⚠️ Si el nombre detectado es incorrecto, cámbialo aquí antes de registrar.")
-        usuario_final = st.text_input("Nombre de usuario final:", 
-                                     value=usuario_detectado, 
-                                     key="user_edit")
+       # st.subheader("✏️ Corregir Nombre de Usuario")
+       # st.warning("⚠️ Si el nombre detectado es incorrecto, cámbialo aquí antes de registrar.")
+       # usuario_final = st.text_input("Nombre de usuario final:", 
+                               #      value=usuario_detectado, 
+                                #     key="user_edit")
 
 
         # Selección manual
