@@ -64,11 +64,11 @@ st.title("🏆 Sube tu mejor puntaje")
 
 uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", type=["png", "jpg", "jpeg"])
 
-if uploaded_file is not None:
-    imagen_completa = Image.open(uploaded_file)
-    ancho, alto = imagen_completa.size
+if uploaded_file is not None
     
     with st.spinner("Analizando captura..."):
+        imagen_completa = Image.open(uploaded_file)
+        ancho, alto = imagen_completa.size
         # 📌 2.5. Área de la Dificultad
         # Ajustado según la posición en la imagen (esquina inferior derecha de la tarjeta)
         box_diff = (int(ancho * 0.35), int(alto * 0.75), int(ancho * 0.45), int(alto * 0.82))
