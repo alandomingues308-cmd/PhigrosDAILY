@@ -18,11 +18,6 @@ def init_firestore():
     key_dict = dict(st.secrets["firestore"])
     creds = service_account.Credentials.from_service_account_info(key_dict)
     return firestore.Client(credentials=creds, project=key_dict["project_id"])
-@st.cache_resource
-def get_reader():
-    return easyocr.Reader(['es', 'en'])
-
-reader = get_reader() # Úsalo así en lugar de inicializarlo directamente
 
 db = init_firestore()
 
@@ -42,11 +37,15 @@ random.seed(today)
 daily_song = random.choice(songs)
 CANCION_DAILY = daily_song["title"]
 
+with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
+    json.dump(daily_song, f, ensure_ascii=False, indent=2)
+
 st.subheader(f"La canción elegida para hoy, {today}, es:")
 diff_parts = []
 if daily_song.get("IN") is not None: diff_parts.append(f"IN: {daily_song['IN']}")
 if daily_song.get("AT") is not None: diff_parts.append(f"AT: {daily_song['AT']}")
 diff_string = " - ".join(diff_parts)
+st.info(f"👉 **{daily_song['title']} / ({diff_string})**")
 
 @st.cache_resource
 def inicializar_ocr():
@@ -56,113 +55,81 @@ reader = inicializar_ocr()
 
 # Variables de estado
 cancion_objetivo = daily_song["title"]
+constante_activa = daily_song.get("IN") # Ajustar según dificultad si es necesario
 
 st.title("🏆 Sube tu mejor puntaje")
 
 uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", type=["png", "jpg", "jpeg"])
 
-# Cambia la línea 64 por esto:
 if uploaded_file is not None:
-    if st.button("Analizar captura"):  # <-- ESTO ES CLAVE
-        with st.spinner("Analizando captura..."):
-            imagen_completa = Image.open(uploaded_file)
-            ancho, alto = imagen_completa.size
-            # 📌 2.5. Área de la Dificultad
-            # Ajustado según la posición en la imagen (esquina inferior derecha de la tarjeta)
-            box_diff = (int(ancho * 0.35), int(alto * 0.75), int(ancho * 0.45), int(alto * 0.82))
-            img_diff = np.array(imagen_completa.crop(box_diff))
-            ocr_diff = reader.readtext(img_diff, detail=0)
-            diff_detectada = " ".join(ocr_diff).upper()
-        
-            # Determinar qué constante usar basándonos en lo que detectó el OCR
-    .       if "AT" in diff_detectada and daily_song.get("AT") is not None:
-                  constante_activa = daily_song["AT"]
-                  dificultad_usada = "AT"
-            else:
-                # Por defecto, o si detecta IN, usa la constante de IN
-                    constante_activa = daily_song.get("IN", 0)
-                    dificultad_usada = "IN"
-            
-            st.info(f"Dificultad detectada: {dificultad_usada}")
-                
-            # 📌 1. Área del Usuario (Esquina superior derecha)
-            box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
-            img_usuario = np.array(imagen_completa.crop(box_usuario))
-            ocr_user = reader.readtext(img_usuario, detail=0)
-            usuario_final = " ".join(ocr_user).strip() if ocr_user else "Usuario_Desconocido"
-        
-            # 📌 2. Área de la Canción (Esquina inferior izquierda)
-            box_cancion = (int(ancho * 0.05), int(alto * 0.65), int(ancho * 0.40), int(alto * 0.80))
-            img_cancion = np.array(imagen_completa.crop(box_cancion))
-            ocr_cancion = reader.readtext(img_cancion, detail=0)
-        
-            # 📌 3. Área del Score (Centro derecho superior)
-            box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
-            img_score = np.array(imagen_completa.crop(box_score))
-            ocr_score = reader.readtext(img_score, detail=0)
-            score_detectado = 0
-            for item in ocr_score:
-                nums = re.findall(r'\d+', item)
-                if nums:
-                    score_detectado = int("".join(nums))
-                    break
-                
-            # 📌 4. Área de la Accuracy (Centro derecho medio)
-            box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
-            img_acc = np.array(imagen_completa.crop(box_acc))
-            ocr_acc = reader.readtext(img_acc, detail=0)
-            accuracy_detectada = 0.0
-            for item in ocr_acc:
-                match = re.search(r'(\d+\.\d+)', item)
-                if match:
-                    accuracy_detectada = float(match.group(1))
-                    break
-                
-            #Los que se leyeron mal
-            if usuario_final== "crafi": usuario_final= "craftyy!"
-            if usuario_final== "Evz": usuario_final= "Evanii"
-            if usuario_final== "Shadom": usuario_final= "Shadow"
-            if usuario_final== "3 MathyPop": usuario_final= "MathyPop"
-            if usuario_final== ">OMathyPop": usuario_final= "MathyPop"
-            if usuario_final== "MalenaF": usuario_final= "MalenaPop"
-            if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
-            st.session_state.usuario= usuario_final
-        
-            # def actualizar_nombre():
-              #  st.session_state.usuario = st.session_state.input_key
-               # st.rerun()
+    imagen_completa = Image.open(uploaded_file)
+    ancho, alto = imagen_completa.size
     
-            # UI de confirmación
-            st.subheader("📝 Datos Extraídos")
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Usuario", st.session_state.usuario)
-            col2.metric("Score", f"{score_detectado:,}")
-            col3.metric("Acc", f"{accuracy_detectada}%")
+    with st.spinner("Analizando captura..."):
+        # 📌 1. Área del Usuario (Esquina superior derecha)
+        box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
+        img_usuario = np.array(imagen_completa.crop(box_usuario))
+        ocr_user = reader.readtext(img_usuario, detail=0)
+        usuario_final = " ".join(ocr_user).strip() if ocr_user else "Usuario_Desconocido"
         
-           # st.text_input(
-                #"¿Usuario incorrecto?, cámbialo aquí:", 
-                #key="input_key", 
-                # on_change= actualizar_nombre
-                #)
+        # 📌 2. Área de la Canción (Esquina inferior izquierda)
+        box_cancion = (int(ancho * 0.05), int(alto * 0.65), int(ancho * 0.40), int(alto * 0.80))
+        img_cancion = np.array(imagen_completa.crop(box_cancion))
+        ocr_cancion = reader.readtext(img_cancion, detail=0)
+        
+        # 📌 3. Área del Score (Centro derecho superior)
+        box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
+        img_score = np.array(imagen_completa.crop(box_score))
+        ocr_score = reader.readtext(img_score, detail=0)
+        score_detectado = 0
+        for item in ocr_score:
+            nums = re.findall(r'\d+', item)
+            if nums:
+                score_detectado = int("".join(nums))
+                break
+                
+        # 📌 4. Área de la Accuracy (Centro derecho medio)
+        box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
+        img_acc = np.array(imagen_completa.crop(box_acc))
+        ocr_acc = reader.readtext(img_acc, detail=0)
+        accuracy_detectada = 0.0
+        for item in ocr_acc:
+            match = re.search(r'(\d+\.\d+)', item)
+            if match:
+                accuracy_detectada = float(match.group(1))
+                break
+                
+        #Los que se leyeron mal
+        if usuario_final== "crafi": usuario_final= "craftyy!"
+        if usuario_final== "Evz": usuario_final= "Evanii"
+        if usuario_final== "Shadom": usuario_final= "Shadow"
+        if usuario_final== "3 MathyPop": usuario_final= "MathyPop"
+        if usuario_final== ">OMathyPop": usuario_final= "MathyPop"
+        
+        # UI de confirmación
+        st.subheader("📝 Datos Extraídos")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Usuario", usuario_final)
+        col2.metric("Score", f"{score_detectado:,}")
+        col3.metric("Acc", f"{accuracy_detectada}%")
     
-            if st.button("Registrar Puntaje"):
-            # Lógica de cálculo (reutilizando tus funciones previas)
-                def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
-            rks= calcular_rks(accuracy_detectada, constante_activa)
+        if st.button("Registrar Puntaje"):
+        # Lógica de cálculo (reutilizando tus funciones previas)
+            def calcular_rks(acc, const): return round((((acc - 55) / 45) ** 2) * const, 2)
+        rks= calcular_rks(accuracy_detectada, constante_activa)
         
-            rks_final=rks
+        rks_final=rks
     
-            nuevo_score = {
-                 "usuario": st.session_state.usuario,
-                 "cancion": cancion_objetivo,
-                 "score": score_detectado,
-                 "accuracy": accuracy_detectada,
-                 "rks": rks_final,
-                 "fecha": today,
-            }
-            db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
-            st.success("¡Registrado con éxito!")
-        
+        nuevo_score = {
+            "usuario": usuario_final,
+             "cancion": cancion_objetivo,
+             "score": score_detectado,
+             "accuracy": accuracy_detectada,
+             "rks": rks_final,
+             "fecha": today,
+        }
+        db.collection("scores").document(f"{usuario_final}_{today}").set(nuevo_score)
+        st.success("¡Registrado con éxito!")
     
 
 #=============================================================================
