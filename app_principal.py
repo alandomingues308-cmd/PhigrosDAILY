@@ -139,7 +139,7 @@ if uploaded_file is not None:
         st.text_input(
             "¿Usuario incorrecto?, cámbialo aquí:", 
             key="input_key", 
-            on_change=actualizar_nombre
+            on_change= actualizar_nombre()
             )
     
         if st.button("Registrar Puntaje"):
