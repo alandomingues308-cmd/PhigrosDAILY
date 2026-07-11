@@ -1,4 +1,4 @@
-import os
+                import os
 import re
 import numpy as np
 import pandas as pd
@@ -11,7 +11,6 @@ from google.oauth2 import service_account
 import pytz
 import random
 import json
-import difflib
 
 @st.cache_resource
 def init_firestore():
@@ -56,104 +55,7 @@ with col2:
 def inicializar_ocr():
     return easyocr.Reader(['en'])
 
-reader = inicializar_ocr()
-
-st.title("🏆 Sube tu mejor puntaje")
-
-uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", type=["png", "jpg", "jpeg"])
-
-if uploaded_file is not None:
-    imagen_completa = Image.open(uploaded_file)
-    ancho, alto = imagen_completa.size
-    
-    with st.spinner("Analizando captura..."):
-        # OCR Usuario
-        box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
-        img_usuario = np.array(imagen_completa.crop(box_usuario))
-        ocr_user = reader.readtext(img_usuario, detail=0)
-        usuario_final = " ".join(ocr_user).strip() or "Usuario_Desconocido"
-
-        # OCR Canción (mejorado)
-        box_cancion = (int(ancho * 0.05), int(alto * 0.65), int(ancho * 0.45), int(alto * 0.82))
-        img_cancion = np.array(imagen_completa.crop(box_cancion))
-        ocr_cancion = reader.readtext(img_cancion, detail=0)
-        cancion_detectada = " ".join(ocr_cancion).strip()
-
-        # OCR Score y Accuracy
-        box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
-        img_score = np.array(imagen_completa.crop(box_score))
-        ocr_score = reader.readtext(img_score, detail=0)
-        score_detectado = 0
-        for item in ocr_score:
-            nums = re.findall(r'\d+', item)
-            if nums:
-                score_detectado = int("".join(nums))
-                break
-
-        box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
-        img_acc = np.array(imagen_completa.crop(box_acc))
-        ocr_acc = reader.readtext(img_acc, detail=0)
-        accuracy_detectada = 0.0
-        for item in ocr_acc:
-            match = re.search(r'(\d+\.\d+)', item)
-            if match:
-                accuracy_detectada = float(match.group(1))
-                break
-
-        # Correcciones de usuario
-        corrections = {"crafi": "craftyy!", "Evz": "Evanii", "Shadom": "Shadow",
-                       "3 MathyPop": "MathyPop", ">OMathyPop": "MathyPop"}
-        usuario_final = corrections.get(usuario_final, usuario_final)
-
-        # === MEJORADA: Detección de canción ===
-        def similarity(a, b):
-            return difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio()
-
-        sim_daily = similarity(cancion_detectada, CANCION_DAILY)
-        sim_alt = similarity(cancion_detectada, CANCION_ALT)
-
-        if sim_daily > 0.65 or sim_alt > 0.65:
-            if sim_daily > sim_alt:
-                cancion_objetivo = CANCION_DAILY
-                constante_activa = daily_song.get("IN")
-                tipo = "Daily"
-            else:
-                cancion_objetivo = CANCION_ALT
-                constante_activa = alternative_song.get("IN")
-                tipo = "Alternative"
-        else:
-            st.error(f"❌ Canción no reconocida: **{cancion_detectada}**\nSolo se permiten el Daily o Alternative de hoy.")
-            st.stop()
-
-        st.success(f"✅ Detectado: **{cancion_objetivo}** ({tipo})")
-
-        # Mostrar datos
-        st.subheader("📝 Datos Extraídos")
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Usuario", usuario_final)
-        col2.metric("Canción", cancion_objetivo)
-        col3.metric("Score", f"{score_detectado:,}")
-        col4.metric("Acc", f"{accuracy_detectada}%")
-
-        if st.button("Registrar Puntaje"):
-            def calcular_rks(acc, const): 
-                return round((((acc - 55) / 45) ** 2) * const, 2)
-            
-            rks = calcular_rks(accuracy_detectada, constante_activa)
-
-            nuevo_score = {
-                "usuario": usuario_final,
-                "cancion": cancion_objetivo,
-                "tipo": tipo,
-                "score": score_detectado,
-                "accuracy": accuracy_detectada,
-                "rks": rks,
-                "fecha": today,
-            }
-            db.collection("scores").document(f"{usuario_final}_{today}_{tipo}").set(nuevo_score)
-            st.success(f"¡Registrado correctamente en **{tipo}**!")
-
-
+reader = inicializar_
 
 
 # =============================================================================
