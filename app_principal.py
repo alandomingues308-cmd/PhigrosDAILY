@@ -44,7 +44,7 @@ with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
     json.dump({"daily": daily_song, "alternative": alternative_song}, f, ensure_ascii=False, indent=2)
 
 
-st.info(f"{CANCION_DAILY} ({daily_song["IN"]})**")
+st.success(f"{CANCION_DAILY} ({daily_song["IN"]})**")
 st.subheader(f"🎵 Cancion Alternativa")
 st.info(f"**{CANCION_ALT} ({alternative_song["IN"]})**")
 
