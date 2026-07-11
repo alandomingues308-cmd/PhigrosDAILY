@@ -49,7 +49,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.success(f"**Daily: **\n**{CANCION_DAILY} ({daily_song["IN"]})**")
 with col2:
-    st.info(f"**Alternative: **\n**{CANCION_ALT} ({daily_song["IN"]})**")
+    st.info(f"**Alternative: **\n**{CANCION_ALT} ({alternative_song["IN"]})**")
 
 @st.cache_resource
 def inicializar_ocr():
