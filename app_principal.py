@@ -98,12 +98,20 @@ if uploaded_file is not None:
         corrections = {"crafi": "craftyy!", "Evz": "Evanii", "Shadom": "Shadow",
                        "3 MathyPop": "MathyPop", ">OMathyPop": "MathyPop"}
         usuario_final = corrections.get(usuario_final, usuario_final)
-
+        
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Usuario", usuario_final)
+        col1.metric("Usuario (detectado)", usuario_detectado)
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
+
+        # === Editar Usuario ===
+        st.subheader("✏️ Corregir Nombre de Usuario")
+        st.warning("⚠️ Si el nombre detectado es incorrecto, cámbialo aquí antes de registrar.")
+        usuario_final = st.text_input("Nombre de usuario final:", 
+                                     value=usuario_detectado, 
+                                     key="user_edit")
+
 
         # Selección manual
         st.subheader("¿De qué canción es esta captura?")
