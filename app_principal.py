@@ -130,9 +130,9 @@ if uploaded_file is not None:
         if usuario_final== "5 MathyPop": usuario_final= "MathyPop"
         st.session_state.usuario= usuario_final
         
-        def actualizar_nombre():
-            st.session_state.usuario = st.session_state.input_key
-            st.rerun()
+       # def actualizar_nombre():
+          #  st.session_state.usuario = st.session_state.input_key
+           # st.rerun()
     
         # UI de confirmación
         st.subheader("📝 Datos Extraídos")
@@ -141,11 +141,11 @@ if uploaded_file is not None:
         col2.metric("Score", f"{score_detectado:,}")
         col3.metric("Acc", f"{accuracy_detectada}%")
         
-        st.text_input(
-            "¿Usuario incorrecto?, cámbialo aquí:", 
-            key="input_key", 
-            on_change= actualizar_nombre
-            )
+       # st.text_input(
+            #"¿Usuario incorrecto?, cámbialo aquí:", 
+            #key="input_key", 
+           # on_change= actualizar_nombre
+            #)
     
         if st.button("Registrar Puntaje"):
         # Lógica de cálculo (reutilizando tus funciones previas)
