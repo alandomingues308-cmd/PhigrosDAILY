@@ -177,7 +177,8 @@ if todos_los_scores:
             st.info("Aún no hay scores subidos hoy.")
 
     with tab_general:
-        st.subheader("Tabla Global Histórica (Mejor por día)")
+        st.subheader("Tabla General (Mejor por día)")
+        st.write("En esta tabla se sumam los mejores rks que conseguiste dia tras dia")
         df_hoy_max = df[df["fecha"] == today]
         if not df_hoy_max.empty:
             df_best_per_day = df_hoy_max.loc[df_hoy_max.groupby("usuario")["rks"].idxmax()]
