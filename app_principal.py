@@ -45,7 +45,7 @@ with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
 
 
 st.success(f"{CANCION_DAILY} ({daily_song["IN"]})**")
-st.subheader(f"🎵 Cancion Alternativa")
+st.subheader("Cancion Alternativa")
 st.info(f"**{CANCION_ALT} ({alternative_song["IN"]})**")
 
 @st.cache_resource
