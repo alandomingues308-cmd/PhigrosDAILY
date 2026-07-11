@@ -18,6 +18,11 @@ def init_firestore():
     key_dict = dict(st.secrets["firestore"])
     creds = service_account.Credentials.from_service_account_info(key_dict)
     return firestore.Client(credentials=creds, project=key_dict["project_id"])
+@st.cache_resource
+def get_reader():
+    return easyocr.Reader(['es', 'en'])
+
+reader = get_reader() # Úsalo así en lugar de inicializarlo directamente
 
 db = init_firestore()
 
