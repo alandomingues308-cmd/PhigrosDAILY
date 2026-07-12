@@ -32,7 +32,7 @@ songs = load_songs()
 today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
 st.title(f"🎵 Canción del Día {today} Phigros")
-usuario_final=st.input("coloca tu usuario")
+usuario_final=st.txt_input("coloca tu usuario")
 
 # Selección de dos canciones
 daily_song = random.choice(songs)
