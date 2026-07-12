@@ -89,7 +89,8 @@ if uploaded_file is not None:
             if match:
                 accuracy_detectada = float(match.group(1))
                 break
-        
+        if score == 1000000: accuracy_detectada= 100
+            
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
         col1.metric("Usuario (detectado)", usuario_final)
