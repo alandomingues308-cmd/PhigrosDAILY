@@ -32,6 +32,7 @@ songs = load_songs()
 today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
 st.title(f"🎵 Canción del Día {today} Phigros")
+usuario_final=st.input("coloca tu usuario")
 
 # Selección de dos canciones
 daily_song = random.choice(songs)
@@ -66,12 +67,7 @@ if uploaded_file is not None:
     ancho, alto = imagen_completa.size
     
     with st.spinner("Analizando captura..."):
-        # OCR Usuario
-        box_usuario = (int(ancho * 0.56), int(alto * 0.02), int(ancho * 0.82), int(alto * 0.12))
-        img_usuario = np.array(imagen_completa.crop(box_usuario))
-        ocr_user = reader.readtext(img_usuario, detail=0)
-        usuario_final = " ".join(ocr_user).strip() or "Usuario_Desconocido"
-
+        
         # OCR Score
         box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
         img_score = np.array(imagen_completa.crop(box_score))
@@ -93,11 +89,6 @@ if uploaded_file is not None:
             if match:
                 accuracy_detectada = float(match.group(1))
                 break
-
-        # Correcciones comunes
-        corrections = {"crafi": "craftyy!", "Evz": "Evanii", "Shadom": "Shadow",
-                       "3 MathyPop": "MathyPop", ">OMathyPop": "MathyPop"}
-        usuario_final = corrections.get(usuario_final, usuario_final)
         
         st.subheader("📝 Datos Extraídos")
         col1, col2, col3 = st.columns(3)
