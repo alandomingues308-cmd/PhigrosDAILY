@@ -32,7 +32,7 @@ songs = load_songs()
 today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 random.seed(today)
 st.title(f"🎵 Canción del Día {today} Phigros")
-usuario_final=st.text_input("coloca tu usuario")
+
 
 # Selección de dos canciones
 daily_song = random.choice(songs)
@@ -56,7 +56,7 @@ def inicializar_ocr():
 reader = inicializar_ocr()
 
 st.title("🏆 Sube tu mejor puntaje")
-
+usuario_final=st.text_input("coloca tu usuario")
 # ==================== SUBIDA DE IMAGEN ====================
 uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", 
                                 type=["png", "jpg", "jpeg"], 
