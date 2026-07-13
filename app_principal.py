@@ -126,6 +126,7 @@ if uploaded_file is not None:
                 "accuracy": accuracy_detectada,
                 "rks": rks,
                 "fecha": today,
+                "timestamp": datetime.now(mx_tz).isoformat()
             }
             
             db.collection("scores").document(f"{usuario_final}_{today}_{tipo}").set(nuevo_score)
@@ -149,8 +150,11 @@ if todos_los_scores:
         
         if not df_hoy.empty:
             # Top Daily
-            df_daily = df_hoy[df_hoy["cancion"] == CANCION_DAILY]
-            df_daily = df_daily.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
+            df_daily = df_hoy[df_hoy["cancion"] == CANCION_DAILY].copy()
+            if not df_daily.empty:
+                df_daily = df_daily.sort_values(by=["rks", "timestamp"], 
+                                              ascending=[False, True])  # Mayor RKS, y si empatan → más antiguo primero
+                df_daily = df_daily.drop_duplicates(subset=["usuario"], keep="first")
             st.markdown("### 🏆 Top Daily")
             if not df_daily.empty:
                 st.dataframe(df_daily[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
@@ -160,8 +164,12 @@ if todos_los_scores:
             st.markdown("---")
 
             # Top Alternative
-            df_alt = df_hoy[df_hoy["cancion"] == CANCION_ALT]
-            df_alt = df_alt.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario"], keep="first")
+            # Top Alternative
+            df_alt = df_hoy[df_hoy["cancion"] == CANCION_ALT].copy()
+            if not df_alt.empty:
+                df_alt = df_alt.sort_values(by=["rks", "timestamp"], 
+                                          ascending=[False, True])
+                df_alt = df_alt.drop_duplicates(subset=["usuario"], keep="first")
             st.markdown("### 🥈 Top Alternative")
             if not df_alt.empty:
                 st.dataframe(df_alt[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
