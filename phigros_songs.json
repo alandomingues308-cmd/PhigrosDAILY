@@ -27,7 +27,6 @@
   {"title": "Swing Skip Drop", "IN": 15, "AT": null},
   {"title": "ニライカナイ (NiraicA_nai Mix)", "IN": 13, "AT": null},
   {"title": "インマイマインド", "IN": 12, "AT": null},
-  {"title": "贝多芬祝福 (Beethoven Blessing)", "IN": 15, "AT": null},
   {"title": "蝎虎天体 -Lacertid-", "IN": 15, "AT": null},
   {"title": "Shelter", "IN": 13, "AT": null},
   {"title": "Kirakira Noel Story!!", "IN": 14, "AT": null},
@@ -277,8 +276,6 @@
   {"title": "Shadow", "IN": 14, "AT": 16},
   {"title": "心之所向", "IN": 13, "AT": null},
   {"title": "inferior", "IN": 14, "AT": null},
-  {"title": "Anomaly", "IN": 14, "AT": true},
-  {"title": "Destination", "IN": 13, "AT": 15},
   {"title": "Apocalypse", "IN": 13, "AT": null},
   {"title": "Protoflicker", "IN": 15, "AT": null},
   {"title": "Horizon Blue", "IN": 15, "AT": true}
