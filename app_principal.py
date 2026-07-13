@@ -92,7 +92,7 @@ if uploaded_file is not None:
         if score_detectado== 10000: score_detectado= 1000000
         if score_detectado== 100000: score_detectads= 1000000
         if score_detectado == 1000000: accuracy_detectada= 100
-        if accuracy_detectado== 100: score_detectado= 1000000
+        if accuracy_detectada== 100: score_detectado= 1000000
         
             
         st.subheader("📝 Datos Extraídos")
