@@ -205,7 +205,7 @@ if todos_los_scores:
             use_container_width=True,
             hide_index=True
             )
-        st.caption("Solo se cuenta la mejor canción (Daily o Alternative) por día.")
+            st.caption("Solo se cuenta la mejor canción (Daily o Alternative) por día.")
         else:
            st.info("No hay datos aún.")
 else:
