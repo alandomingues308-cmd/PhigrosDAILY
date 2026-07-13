@@ -89,7 +89,7 @@ if uploaded_file is not None:
             if match:
                 accuracy_detectada = float(match.group(1))
                 break
-        if score_detectaado== 10000: score_detectado= 1000000
+        if score_detectado== 10000: score_detectado= 1000000
         if score_detectado== 100000: score_detectads= 1000000
         if score_detectado == 1000000: accuracy_detectada= 100
         if accuracy_detectado== 100: score_detectado= 1000000
