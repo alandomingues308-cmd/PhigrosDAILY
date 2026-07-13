@@ -179,30 +179,34 @@ if todos_los_scores:
 
     with tab_general:
         st.subheader("Tabla General (Mejor por día)")
-        st.write("En esta tabla se sumam los mejores rks que conseguiste dia tras dia")
-        df_hoy_max = df[df["fecha"] == today]
-        if not df_hoy_max.empty:
-            df_best_per_day = df_hoy_max.loc[df_hoy_max.groupby("usuario")["rks"].idxmax()]
-        else:
-            df_best_per_day = pd.DataFrame()
+        st.write("En esta tabla se suman los mejores rks que conseguiste día tras día")
+ 
+        # Asegurarnos de que la fecha esté en formato date
+        df['fecha'] = pd.to_datetime(df['fecha']).dt.date
 
-        df_historico = df[df["fecha"] != today]
-        df_all = pd.concat([df_historico, df_best_per_day]) if not df_best_per_day.empty else df_historico
-
-        df_mejores = df_all.sort_values(by="rks", ascending=False).drop_duplicates(subset=["usuario", "cancion"], keep="first")
-        
-        df_acumulado = df_mejores.groupby("usuario").agg(
-            RKS_Total=("rks", "sum"),
-            Canciones_Jugadas=("cancion", "count")
+        # 1. Para cada día y cada usuario → tomar SOLO la mejor canción (la de mayor RKS)
+        df_best_per_day = (
+        df.sort_values(by=['usuario', 'fecha', 'rks'], ascending=[True, True, False])
+        .drop_duplicates(subset=['usuario', 'fecha'], keep='first')
+        )
+ 
+        # 2. Ahora agrupamos para obtener el acumulado
+        df_acumulado = df_best_per_day.groupby("usuario").agg(
+        RKS_Total=("rks", "sum"),
+        Canciones_Jugadas=("rks", "count")   # Contamos días con al menos una canción
         ).reset_index()
-        
+
         df_acumulado["RKS_Total"] = df_acumulado["RKS_Total"].round(4)
         df_acumulado = df_acumulado.sort_values(by="RKS_Total", ascending=False)
-        
+
         if not df_acumulado.empty:
-            st.dataframe(df_acumulado[["usuario", "RKS_Total", "Canciones_Jugadas"]], use_container_width=True)
-            st.caption("Solo se cuenta la mejor canción (Daily o Alternative) por día.")
+            st.dataframe(
+            df_acumulado[["usuario", "RKS_Total", "Canciones_Jugadas"]], 
+            use_container_width=True,
+            hide_index=True
+            )
+        st.caption("Solo se cuenta la mejor canción (Daily o Alternative) por día.")
         else:
-            st.info("No hay datos aún.")
+           st.info("No hay datos aún.")
 else:
     st.info("No hay registros todavía.")
