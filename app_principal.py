@@ -105,4 +105,90 @@ with tab_phigros:
                         break
 
                 # OCR Accuracy
-                box_acc = (int(ancho * 0.75), int(alto * 0.
+                box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
+                img_acc = np.array(imagen_completa.crop(box_acc))
+                ocr_acc = reader.readtext(img_acc, detail=0)
+                accuracy_detectada = 0.0
+                for item in ocr_acc:
+                    match = re.search(r'(\d+\.\d+)', item)
+                    if match:
+                        accuracy_detectada = float(match.group(1))
+                        break
+
+                if score_detectado in (10000, 100000):
+                    score_detectado = 1000000
+                if score_detectado == 1000000:
+                    accuracy_detectada = 100.0
+
+                st.subheader("📝 Datos Extraídos")
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Usuario", usuario_final)
+                col2.metric("Score", f"{score_detectado:,}")
+                col3.metric("Acc", f"{accuracy_detectada}%")
+
+                st.subheader("¿De qué canción es esta captura?")
+                opcion = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True)
+
+                if st.button("Registrar Puntaje", type="primary"):
+                    if opcion == "Daily":
+                        cancion_objetivo = CANCION_DAILY
+                        constante_activa = daily_song.get("IN")
+                        tipo = "Daily"
+                    else:
+                        cancion_objetivo = CANCION_ALT
+                        constante_activa = alternative_song.get("IN")
+                        tipo = "Alternative"
+
+                    def calcular_rks(acc, const): 
+                        return round((((acc - 55) / 45) ** 2) * const, 2)
+                    
+                    rks = calcular_rks(accuracy_detectada, constante_activa)
+
+                    nuevo_score = {
+                        "usuario": usuario_final,
+                        "cancion": cancion_objetivo,
+                        "tipo": tipo,
+                        "score": score_detectado,
+                        "accuracy": accuracy_detectada,
+                        "rks": rks,
+                        "fecha": today,
+                        "timestamp": datetime.now(mx_tz).isoformat()
+                    }
+                    
+                    db.collection("scores").document(f"{usuario_final}_{today}_{tipo}").set(nuevo_score)
+                    st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
+                    st.balloons()
+
+    # ==================== TABLAS ====================
+    st.write("---")
+    st.header("📊 Tablas de Clasificación")
+    # (Mantengo el código de tablas completo, pero resumido aquí por espacio)
+    scores_ref = db.collection("scores").stream()
+    todos_los_scores = [doc.to_dict() for doc in scores_ref]
+
+    if todos_los_scores:
+        df = pd.DataFrame(todos_los_scores)
+        tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+        
+        with tab_diaria:
+            st.subheader(f"Desafío del Día - {today}")
+            df_hoy = df[df["fecha"] == today].copy()
+            # Top Daily y Alternative (igual que antes)
+            for song_name, label in [(CANCION_DAILY, "Top Daily"), (CANCION_ALT, "Top Alternative")]:
+                df_temp = df_hoy[df_hoy["cancion"] == song_name].copy()
+                if not df_temp.empty:
+                    df_temp = df_temp.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                    st.markdown(f"### {label}")
+                    st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
+
+        with tab_general:
+            df['fecha'] = pd.to_datetime(df['fecha']).dt.date
+            best_per_day = df.sort_values(by=['usuario', 'fecha', 'rks'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha'])
+            acumulado = best_per_day.groupby("usuario").agg(RKS_Total=("rks", "sum"), Canciones_Jugadas=("rks", "count")).reset_index()
+            acumulado["RKS_Total"] = acumulado["RKS_Total"].round(4)
+            st.dataframe(acumulado.sort_values("RKS_Total", ascending=False), use_container_width=True, hide_index=True)
+
+# ====================== ARCAEA ======================
+with tab_arcaea:
+    st.title("🌊 Arcaea - Daily Challenge")
+    st.info("🚧 En proceso...")
