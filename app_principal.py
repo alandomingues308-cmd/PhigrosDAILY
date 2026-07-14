@@ -47,7 +47,7 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
             st.warning("Completa ambos campos")
 
 # ====================== PHIGROS ======================
-tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "🌊 Arcaea"])
+tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
 
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
@@ -72,8 +72,7 @@ with tab_phigros:
     st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
     # ==================== USUARIO EN PANTALLA PRINCIPAL ====================
-    usuario_final = st.text_input("Coloca tu usuario", placeholder="Tu nombre de usuario")
-
+    
     @st.cache_resource
     def inicializar_ocr():
         return easyocr.Reader(['en'])
@@ -81,6 +80,8 @@ with tab_phigros:
     reader = inicializar_ocr()
 
     st.title("🏆 Sube tu mejor puntaje")
+    usuario_final = st.text_input("Coloca tu usuario", placeholder="Tu nombre de usuario")
+    
 
     uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", 
                                     type=["png", "jpg", "jpeg"])
@@ -190,5 +191,5 @@ with tab_phigros:
 
 # ====================== ARCAEA ======================
 with tab_arcaea:
-    st.title("🌊 Arcaea - Daily Challenge")
+    st.title(" Arcaea - Daily Challenge")
     st.info("🚧 En proceso...")
