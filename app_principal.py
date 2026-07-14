@@ -241,7 +241,7 @@ with tab_phigros:
 
 # ====================== ARCAEA ======================
 with tab_arcaea:
-    st.title("🌊 Arcaea - Daily Challenge")
+    st.title("Arcaea - Daily Challenge")
     st.info("🚧 **En proceso...**")
     st.write("Esta sección estará disponible próximamente.")
     st.image("https://via.placeholder.com/800x400?text=Arcaea+Coming+Soon", use_column_width=True)
