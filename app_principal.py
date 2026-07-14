@@ -41,7 +41,11 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
                 for doc in scores_ref:
                     data = doc.to_dict()
                     data["usuario"] = new_user
-                    db.collection("scores").document(doc.id).set(data)
+                    # Actualizamos también el document ID si es necesario
+                    new_doc_id = doc.id.replace(old_user, new_user)
+                    db.collection("scores").document(new_doc_id).set(data)
+                    # Borramos el documento viejo
+                    db.collection("scores").document(doc.id).delete()
                     updated_count += 1
                 
                 if updated_count > 0:
@@ -51,8 +55,17 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
         else:
             st.warning("Ingresa ambos nombres y asegúrate de que sean diferentes.")
 
-# Usuario actual para subir scores
-usuario_final = st.sidebar.text_input("Usuario para subir scores", value=new_user if 'new_user' in locals() and new_user else "")
+# Usuario actual (se usa el nuevo después de renombrar)
+if "usuario_actual" not in st.session_state:
+    st.session_state.usuario_actual = ""
+
+usuario_final = st.sidebar.text_input("Usuario actual para subir scores:", 
+                                      value=st.session_state.usuario_actual)
+
+if st.sidebar.button("Guardar Usuario"):
+    if usuario_final.strip():
+        st.session_state.usuario_actual = usuario_final.strip()
+        st.sidebar.success("Usuario guardado")
 
 # ====================== SELECCIÓN DE JUEGO ======================
 tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
@@ -67,7 +80,6 @@ with tab_phigros:
             return json.load(f)
 
     songs = load_songs()
-
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
@@ -80,9 +92,9 @@ with tab_phigros:
     with open("daily_backup.json", "w", encoding="utf-8-sig") as f:
         json.dump({"daily": daily_song, "alternative": alternative_song}, f, ensure_ascii=False, indent=2)
 
-    st.success(f"{CANCION_DAILY} ({daily_song['IN']})")
+    st.success(f"{CANCION_DAILY} ({daily_song.get('IN', '')})")
     st.subheader("Cancion Alternativa")
-    st.info(f"**{CANCION_ALT} ({alternative_song['IN']})**")
+    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
     @st.cache_resource
     def inicializar_ocr():
@@ -93,15 +105,14 @@ with tab_phigros:
     st.title("🏆 Sube tu mejor puntaje")
 
     uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", 
-                                    type=["png", "jpg", "jpeg"], 
-                                    help="Captura de resultados de Phigros")
+                                    type=["png", "jpg", "jpeg"])
 
     if uploaded_file is not None and usuario_final:
-        # ... (todo el código de OCR y registro se mantiene igual) ...
         imagen_completa = Image.open(uploaded_file)
         ancho, alto = imagen_completa.size
         
         with st.spinner("Analizando captura..."):
+            # OCR Score
             box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
             img_score = np.array(imagen_completa.crop(box_score))
             ocr_score = reader.readtext(img_score, detail=0)
@@ -112,6 +123,7 @@ with tab_phigros:
                     score_detectado = int("".join(nums))
                     break
 
+            # OCR Accuracy
             box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
             img_acc = np.array(imagen_completa.crop(box_acc))
             ocr_acc = reader.readtext(img_acc, detail=0)
@@ -134,7 +146,7 @@ with tab_phigros:
             col3.metric("Acc", f"{accuracy_detectada}%")
 
             st.subheader("¿De qué canción es esta captura?")
-            opcion = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="tipo_cancion_phigros")
+            opcion = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="tipo_cancion")
 
             if st.button("Registrar Puntaje", type="primary"):
                 if opcion == "Daily":
@@ -166,7 +178,7 @@ with tab_phigros:
                 st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
                 st.balloons()
 
-    # Tablas de Clasificación (código sin cambios)
+    # ==================== TABLAS ====================
     st.write("---")
     st.header("📊 Tablas de Clasificación")
 
@@ -178,45 +190,30 @@ with tab_phigros:
         tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
         
         with tab_diaria:
-            # ... (mantengo el código de las tablas igual) ...
             st.subheader(f"Desafío del Día - {today}")
-            df_hoy = df[df["fecha"] == today].copy()
-            
+            df_hoy = df[df.get("fecha") == today].copy()
+            # ... (resto del código de tablas se mantiene igual, solo muestro lo esencial) ...
             if not df_hoy.empty:
                 df_daily = df_hoy[df_hoy["cancion"] == CANCION_DAILY].copy()
                 if not df_daily.empty:
-                    df_daily = df_daily.sort_values(by=["rks", "timestamp"], ascending=[False, True])
-                    df_daily = df_daily.drop_duplicates(subset=["usuario"], keep="first")
-                st.markdown("### 🏆 Top Daily")
-                if not df_daily.empty:
+                    df_daily = df_daily.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                    st.markdown("### 🏆 Top Daily")
                     st.dataframe(df_daily[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
-
-                st.markdown("---")
 
                 df_alt = df_hoy[df_hoy["cancion"] == CANCION_ALT].copy()
                 if not df_alt.empty:
-                    df_alt = df_alt.sort_values(by=["rks", "timestamp"], ascending=[False, True])
-                    df_alt = df_alt.drop_duplicates(subset=["usuario"], keep="first")
-                st.markdown("### 🥈 Top Alternative")
-                if not df_alt.empty:
+                    df_alt = df_alt.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                    st.markdown("### 🥈 Top Alternative")
                     st.dataframe(df_alt[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
 
         with tab_general:
-            # ... (código de tabla general sin cambios) ...
             df['fecha'] = pd.to_datetime(df['fecha']).dt.date
-            df_best_per_day = df.sort_values(by=['usuario', 'fecha', 'rks'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha'], keep='first')
-            
-            df_acumulado = df_best_per_day.groupby("usuario").agg(
-                RKS_Total=("rks", "sum"),
-                Canciones_Jugadas=("rks", "count")
-            ).reset_index()
-
-            df_acumulado["RKS_Total"] = df_acumulado["RKS_Total"].round(4)
-            df_acumulado = df_acumulado.sort_values(by="RKS_Total", ascending=False)
-
-            st.dataframe(df_acumulado[["usuario", "RKS_Total", "Canciones_Jugadas"]], use_container_width=True, hide_index=True)
+            df_best = df.sort_values(by=['usuario', 'fecha', 'rks'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha'], keep='first')
+            df_acum = df_best.groupby("usuario").agg(RKS_Total=("rks", "sum"), Canciones=("rks", "count")).reset_index()
+            df_acum["RKS_Total"] = df_acum["RKS_Total"].round(4)
+            st.dataframe(df_acum.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True, hide_index=True)
 
 # ====================== ARCAEA ======================
 with tab_arcaea:
-    st.title(" Arcaea - Daily Challenge")
+    st.title("Arcaea - Daily Challenge")
     st.info("🚧 **En proceso...** Esta sección estará disponible próximamente.")
