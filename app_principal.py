@@ -45,7 +45,7 @@ if col_user2.button("Cambiar"):
 usuario_final = st.session_state.usuario_actual
 
 # ====================== SELECCIÓN DE JUEGO ======================
-tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", " "🎵 Arcaea"])
+tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "🎵 Arcaea"])
 
 # ====================== PHIGROS ======================
 with tab_phigros:
