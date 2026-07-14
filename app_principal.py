@@ -179,7 +179,7 @@ with tab_phigros:
                 if not df_temp.empty:
                     df_temp = df_temp.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
                     st.markdown(f"### {label}")
-                    st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True)
+                    st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True,hide_index=True)
                 else:
                     st.info(f"Aún no hay scores para {song}")
 
