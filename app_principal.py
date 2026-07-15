@@ -190,7 +190,35 @@ with tab_phigros:
             acum["RKS_Total"] = acum["RKS_Total"].round(4)
             st.dataframe(acum.sort_values("RKS_Total", ascending=False)[["usuario","RKS_Total","Canciones"]], use_container_width=True, hide_index=True)
 
-# ====================== ARCAEA ======================
+
+            st.subheader("¿De qué canción es esta captura?")
+            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_opcion")
+
+            if st.button("Registrar Puntaje", type="primary", key="ar_registrar"):
+                if opcion_a == "Daily":
+                    cancion_objetivo = daily_song_a["title"]
+                    tipo = "Daily"
+                else:
+                    cancion_objetivo = alternative_song_a["title"]
+                    tipo = "Alternative"
+
+                nuevo_score = {
+                    "usuario": usuario_final_a,
+                    "cancion": cancion_objetivo,
+                    "tipo": tipo,
+                    "score": score_detectado,
+                    "potencial": potencial,
+                    "fecha": today,
+                    "timestamp": datetime.now(mx_tz).isoformat(),
+                    "juego": "Arcaea",
+                    "dificultad": dificultad_a
+                }
+                
+                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
+                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
+                st.balloons()
+
+    # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
