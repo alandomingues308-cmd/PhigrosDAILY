@@ -227,7 +227,7 @@ with tab_phigros:
 
 
                 
-                   # ====================== ARCAEA ======================
+             # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
@@ -257,19 +257,13 @@ with tab_arcaea:
         ancho, alto = imagen_completa.size
         
         with st.spinner("Analizando captura..."):
-            # OCR Mejorado
             score_detectado = 0
-            strategies = [
-                (0.22, 0.15, 0.80, 0.42),
-                (0.28, 0.20, 0.75, 0.38),
-                (0.18, 0.12, 0.85, 0.48)
-            ]
+            strategies = [(0.22, 0.15, 0.80, 0.42), (0.28, 0.20, 0.75, 0.38), (0.18, 0.12, 0.85, 0.48)]
             
             for left, top, right, bottom in strategies:
                 box = (int(ancho*left), int(alto*top), int(ancho*right), int(alto*bottom))
                 img = np.array(imagen_completa.crop(box))
                 ocr = reader.readtext(img, detail=0, width_ths=0.5)
-                
                 for text in ocr:
                     clean = re.sub(r'[^0-9]', '', text)
                     if len(clean) >= 7:
@@ -283,40 +277,31 @@ with tab_arcaea:
             col1.metric("Usuario", usuario_final_a)
             col2.metric("Score", f"{score_detectado:,}")
 
-            # ==================== SELECCIÓN DINÁMICA DE DIFICULTAD ====================
+            # === PRIMERO: Elegir Daily o Alternative ===
+            st.subheader("¿De qué canción es esta captura?")
+            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_song_type")
+
+            # Seleccionar la canción correspondiente
+            cancion_seleccionada = daily_song_a if opcion_a == "Daily" else alternative_song_a
+
+            # === SEGUNDO: Dificultades disponibles para esa canción ===
             st.subheader("Dificultad del Chart")
             
-            # Obtener dificultades disponibles para la canción seleccionada
-            available_diff = []
-            if "FTR" in daily_song_a or "Future" in daily_song_a:
-                available_diff.append("FTR")
-            if "ETR" in daily_song_a or "Eternal" in daily_song_a:
-                available_diff.append("ETR")
-            if "BYD" in daily_song_a or "Beyond" in daily_song_a:
-                available_diff.append("BYD")
-            
-            # Si no hay ninguna, fallback a FTR
-            if not available_diff:
-                available_diff = ["FTR"]
+            available = []
+            if "FTR" in cancion_seleccionada:
+                available.append("FTR (Future)")
+            if "ETR" in cancion_seleccionada:
+                available.append("ETR (Eternal)")
+            if "BYD" in cancion_seleccionada:
+                available.append("BYD (Beyond)")
 
-            # Crear opciones legibles
-            diff_options = []
-            for d in available_diff:
-                if d == "FTR":
-                    diff_options.append("FTR (Future)")
-                elif d == "ETR":
-                    diff_options.append("ETR (Eternal)")
-                elif d == "BYD":
-                    diff_options.append("BYD (Beyond)")
+            if not available:
+                available = ["FTR (Future)"]
 
-            diff_option = st.radio("Selecciona la dificultad:", 
-                                  diff_options, 
-                                  horizontal=True, 
-                                  key="ar_diff_dynamic")
+            diff_option = st.radio("Selecciona la dificultad:", available, horizontal=True, key="ar_diff")
 
-            diff_key = diff_option.split()[0]  # FTR, ETR o BYD
-
-            constante_activa = daily_song_a.get(diff_key, daily_song_a.get("FTR", 0))
+            diff_key = diff_option.split()[0]
+            constante_activa = cancion_seleccionada.get(diff_key, cancion_seleccionada.get("FTR", 0))
 
             def calcular_modificador(score):
                 if score >= 10000000:
@@ -331,34 +316,27 @@ with tab_arcaea:
 
             st.info(f"**Dificultad:** {diff_key} | **Potencial:** {potencial}")
 
-            st.subheader("¿De qué canción es esta captura?")
-            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_op")
-
             if st.button("Registrar Puntaje", type="primary", key="ar_btn"):
-                if opcion_a == "Daily":
-                    cancion_objetivo = daily_song_a["title"]
-                    tipo = "Daily"
+                if score_detectado == 0:
+                    st.error("No se detectó el score.")
                 else:
-                    cancion_objetivo = alternative_song_a["title"]
-                    tipo = "Alternative"
+                    nuevo_score = {
+                        "usuario": usuario_final_a,
+                        "cancion": cancion_seleccionada["title"],
+                        "tipo": opcion_a,
+                        "score": score_detectado,
+                        "potencial": potencial,
+                        "fecha": today,
+                        "timestamp": datetime.now(mx_tz).isoformat(),
+                        "juego": "Arcaea",
+                        "dificultad": diff_key
+                    }
+                    
+                    db.collection("scores").document(f"{usuario_final_a}_{today}_{opcion_a}_arcaea").set(nuevo_score)
+                    st.success(f"✅ ¡Registrado correctamente en **{opcion_a}**!")
+                    st.balloons()
 
-                nuevo_score = {
-                    "usuario": usuario_final_a,
-                    "cancion": cancion_objetivo,
-                    "tipo": tipo,
-                    "score": score_detectado,
-                    "potencial": potencial,
-                    "fecha": today,
-                    "timestamp": datetime.now(mx_tz).isoformat(),
-                    "juego": "Arcaea",
-                    "dificultad": diff_key
-                }
-                
-                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
-                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
-                st.balloons()
-
-    # Tablas (sin cambios)
+    # ====================== TABLAS ======================
     st.write("---")
     st.header("📊 Tablas de Clasificación - Arcaea")
     scores_ref = db.collection("scores").stream()
@@ -385,4 +363,5 @@ with tab_arcaea:
             best = df.sort_values(by=['usuario','fecha','potencial'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
             acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
-            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)                                                   
+            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)      
+            
