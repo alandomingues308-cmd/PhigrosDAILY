@@ -227,7 +227,7 @@ with tab_phigros:
 
 
                 
-             # ====================== ARCAEA ======================
+                                     # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
@@ -277,30 +277,31 @@ with tab_arcaea:
             col1.metric("Usuario", usuario_final_a)
             col2.metric("Score", f"{score_detectado:,}")
 
-            # === PRIMERO: Elegir Daily o Alternative ===
+            # Elegir canción primero
             st.subheader("¿De qué canción es esta captura?")
             opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_song_type")
 
-            # Seleccionar la canción correspondiente
             cancion_seleccionada = daily_song_a if opcion_a == "Daily" else alternative_song_a
 
-            # === SEGUNDO: Dificultades disponibles para esa canción ===
-            st.subheader("Dificultad del Chart")
-            
-            available = []
-            if "FTR" in cancion_seleccionada:
-                available.append("FTR (Future)")
-            if "ETR" in cancion_seleccionada:
-                available.append("ETR (Eternal)")
-            if "BYD" in cancion_seleccionada:
-                available.append("BYD (Beyond)")
+            # Determinar si necesita selección de dificultad
+            has_eternal = "ETR" in cancion_seleccionada
+            has_beyond = "BYD" in cancion_seleccionada
 
-            if not available:
-                available = ["FTR (Future)"]
+            diff_key = "FTR"  # Por defecto
+            show_diff_selector = has_eternal or has_beyond
 
-            diff_option = st.radio("Selecciona la dificultad:", available, horizontal=True, key="ar_diff")
+            if show_diff_selector:
+                st.subheader("Dificultad del Chart")
+                options = ["FTR (Future)"]
+                if has_eternal:
+                    options.append("ETR (Eternal)")
+                if has_beyond:
+                    options.append("BYD (Beyond)")
+                
+                diff_option = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
+                diff_key = diff_option.split()[0]
 
-            diff_key = diff_option.split()[0]
+            # Calcular potencial
             constante_activa = cancion_seleccionada.get(diff_key, cancion_seleccionada.get("FTR", 0))
 
             def calcular_modificador(score):
@@ -314,7 +315,10 @@ with tab_arcaea:
             mod = calcular_modificador(score_detectado)
             potencial = round(constante_activa + mod, 2)
 
-            st.info(f"**Dificultad:** {diff_key} | **Potencial:** {potencial}")
+            if show_diff_selector:
+                st.info(f"**Dificultad:** {diff_key} | **Potencial:** {potencial}")
+            else:
+                st.info(f"**Dificultad:** FTR (automática) | **Potencial:** {potencial}")
 
             if st.button("Registrar Puntaje", type="primary", key="ar_btn"):
                 if score_detectado == 0:
@@ -336,7 +340,7 @@ with tab_arcaea:
                     st.success(f"✅ ¡Registrado correctamente en **{opcion_a}**!")
                     st.balloons()
 
-    # ====================== TABLAS ======================
+    # Tablas Arcaea
     st.write("---")
     st.header("📊 Tablas de Clasificación - Arcaea")
     scores_ref = db.collection("scores").stream()
@@ -363,5 +367,4 @@ with tab_arcaea:
             best = df.sort_values(by=['usuario','fecha','potencial'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
             acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
-            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)      
-            
+            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
