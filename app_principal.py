@@ -190,7 +190,127 @@ with tab_phigros:
             acum["RKS_Total"] = acum["RKS_Total"].round(4)
             st.dataframe(acum.sort_values("RKS_Total", ascending=False)[["usuario","RKS_Total","Canciones"]], use_container_width=True, hide_index=True)
 
-# Arcaea
+# ====================== ARCAEA ======================
 with tab_arcaea:
-    st.title(" Arcaea")
-    st.info("🚧 En proceso...")
+    st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
+
+    @st.cache_data
+    def load_arcaea_songs():
+        with open("arcaea_songs.json", "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+
+    songs_a = load_arcaea_songs()
+    today = datetime.now(mx_tz).strftime("%Y-%m-%d")
+    random.seed(today)
+
+    daily_song_a = random.choice(songs_a)
+    alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
+
+    st.success(f"{daily_song_a['title']}")
+    st.subheader("Cancion Alternativa")
+    st.info(f"**{alternative_song_a['title']}**")
+
+    usuario_final_a = st.text_input("Coloca tu usuario", placeholder="Tu nombre de usuario", key="ar_user")
+
+    uploaded_file_a = st.file_uploader("Sube la captura de pantalla de tus resultados (Arcaea):", 
+                                      type=["png", "jpg", "jpeg"], key="ar_upload")
+
+    if uploaded_file_a is not None and usuario_final_a.strip():
+        imagen_completa = Image.open(uploaded_file_a)
+        ancho, alto = imagen_completa.size
+        
+        with st.spinner("Analizando captura..."):
+            box_score = (int(ancho * 0.35), int(alto * 0.22), int(ancho * 0.72), int(alto * 0.42))
+            img_score = np.array(imagen_completa.crop(box_score))
+            ocr_score = reader.readtext(img_score, detail=0)
+            
+            score_detectado = 0
+            for item in ocr_score:
+                nums = re.findall(r'\d+', item.replace("'", "").replace(",", ""))
+                if nums:
+                    score_detectado = int("".join(nums))
+                    break
+
+            # Detectar dificultad (FTR / ETR / BYD)
+            texto_ocr = " ".join(ocr_score).upper()
+            if "BYD" in texto_ocr or "BEYOND" in texto_ocr:
+                dificultad_a = "BYD"
+            elif "ETR" in texto_ocr or "ETERNAL" in texto_ocr:
+                dificultad_a = "ETR"
+            else:
+                dificultad_a = "FTR"
+            
+            constante_activa = daily_song_a.get(dificultad_a, daily_song_a.get("FTR", 0))
+
+            def calcular_modificador(score):
+                if score >= 10000000:
+                    return 2.0
+                elif score >= 9800000:
+                    return 1.0 + (score - 9800000) / 200000
+                else:
+                    return (score - 9500000) / 300000
+
+            mod = calcular_modificador(score_detectado)
+            potencial = round(constante_activa + mod, 2)
+
+            st.subheader("📝 Datos Extraídos")
+            col1, col2 = st.columns(2)
+            col1.metric("Usuario", usuario_final_a)
+            col2.metric("Score", f"{score_detectado:,}")
+            st.info(f"Dificultad detectada: **{dificultad_a}** | Modificador: **{mod:.2f}**")
+
+            st.subheader("¿De qué canción es esta captura?")
+            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_opcion")
+
+            if st.button("Registrar Puntaje", type="primary", key="ar_registrar"):
+                if opcion_a == "Daily":
+                    cancion_objetivo = daily_song_a["title"]
+                    tipo = "Daily"
+                else:
+                    cancion_objetivo = alternative_song_a["title"]
+                    tipo = "Alternative"
+
+                nuevo_score = {
+                    "usuario": usuario_final_a,
+                    "cancion": cancion_objetivo,
+                    "tipo": tipo,
+                    "score": score_detectado,
+                    "potencial": potencial,
+                    "fecha": today,
+                    "timestamp": datetime.now(mx_tz).isoformat(),
+                    "juego": "Arcaea",
+                    "dificultad": dificultad_a
+                }
+                
+                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
+                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
+                st.balloons()
+
+    # ====================== TABLAS ARCAEA ======================
+    st.write("---")
+    st.header("📊 Tablas de Clasificación - Arcaea")
+    scores_ref = db.collection("scores").stream()
+    todos_los_scores = [doc.to_dict() for doc in scores_ref if doc.to_dict().get("juego") == "Arcaea"]
+
+    if todos_los_scores:
+        df = pd.DataFrame(todos_los_scores)
+        tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+        
+        with tab_diaria:
+            st.subheader(f"Desafío del Día - {today}")
+            df_hoy = df[df["fecha"] == today].copy()
+            for song, label in [(daily_song_a["title"], "🏆 Top Daily"), (alternative_song_a["title"], "🥈 Top Alternative")]:
+                df_temp = df_hoy[df_hoy["cancion"] == song].copy()
+                if not df_temp.empty:
+                    df_temp = df_temp.sort_values(by=["potencial", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                    st.markdown(f"### {label}")
+                    st.dataframe(df_temp[["usuario", "score", "potencial", "dificultad"]], use_container_width=True)
+                else:
+                    st.info(f"Aún no hay scores para {song}")
+
+        with tab_general:
+            df['fecha'] = pd.to_datetime(df['fecha']).dt.date
+            best = df.sort_values(by=['usuario','fecha','potencial'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
+            acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
+            acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
+            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
