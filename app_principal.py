@@ -219,7 +219,7 @@ with tab_phigros:
                 st.balloons()
 
             
-                            "fecha": today,
+                    "fecha": today,
                     "timestamp": datetime.now(mx_tz).isoformat(),
                     "juego": "Arcaea",
                     "dificultad": dificultad_a
