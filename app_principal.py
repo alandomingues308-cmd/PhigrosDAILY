@@ -227,7 +227,7 @@ with tab_phigros:
 
 
                 
-                                    # ====================== ARCAEA ======================
+                   # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
@@ -316,3 +316,73 @@ with tab_arcaea:
 
             diff_key = diff_option.split()[0]  # FTR, ETR o BYD
 
+            constante_activa = daily_song_a.get(diff_key, daily_song_a.get("FTR", 0))
+
+            def calcular_modificador(score):
+                if score >= 10000000:
+                    return 2.0
+                elif score >= 9800000:
+                    return 1.0 + (score - 9800000) / 200000.0
+                else:
+                    return (score - 9500000) / 300000.0
+
+            mod = calcular_modificador(score_detectado)
+            potencial = round(constante_activa + mod, 2)
+
+            st.info(f"**Dificultad:** {diff_key} | **Potencial:** {potencial}")
+
+            st.subheader("¿De qué canción es esta captura?")
+            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_op")
+
+            if st.button("Registrar Puntaje", type="primary", key="ar_btn"):
+                if opcion_a == "Daily":
+                    cancion_objetivo = daily_song_a["title"]
+                    tipo = "Daily"
+                else:
+                    cancion_objetivo = alternative_song_a["title"]
+                    tipo = "Alternative"
+
+                nuevo_score = {
+                    "usuario": usuario_final_a,
+                    "cancion": cancion_objetivo,
+                    "tipo": tipo,
+                    "score": score_detectado,
+                    "potencial": potencial,
+                    "fecha": today,
+                    "timestamp": datetime.now(mx_tz).isoformat(),
+                    "juego": "Arcaea",
+                    "dificultad": diff_key
+                }
+                
+                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
+                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
+                st.balloons()
+
+    # Tablas (sin cambios)
+    st.write("---")
+    st.header("📊 Tablas de Clasificación - Arcaea")
+    scores_ref = db.collection("scores").stream()
+    todos_los_scores = [doc.to_dict() for doc in scores_ref if doc.to_dict().get("juego") == "Arcaea"]
+
+    if todos_los_scores:
+        df = pd.DataFrame(todos_los_scores)
+        tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+        
+        with tab_diaria:
+            st.subheader(f"Desafío del Día - {today}")
+            df_hoy = df[df["fecha"] == today].copy()
+            for song, label in [(daily_song_a["title"], "🏆 Top Daily"), (alternative_song_a["title"], "🥈 Top Alternative")]:
+                df_temp = df_hoy[df_hoy["cancion"] == song].copy()
+                if not df_temp.empty:
+                    df_temp = df_temp.sort_values(by=["potencial", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                    st.markdown(f"### {label}")
+                    st.dataframe(df_temp[["usuario", "score", "potencial", "dificultad"]], use_container_width=True)
+                else:
+                    st.info(f"Aún no hay scores para {song}")
+
+        with tab_general:
+            df['fecha'] = pd.to_datetime(df['fecha']).dt.date
+            best = df.sort_values(by=['usuario','fecha','potencial'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
+            acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
+            acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
+            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)                                                   
