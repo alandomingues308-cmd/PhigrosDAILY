@@ -218,7 +218,8 @@ with tab_phigros:
                 st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
                 st.balloons()
 
-    # ====================== ARCAEA ======================
+            
+        # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
