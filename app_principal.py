@@ -216,8 +216,13 @@ with tab_phigros:
                 db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
                 st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
                 st.balloons()
-        
-# ====================== ARCAEA ======================
+
+
+
+
+
+                
+                # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
@@ -246,89 +251,112 @@ with tab_arcaea:
         imagen_completa = Image.open(uploaded_file_a)
         ancho, alto = imagen_completa.size
         
-        with st.spinner("Analizando captura..."):
-            # Recorte amplio + búsqueda agresiva de números grandes
-            box_score = (int(ancho * 0.25), int(alto * 0.18), int(ancho * 0.80), int(alto * 0.40))
-            img_score = np.array(imagen_completa.crop(box_score))
-            ocr_results = reader.readtext(img_score, detail=0, width_ths=0.6)
-            
+        with st.spinner("Analizando captura con OCR mejorado..."):
+            # Múltiples estrategias de recorte
             score_detectado = 0
-            for text in ocr_results:
-                # Buscar números grandes (7+ dígitos)
-                clean_text = re.sub(r'[^0-9]', '', text)
-                if len(clean_text) >= 7:
-                    candidate = int(clean_text)
-                    if candidate > score_detectado:   # Tomar el más grande
-                        score_detectado = candidate
-                    break
+            strategies = [
+                (0.22, 0.15, 0.80, 0.42),   # Amplio centrado
+                (0.28, 0.20, 0.75, 0.38),   # Más ajustado
+                (0.18, 0.12, 0.85, 0.48),   # Muy amplio
+            ]
             
-            # Fallback si no encuentra
-            if score_detectado == 0:
+            for left, top, right, bottom in strategies:
+                box = (
+                    int(ancho * left), 
+                    int(alto * top), 
+                    int(ancho * right), 
+                    int(alto * bottom)
+                )
+                img_crop = np.array(imagen_completa.crop(box))
+                
+                # OCR con parámetros optimizados para números grandes
+                ocr_results = reader.readtext(
+                    img_crop, 
+                    detail=0, 
+                    width_ths=0.4,
+                    height_ths=0.6,
+                    text_threshold=0.7
+                )
+                
                 for text in ocr_results:
-                    nums = re.findall(r'\d{7,}', text.replace("'", ""))
-                    if nums:
-                        score_detectado = int(nums[0])
+                    # Limpieza extrema para capturar scores como 09'942'258
+                    clean = re.sub(r'[^0-9]', '', text)
+                    if len(clean) >= 7:
+                        candidate = int(clean)
+                        if candidate > score_detectado:
+                            score_detectado = candidate
+                            break
+                if score_detectado > 0:
+                    break
+
+            # Último intento con todo el texto
+            if score_detectado == 0:
+                full_ocr = reader.readtext(np.array(imagen_completa), detail=0)
+                for text in full_ocr:
+                    clean = re.sub(r'[^0-9]', '', text)
+                    if len(clean) >= 8:
+                        score_detectado = int(clean)
                         break
 
             st.subheader("📝 Datos Extraídos")
             col1, col2 = st.columns(2)
             col1.metric("Usuario", usuario_final_a)
-            col2.metric("Score", f"{score_detectado:,}" if score_detectado > 0 else "No detectado ❌")
+            col2.metric("Score", f"{score_detectado:,}" if score_detectado > 0 else "No detectado")
 
-            # Selección manual de dificultad
+            if score_detectado == 0:
+                st.error("No se pudo detectar el score. Prueba con otra captura más clara.")
+                st.stop()
+
+            # Selección manual de dificultad (obligatoria)
             st.subheader("Dificultad del Chart")
             diff_option = st.radio("Selecciona la dificultad:", 
                                   ["FTR (Future)", "ETR (Eternal)", "BYD (Beyond)"], 
-                                  horizontal=True, key="ar_diff_select")
+                                  horizontal=True, key="ar_diff")
 
-            diff_key = diff_option.split()[0]  # FTR, ETR o BYD
-
+            diff_key = diff_option.split()[0]
             constante_activa = daily_song_a.get(diff_key, daily_song_a.get("FTR", 0))
 
             def calcular_modificador(score):
                 if score >= 10000000:
                     return 2.0
                 elif score >= 9800000:
-                    return 1.0 + (score - 9800000) / 200000
+                    return 1.0 + (score - 9800000) / 200000.0
                 else:
-                    return (score - 9500000) / 300000
+                    return (score - 9500000) / 300000.0
 
             mod = calcular_modificador(score_detectado)
             potencial = round(constante_activa + mod, 2)
 
-            st.info(f"**Dificultad:** {diff_key} | **Constante:** {constante_activa} | **Potencial:** {potencial}")
+            st.success(f"**Potencial calculado:** {potencial} (Constante: {constante_activa} | Mod: {mod:.2f})")
 
             st.subheader("¿De qué canción es esta captura?")
-            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_option_unique")
+            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_op")
 
-            if st.button("Registrar Puntaje", type="primary", key="ar_register_btn"):
-                if score_detectado == 0:
-                    st.error("No se pudo detectar el score. Intenta con otra captura.")
+            if st.button("Registrar Puntaje", type="primary", key="ar_btn"):
+                if opcion_a == "Daily":
+                    cancion_objetivo = daily_song_a["title"]
+                    tipo = "Daily"
                 else:
-                    if opcion_a == "Daily":
-                        cancion_objetivo = daily_song_a["title"]
-                        tipo = "Daily"
-                    else:
-                        cancion_objetivo = alternative_song_a["title"]
-                        tipo = "Alternative"
+                    cancion_objetivo = alternative_song_a["title"]
+                    tipo = "Alternative"
 
-                    nuevo_score = {
-                        "usuario": usuario_final_a,
-                        "cancion": cancion_objetivo,
-                        "tipo": tipo,
-                        "score": score_detectado,
-                        "potencial": potencial,
-                        "fecha": today,
-                        "timestamp": datetime.now(mx_tz).isoformat(),
-                        "juego": "Arcaea",
-                        "dificultad": diff_key
-                    }
-                    
-                    db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
-                    st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
-                    st.balloons()
+                nuevo_score = {
+                    "usuario": usuario_final_a,
+                    "cancion": cancion_objetivo,
+                    "tipo": tipo,
+                    "score": score_detectado,
+                    "potencial": potencial,
+                    "fecha": today,
+                    "timestamp": datetime.now(mx_tz).isoformat(),
+                    "juego": "Arcaea",
+                    "dificultad": diff_key
+                }
+                
+                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
+                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
+                st.balloons()
 
-    # ====================== TABLAS ARCAEA ======================
+    # Tablas Arcaea (sin cambios)
     st.write("---")
     st.header("📊 Tablas de Clasificación - Arcaea")
     scores_ref = db.collection("scores").stream()
@@ -356,5 +384,3 @@ with tab_arcaea:
             acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
-                    
-    
