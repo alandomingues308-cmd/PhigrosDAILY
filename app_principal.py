@@ -221,8 +221,13 @@ with tab_phigros:
 
 
 
+
+
+
+
+
                 
-                # ====================== ARCAEA ======================
+                                    # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
@@ -251,136 +256,63 @@ with tab_arcaea:
         imagen_completa = Image.open(uploaded_file_a)
         ancho, alto = imagen_completa.size
         
-        with st.spinner("Analizando captura con OCR mejorado..."):
-            # Múltiples estrategias de recorte
+        with st.spinner("Analizando captura..."):
+            # OCR Mejorado
             score_detectado = 0
             strategies = [
-                (0.22, 0.15, 0.80, 0.42),   # Amplio centrado
-                (0.28, 0.20, 0.75, 0.38),   # Más ajustado
-                (0.18, 0.12, 0.85, 0.48),   # Muy amplio
+                (0.22, 0.15, 0.80, 0.42),
+                (0.28, 0.20, 0.75, 0.38),
+                (0.18, 0.12, 0.85, 0.48)
             ]
             
             for left, top, right, bottom in strategies:
-                box = (
-                    int(ancho * left), 
-                    int(alto * top), 
-                    int(ancho * right), 
-                    int(alto * bottom)
-                )
-                img_crop = np.array(imagen_completa.crop(box))
+                box = (int(ancho*left), int(alto*top), int(ancho*right), int(alto*bottom))
+                img = np.array(imagen_completa.crop(box))
+                ocr = reader.readtext(img, detail=0, width_ths=0.5)
                 
-                # OCR con parámetros optimizados para números grandes
-                ocr_results = reader.readtext(
-                    img_crop, 
-                    detail=0, 
-                    width_ths=0.4,
-                    height_ths=0.6,
-                    text_threshold=0.7
-                )
-                
-                for text in ocr_results:
-                    # Limpieza extrema para capturar scores como 09'942'258
+                for text in ocr:
                     clean = re.sub(r'[^0-9]', '', text)
                     if len(clean) >= 7:
-                        candidate = int(clean)
-                        if candidate > score_detectado:
-                            score_detectado = candidate
-                            break
-                if score_detectado > 0:
-                    break
-
-            # Último intento con todo el texto
-            if score_detectado == 0:
-                full_ocr = reader.readtext(np.array(imagen_completa), detail=0)
-                for text in full_ocr:
-                    clean = re.sub(r'[^0-9]', '', text)
-                    if len(clean) >= 8:
                         score_detectado = int(clean)
                         break
+                if score_detectado > 0:
+                    break
 
             st.subheader("📝 Datos Extraídos")
             col1, col2 = st.columns(2)
             col1.metric("Usuario", usuario_final_a)
-            col2.metric("Score", f"{score_detectado:,}" if score_detectado > 0 else "No detectado")
+            col2.metric("Score", f"{score_detectado:,}")
 
-            if score_detectado == 0:
-                st.error("No se pudo detectar el score. Prueba con otra captura más clara.")
-                st.stop()
-
-            # Selección manual de dificultad (obligatoria)
+            # ==================== SELECCIÓN DINÁMICA DE DIFICULTAD ====================
             st.subheader("Dificultad del Chart")
+            
+            # Obtener dificultades disponibles para la canción seleccionada
+            available_diff = []
+            if "FTR" in daily_song_a or "Future" in daily_song_a:
+                available_diff.append("FTR")
+            if "ETR" in daily_song_a or "Eternal" in daily_song_a:
+                available_diff.append("ETR")
+            if "BYD" in daily_song_a or "Beyond" in daily_song_a:
+                available_diff.append("BYD")
+            
+            # Si no hay ninguna, fallback a FTR
+            if not available_diff:
+                available_diff = ["FTR"]
+
+            # Crear opciones legibles
+            diff_options = []
+            for d in available_diff:
+                if d == "FTR":
+                    diff_options.append("FTR (Future)")
+                elif d == "ETR":
+                    diff_options.append("ETR (Eternal)")
+                elif d == "BYD":
+                    diff_options.append("BYD (Beyond)")
+
             diff_option = st.radio("Selecciona la dificultad:", 
-                                  ["FTR (Future)", "ETR (Eternal)", "BYD (Beyond)"], 
-                                  horizontal=True, key="ar_diff")
+                                  diff_options, 
+                                  horizontal=True, 
+                                  key="ar_diff_dynamic")
 
-            diff_key = diff_option.split()[0]
-            constante_activa = daily_song_a.get(diff_key, daily_song_a.get("FTR", 0))
+            diff_key = diff_option.split()[0]  # FTR, ETR o BYD
 
-            def calcular_modificador(score):
-                if score >= 10000000:
-                    return 2.0
-                elif score >= 9800000:
-                    return 1.0 + (score - 9800000) / 200000.0
-                else:
-                    return (score - 9500000) / 300000.0
-
-            mod = calcular_modificador(score_detectado)
-            potencial = round(constante_activa + mod, 2)
-
-            st.success(f"**Potencial calculado:** {potencial} (Constante: {constante_activa} | Mod: {mod:.2f})")
-
-            st.subheader("¿De qué canción es esta captura?")
-            opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_op")
-
-            if st.button("Registrar Puntaje", type="primary", key="ar_btn"):
-                if opcion_a == "Daily":
-                    cancion_objetivo = daily_song_a["title"]
-                    tipo = "Daily"
-                else:
-                    cancion_objetivo = alternative_song_a["title"]
-                    tipo = "Alternative"
-
-                nuevo_score = {
-                    "usuario": usuario_final_a,
-                    "cancion": cancion_objetivo,
-                    "tipo": tipo,
-                    "score": score_detectado,
-                    "potencial": potencial,
-                    "fecha": today,
-                    "timestamp": datetime.now(mx_tz).isoformat(),
-                    "juego": "Arcaea",
-                    "dificultad": diff_key
-                }
-                
-                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
-                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
-                st.balloons()
-
-    # Tablas Arcaea (sin cambios)
-    st.write("---")
-    st.header("📊 Tablas de Clasificación - Arcaea")
-    scores_ref = db.collection("scores").stream()
-    todos_los_scores = [doc.to_dict() for doc in scores_ref if doc.to_dict().get("juego") == "Arcaea"]
-
-    if todos_los_scores:
-        df = pd.DataFrame(todos_los_scores)
-        tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
-        
-        with tab_diaria:
-            st.subheader(f"Desafío del Día - {today}")
-            df_hoy = df[df["fecha"] == today].copy()
-            for song, label in [(daily_song_a["title"], "🏆 Top Daily"), (alternative_song_a["title"], "🥈 Top Alternative")]:
-                df_temp = df_hoy[df_hoy["cancion"] == song].copy()
-                if not df_temp.empty:
-                    df_temp = df_temp.sort_values(by=["potencial", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
-                    st.markdown(f"### {label}")
-                    st.dataframe(df_temp[["usuario", "score", "potencial", "dificultad"]], use_container_width=True)
-                else:
-                    st.info(f"Aún no hay scores para {song}")
-
-        with tab_general:
-            df['fecha'] = pd.to_datetime(df['fecha']).dt.date
-            best = df.sort_values(by=['usuario','fecha','potencial'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
-            acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
-            acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
-            st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
