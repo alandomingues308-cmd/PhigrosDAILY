@@ -227,7 +227,7 @@ with tab_phigros:
 
 
                 
-                                     # ====================== ARCAEA ======================
+                                                     # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
