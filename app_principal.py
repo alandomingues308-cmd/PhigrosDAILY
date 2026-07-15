@@ -227,7 +227,7 @@ with tab_phigros:
 
 
                 
-                                                     # ====================== ARCAEA ======================
+                                                        # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
@@ -277,20 +277,20 @@ with tab_arcaea:
             col1.metric("Usuario", usuario_final_a)
             col2.metric("Score", f"{score_detectado:,}")
 
-            # Elegir canción primero
+            # Elegir canción
             st.subheader("¿De qué canción es esta captura?")
             opcion_a = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="ar_song_type")
 
             cancion_seleccionada = daily_song_a if opcion_a == "Daily" else alternative_song_a
 
-            # Determinar si necesita selección de dificultad
-            has_eternal = "ETR" in cancion_seleccionada
-            has_beyond = "BYD" in cancion_seleccionada
+            # Verificar dificultades disponibles (según tu JSON)
+            has_eternal = cancion_seleccionada.get("ETR") is not None
+            has_beyond = cancion_seleccionada.get("beyond") is not None
 
-            diff_key = "FTR"  # Por defecto
-            show_diff_selector = has_eternal or has_beyond
+            diff_key = "FTR"  # valor por defecto
 
-            if show_diff_selector:
+            # Solo mostrar selector si tiene ETR o beyond
+            if has_eternal or has_beyond:
                 st.subheader("Dificultad del Chart")
                 options = ["FTR (Future)"]
                 if has_eternal:
@@ -300,6 +300,8 @@ with tab_arcaea:
                 
                 diff_option = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
                 diff_key = diff_option.split()[0]
+            else:
+                st.info("**Dificultad:** FTR (automática)")
 
             # Calcular potencial
             constante_activa = cancion_seleccionada.get(diff_key, cancion_seleccionada.get("FTR", 0))
@@ -315,10 +317,7 @@ with tab_arcaea:
             mod = calcular_modificador(score_detectado)
             potencial = round(constante_activa + mod, 2)
 
-            if show_diff_selector:
-                st.info(f"**Dificultad:** {diff_key} | **Potencial:** {potencial}")
-            else:
-                st.info(f"**Dificultad:** FTR (automática) | **Potencial:** {potencial}")
+            st.info(f"**Potencial calculado:** {potencial}")
 
             if st.button("Registrar Puntaje", type="primary", key="ar_btn"):
                 if score_detectado == 0:
