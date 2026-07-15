@@ -213,11 +213,7 @@ with tab_phigros:
                     "dificultad": dificultad_a
                 }
                 
-                db.collection("scores").document(f"{usuario_final_a}_{today}_{tipo}_arcaea").set(nuevo_score)
-                st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
-                st.balloons()
-
-
+                
 
 
 
