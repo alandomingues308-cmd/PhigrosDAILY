@@ -130,6 +130,24 @@ with tab_phigros:
             st.subheader("¿De qué canción es esta captura?")
             opcion = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True)
 
+            cancion_seleccionada_P = daily_song_a if opcion_a == "Daily" else alternative_song_a
+
+            has_AT = cancion_seleccionada_P.get("AT") is not None
+            diff_key_P = "IN"  # valor por defecto
+
+            # Solo mostrar selector si tiene ETR o beyond
+            if has_AT:
+                st.subheader("Dificultad del Chart")
+                options = ["IN"]
+                if has_AT:
+                    options.append("AT")
+                
+                diff_option_P = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
+                diff_key_P = diff_option.split()[0]
+            else:
+                st.info("**Dificultad:** IN (automática)")
+                
+
             if st.button("Registrar Puntaje", type="primary"):
                 if opcion == "Daily":
                     cancion_objetivo = CANCION_DAILY
