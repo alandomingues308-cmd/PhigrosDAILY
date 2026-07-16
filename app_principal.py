@@ -74,7 +74,7 @@ with tab_phigros:
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
-    st.success(f"{CANCION_DAILY} ({daily_song.get('IN', '')})")
+    st.success(f"{CANCION_DAILY} ({daily_song.get('IN', 'AT')})")
     st.subheader("Cancion Alternativa")
     st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
