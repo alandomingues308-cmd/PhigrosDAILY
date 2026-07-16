@@ -143,7 +143,7 @@ with tab_phigros:
                     options.append("AT")
                 
                 diff_option_P = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
-                diff_key_P = diff_option.split()[0]
+                diff_key_P = diff_option_P.split()[0]
             else:
                 st.info("**Dificultad:** IN (automática)")
                 
