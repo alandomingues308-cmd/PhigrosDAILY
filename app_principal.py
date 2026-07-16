@@ -155,7 +155,7 @@ with tab_phigros:
                     tipo = "Daily"
                 else:
                     cancion_objetivo = CANCION_ALT
-                    constante_activa = daily_song.get("IN") if diff_key_P == "IN" else daily_song.get("AT")
+                    constante_activa = alternative_song.get("IN") if diff_key_P == "IN" else alternative_song.get("AT")
                     tipo = "Alternative"
 
                 def calcular_rks(acc, const): 
