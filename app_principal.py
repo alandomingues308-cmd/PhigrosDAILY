@@ -151,7 +151,7 @@ with tab_phigros:
             if st.button("Registrar Puntaje", type="primary"):
                 if opcion == "Daily":
                     cancion_objetivo = CANCION_DAILY
-                    constante_activa = daily_song.get("IN") if diff_key_P = "IN" else: constante_activa = daily_song.get("AT")
+                    constante_activa = daily_song.get("IN") if diff_key_P == "IN" else constante_activa = daily_song.get("AT")
                     tipo = "Daily"
                 else:
                     cancion_objetivo = CANCION_ALT
