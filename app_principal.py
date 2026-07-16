@@ -130,7 +130,7 @@ with tab_phigros:
             st.subheader("¿De qué canción es esta captura?")
             opcion = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True)
 
-            cancion_seleccionada_P = daily_song_a if opcion_a == "Daily" else alternative_song_a
+            cancion_seleccionada_P = daily_song_a if opcion == "Daily" else alternative_song_a
 
             has_AT = cancion_seleccionada_P.get("AT") is not None
             diff_key_P = "IN"  # valor por defecto
