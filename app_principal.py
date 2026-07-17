@@ -212,7 +212,7 @@ with tab_phigros:
                           
                                                         # ====================== ARCAEA ======================
 with tab_arcaea:
-    st.title(f"🌊 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
+    st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
     @st.cache_data
     def load_arcaea_songs():
