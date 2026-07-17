@@ -296,8 +296,7 @@ with tab_arcaea:
                 
                 diff_option = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
                 diff_key = diff_option.split()[0]
-            else:
-                st.info("**Dificultad:** FTR (automática)")
+            
 
             # Calcular potencial
             constante_activa = cancion_seleccionada.get(diff_key, cancion_seleccionada.get("FTR", 0))
