@@ -229,14 +229,14 @@ with tab_arcaea:
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["Beyond"] is not None:
-        st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]} BYD: {daily_song_a["beyond"]}")
-    else:st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]}")
+        st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (BYD: {daily_song_a["beyond"]})")
+    else:st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]})")
 
     if alternative_song_a["ETR"] is not None:
         st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["Beyond"] is not None:
-        st.success(f"{alternative_song_a['title']} FTR: {alternative_song_a["FTR"]} BYD: {alternative_song_a["beyond"]}")
-    else:st.success(f"{alternative_song_a['title']} FTR: {alternative_song_a["FTR"]}")
+        st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["beyond"]})")
+    else:st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]})")
 
     
     st.subheader("Cancion Alternativa")
