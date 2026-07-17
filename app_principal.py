@@ -226,7 +226,12 @@ with tab_arcaea:
     daily_song_a = random.choice(songs_a)
     alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
 
-    st.success(f"{daily_song_a['title']}")
+    if daily_song_a["ETR"] is not None:
+        st.success(f"{daily_song_a['title'] FTR: {daily_song_a["FTR"]} ETR: {daily_song_a["ETR"]}")
+    elif daily_song_a["beyond"] is not None:
+        st.success(f"{daily_song_a['title'] FTR: {daily_song_a["FTR"]} BYD: {daily_song_a["beyond"]}")
+    else:st.success(f"{daily_song_a['title'] FTR: {daily_song_a["FTR"]}
+        
     st.subheader("Cancion Alternativa")
     st.info(f"**{alternative_song_a['title']}**")
 
@@ -242,7 +247,7 @@ with tab_arcaea:
         with st.spinner("Analizando captura..."):
             score_detectado = 0
             strategies = [(0.22, 0.15, 0.80, 0.42), (0.28, 0.20, 0.75, 0.38), (0.18, 0.12, 0.85, 0.48)]
-            
+            st.success(f"{daily_song_a['title'] FTR: {daily_song_a["FTR"]} ETR: {daily_song_a["ETR"]}")
             for left, top, right, bottom in strategies:
                 box = (int(ancho*left), int(alto*top), int(ancho*right), int(alto*bottom))
                 img = np.array(imagen_completa.crop(box))
