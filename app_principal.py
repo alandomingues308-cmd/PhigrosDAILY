@@ -230,7 +230,7 @@ with tab_arcaea:
         st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]} ETR: {daily_song_a["ETR"]}")
     elif daily_song_a["beyond"] is not None:
         st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]} BYD: {daily_song_a["beyond"]}")
-    else:st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]}"}
+    else:st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]}")
         
     st.subheader("Cancion Alternativa")
     st.info(f"**{alternative_song_a['title']}**")
