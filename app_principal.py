@@ -227,7 +227,7 @@ with tab_arcaea:
     alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
 
     if daily_song_a["ETR"] is not None:
-        st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]} ETR: {daily_song_a["ETR"]}")
+        st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["beyond"] is not None:
         st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]} BYD: {daily_song_a["beyond"]}")
     else:st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]}")
