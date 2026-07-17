@@ -232,16 +232,17 @@ with tab_arcaea:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (BYD: {daily_song_a["beyond"]})")
     else:st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]})")
 
+    st.subheader("Cancion Alternativa")
+    
     if alternative_song_a["ETR"] is not None:
         st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["Beyond"] is not None:
         st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["beyond"]})")
-    else:st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]})")
+    else:st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]})")
 
     
-    st.subheader("Cancion Alternativa")
-    st.info(f"**{alternative_song_a['title']}**")
-
+    
+    
     st.title("🏆 Sube tu mejor puntaje")
     usuario_final_a = st.text_input("Coloca tu usuario", placeholder="Tu nombre de usuario", key="ar_user")
 
