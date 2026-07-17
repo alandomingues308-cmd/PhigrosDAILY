@@ -293,7 +293,7 @@ with tab_arcaea:
                     options.append("ETR (Eternal)")
                 if has_beyond:
                     options.append("BYD (Beyond)")
-                else: st.info("Dificultad FTR (automática)")
+            else: st.info("Dificultad FTR (automática)")
                 
                 diff_option = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
                 diff_key = diff_option.split()[0]
