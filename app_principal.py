@@ -76,7 +76,7 @@ with tab_phigros:
 
     st.success(f"{CANCION_DAILY} ({daily_song.get('IN', '')})")
     st.subheader("Cancion Alternativa")
-    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')} / (16.7)**")
+    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')}) / (16.7)**")
 
 
     @st.cache_resource
@@ -235,9 +235,9 @@ with tab_arcaea:
     st.subheader("Cancion Alternativa")
     
     if alternative_song_a["ETR"] is not None:
-        st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
+        st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["Beyond"] is not None:
-        st.success(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["beyond"]})")
+        st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["beyond"]})")
     else:st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]})")
 
     
