@@ -247,7 +247,7 @@ with tab_arcaea:
         with st.spinner("Analizando captura..."):
             score_detectado = 0
             strategies = [(0.22, 0.15, 0.80, 0.42), (0.28, 0.20, 0.75, 0.38), (0.18, 0.12, 0.85, 0.48)]
-            st.success(f"{daily_song_a['title'] FTR: {daily_song_a["FTR"]} ETR: {daily_song_a["ETR"]}")
+            st.success(f"{daily_song_a['title']} FTR: {daily_song_a["FTR"]} ETR: {daily_song_a["ETR"]}")
             for left, top, right, bottom in strategies:
                 box = (int(ancho*left), int(alto*top), int(ancho*right), int(alto*bottom))
                 img = np.array(imagen_completa.crop(box))
