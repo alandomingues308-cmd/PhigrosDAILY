@@ -463,7 +463,7 @@
   {"title": "Dull Blade", "FTR": 10, "ETR": null, "Beyond": null},
   {"title": "Won't Back Down", "FTR": "9+", "ETR": null, "Beyond": null},
   {"title": "Don't Die", "FTR": 9, "ETR": 10, "Beyond": null},
-  {"title": "Ladymade Star", "FTR": 8, "ETR": "9+", "Beyond": null},
+  {"title": "Ladymade Star", "FTR": 8.4, "ETR": "9.2", "Beyond": null},
   {"title": "End of The Moonlight", "FTR": 9, "ETR": null, "Beyond": null},
   {"title": "U.A.D", "FTR": "8+", "ETR": "9+", "Beyond": null},
   {"title": "OBLIVION", "FTR": 9, "ETR": "10+", "Beyond": null},
