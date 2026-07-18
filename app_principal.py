@@ -22,7 +22,7 @@ def init_firestore():
     return firestore.Client(credentials=creds, project=key_dict["project_id"])
 
 db = init_firestore()
-mx_tz = pytz.timezone('America/Mexico_City')
+mx_tz = pytz.timezone('America/Caracas')
 
 # ====================== SIDEBAR - RENOMBRAR ======================
 st.sidebar.title("👤 Gestión de Usuario")
