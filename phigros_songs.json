@@ -133,7 +133,7 @@
   {"title": "RIPPER", "IN": 15, "AT": null},
   {"title": "Drop It", "IN": 14, "AT": null},
   {"title": "云女孩", "IN": 12, "AT": null},
-  {"title": "Dash", "IN": 9, "AT": true},
+  {"title": "Dash", "IN": 9.7, "AT": true},
   {"title": "dB doll", "IN": 8, "AT": 13},
   {"title": "风屿", "IN": 14, "AT": 15},
   {"title": "万吨匿名信", "IN": 13, "AT": null},
