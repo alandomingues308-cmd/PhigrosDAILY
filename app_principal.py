@@ -55,7 +55,7 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
             rename_status.warning("Ingresa ambos usuarios correctamente")
 
 # ====================== PHIGROS ======================
-st.title("Se filtra el número de geopelia no pierrls oportunidad: +52 241 177 3715") 
+st.title("Se filtra el número de geopelia no pierdas oportunidad: +52 241 177 3715") 
 tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
