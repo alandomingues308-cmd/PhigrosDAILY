@@ -206,10 +206,11 @@ with tab_phigros:
             best = df.sort_values(by=['usuario','fecha','rks'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
             acum = best.groupby("usuario").agg(RKS_Total=("rks","sum"), Canciones=("rks","count")).reset_index()
             acum["RKS_Total"] = acum["RKS_Total"].round(4)
-            filtro= acum[acum["Canciones"]] > 0
-            if len(filtro) > 0:
-                st.dataframe(filtro.sort_values("RKS_Total", ascending=False)[["usuario","RKS_Total","Canciones"]], use_container_width=True, hide_index=True)
+            df_filtrado = acum[acum["Canciones"] > 0]
 
+            if len(df_filtrado) > 0:
+                st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True)
+    
 
     
                           
