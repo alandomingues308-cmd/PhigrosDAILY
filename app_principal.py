@@ -206,7 +206,7 @@ with tab_phigros:
             best = df.sort_values(by=['usuario','fecha','rks'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
             acum = best.groupby("usuario").agg(RKS_Total=("rks","sum"), Canciones=("rks","count")).reset_index()
             acum["RKS_Total"] = acum["RKS_Total"].round(4)
-            if Canciones > 0:
+            if acum.Canciones > 0:
                 st.dataframe(acum.sort_values("RKS_Total", ascending=False)[["usuario","RKS_Total","Canciones"]], use_container_width=True, hide_index=True)
 
 
