@@ -209,7 +209,7 @@ with tab_phigros:
             df_filtrado = acum[acum["Canciones"] > 0]
 
             if len(df_filtrado) > 0:
-                st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True)
+                st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True,hide_index=True)
     
 
     
@@ -356,7 +356,7 @@ with tab_arcaea:
                 if not df_temp.empty:
                     df_temp = df_temp.sort_values(by=["potencial", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
                     st.markdown(f"### {label}")
-                    st.dataframe(df_temp[["usuario", "score", "potencial", "dificultad"]], use_container_width=True)
+                    st.dataframe(df_temp[["usuario", "score", "potencial", "dificultad"]], use_container_width=True,hide_index=True)
                 else:
                     st.info(f"Aún no hay scores para {song}")
 
