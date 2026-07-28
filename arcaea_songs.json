@@ -521,7 +521,7 @@
   {"title": "CHAIN2NITE", "FTR": 8, "ETR": null, "Beyond": "9+"},
   {"title": "One Step Closer", "FTR": 9, "ETR": null, "Beyond": null},
   {"title": "My life is mine alone!", "FTR": "8+", "ETR": null, "Beyond": 10},
-  {"title": "Melty Rhapsody", "FTR": 9.6, "ETR": null, "Beyond": 10.4},
+  {"title": "Melty Rhapsody", "FTR": 9.6, "ETR": 10.4, "Beyond": null},
   {"title": "Signal", "FTR": "9+", "ETR": null, "Beyond": "10+"},
   {"title": "Gimme Caramel Popcorn!", "FTR": 8, "ETR": null, "Beyond": 9},
   {"title": "The Forgotten Forest Haven", "FTR": "9+", "ETR": null, "Beyond": null},
