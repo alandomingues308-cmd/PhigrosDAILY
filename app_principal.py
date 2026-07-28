@@ -282,7 +282,7 @@ with tab_arcaea:
 
             # Verificar dificultades disponibles (según tu JSON)
             has_eternal = cancion_seleccionada.get("ETR") is not None
-            has_beyond = cancion_seleccionada.get("beyond") is not None
+            has_beyond = cancion_seleccionada.get("Beyond") is not None
 
             diff_key = "FTR"  # valor por defecto
 
