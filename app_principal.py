@@ -208,7 +208,7 @@ with tab_phigros:
             acum["RKS_Total"] = acum["RKS_Total"].round(4)
             filtro= acum[acum["Canciones"]] > 0
             if len(filtro) > 0:
-                st.dataframe(acum.sort_values("RKS_Total", ascending=False)[["usuario","RKS_Total","Canciones"]], use_container_width=True, hide_index=True)
+                st.dataframe(filtro.sort_values("RKS_Total", ascending=False)[["usuario","RKS_Total","Canciones"]], use_container_width=True, hide_index=True)
 
 
     
