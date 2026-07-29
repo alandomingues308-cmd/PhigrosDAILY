@@ -228,7 +228,7 @@ with tab_arcaea:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song_a= {"title": "PRAGMATISM -RESURRECTION-", "FTR": 10.1, "ETR": null, "Beyond": 11.2}
+    daily_song_a= {"title": "PRAGMATISM -RESURRECTION-", "FTR": 10.1, "ETR": None, "Beyond": 11.2}
     alternative_song_a= {"title": "Vulcanus", "FTR": 10.9, "ETR": null, "Beyond": null}
     
     if daily_song_a["ETR"] is not None:
