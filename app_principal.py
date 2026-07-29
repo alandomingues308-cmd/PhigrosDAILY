@@ -229,7 +229,7 @@ with tab_arcaea:
     random.seed(today)
 
     daily_song_a= {"title": "PRAGMATISM -RESURRECTION-", "FTR": 10.1, "ETR": None, "Beyond": 11.2}
-    alternative_song_a= {"title": "Vulcanus", "FTR": 10.9, "ETR": null, "Beyond": null}
+    alternative_song_a= {"title": "Vulcanus", "FTR": 10.9, "ETR": None, "Beyond": None}
     
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
