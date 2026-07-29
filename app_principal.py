@@ -56,6 +56,7 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
 
 # ====================== PHIGROS ======================
 st.title("Feliz cumpleaños wonder Acute")
+st.write("Hoy los daily-alternative fueron escogidos por el cumpleañero (aunque fue ayer :⁠^⁠)) cualquier inconveniente hablarlo con el")
 tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
@@ -69,8 +70,8 @@ with tab_phigros:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song = random.choice(songs)
-    alternative_song = random.choice([s for s in songs if s["title"] != daily_song["title"]])
+    daily_song = {"title": "祈 -我ら神祖と共に歩む者なり-", "IN": 16.4, "AT": 17.3}
+    alternative_song= {"title": "玩具狂奏曲 -終焉-", "IN": 15.8, "AT": 17}
 
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
@@ -227,9 +228,9 @@ with tab_arcaea:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song_a = random.choice(songs_a)
-    alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
-
+    daily_song_a= {"title": "PRAGMATISM -RESURRECTION-", "FTR": 10.1, "ETR": null, "Beyond": 11.2}
+    alternative_song_a= {"title": "Vulcanus", "FTR": 10.9, "ETR": null, "Beyond": null}
+    
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["Beyond"] is not None:
