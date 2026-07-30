@@ -55,8 +55,8 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
             rename_status.warning("Ingresa ambos usuarios correctamente")
 
 # ====================== PHIGROS ======================
-st.title("Feliz cumpleaños wonder Acute")
-st.write("Hoy los daily-alternative fueron escogidos por el cumpleañero (aunque fue ayer :⁠^⁠)) cualquier inconveniente hablarlo con el")
+st.title("Feliz cumpleaños craftyy")
+st.write("Hoy el DAYLI y ALTERNATIVE de PHIGROS fueron escogidos por el cumpleañero (aunque ya paso :⁠^⁠)) no me funen a mi")
 tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
@@ -70,8 +70,8 @@ with tab_phigros:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song = {"title": "Bounded Quietude", "IN": 16, "AT": null}
-    alternative_song= {"title": "Retribution  Cycle of Redemption ~", "IN": 16, "AT": null}
+    daily_song = {"title": "Bounded Quietude", "IN": 16, "AT": None}
+    alternative_song= {"title": "Retribution  Cycle of Redemption ~", "IN": 16, "AT": None}
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
