@@ -238,7 +238,7 @@ with tab_arcaea:
 
     st.subheader("Cancion Alternativa")
     
-    if alternative_song_a["ETR"] is not None:
+    if 2 is not None:
         st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["Beyond"] is not None:
         st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["Beyond"]})")
