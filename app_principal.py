@@ -228,9 +228,9 @@ with tab_arcaea:
     random.seed(today)
 
     daily_song_a = random.choice(songs_a)
-    alternative_song_a = random.choice([s for s in songs if s["title"] != daily_song_a["title"]])
+    alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
     
-    if 2 is not None:
+    if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["Beyond"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (BYD: {daily_song_a["Beyond"]})")
@@ -238,7 +238,7 @@ with tab_arcaea:
 
     st.subheader("Cancion Alternativa")
     
-    if 2 is not None:
+    if alternative_song_a["ETR"] is not None:
         st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["Beyond"] is not None:
         st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["Beyond"]})")
