@@ -70,8 +70,8 @@ with tab_phigros:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song = {"title": "Bounded Quietude", "IN": 16, "AT": None}
-    alternative_song= {"title": "Retribution  Cycle of Redemption ~", "IN": 16, "AT": None}
+    daily_song = {"title": "Bounded Quietude", "IN": 16.2, "AT": None}
+    alternative_song= {"title": "Retribution  Cycle of Redemption ~", "IN": 16.2, "AT": None}
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
