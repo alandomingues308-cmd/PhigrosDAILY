@@ -55,8 +55,7 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
             rename_status.warning("Ingresa ambos usuarios correctamente")
 
 # ====================== PHIGROS ======================
-st.title("Feliz cumpleaños craftyy")
-st.write("Hoy el DAYLI y ALTERNATIVE de PHIGROS fueron escogidos por el cumpleañero (aunque ya paso :⁠^⁠)) no me funen a mi")
+
 tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
