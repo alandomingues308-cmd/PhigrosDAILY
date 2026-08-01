@@ -70,7 +70,7 @@ with tab_phigros:
     random.seed(today)
 
     daily_song = random.choice(songs)
-    alternative_song = random.choice([p for p in songs if s["title"] != daily_song["title"]])
+    alternative_song = random.choice([p for p in songs if p["title"] != daily_song["title"]])
     
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
