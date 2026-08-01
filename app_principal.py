@@ -70,14 +70,14 @@ with tab_phigros:
     random.seed(today)
 
     daily_song = random.choice(songs)
-    alternative_song = random.choice([s for s in songs if s["title"] != daily_song["title"]])
+    alternative_song = random.choice([p for p in songs if s["title"] != daily_song["title"]])
     
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
     st.success(f"{CANCION_DAILY} ({daily_song.get('IN')})")
     st.subheader("Cancion Alternativa")
-    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')}) / (15.9) **")
+    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
 
     @st.cache_resource
