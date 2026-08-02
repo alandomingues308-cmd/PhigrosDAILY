@@ -78,7 +78,7 @@ with tab_phigros:
 
     st.success(f"{CANCION_DAILY} ({daily_song.get('IN')}) / (16.8)")
     st.subheader("Cancion Alternativa")
-    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
+    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')}) / (17.4)**")
 
 
     @st.cache_resource
