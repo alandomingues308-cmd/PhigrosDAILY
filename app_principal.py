@@ -228,8 +228,8 @@ with tab_arcaea:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song_a ={"title": "XTREME", "FTR": 10.5, "ETR": null, "Beyond": null}
-    alternative_song_a = {"title": "[X]", "FTR": 10.6, "ETR": null, "Beyond": null}
+    daily_song_a ={"title": "XTREME", "FTR": 10.5, "ETR": None, "Beyond": None}
+    alternative_song_a = {"title": "[X]", "FTR": 10.6, "ETR": None, "Beyond": None}
     
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
