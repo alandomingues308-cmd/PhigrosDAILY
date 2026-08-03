@@ -76,9 +76,9 @@ with tab_phigros:
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
-    st.success(f"{CANCION_DAILY} ({daily_song.get('IN')}) / (16.8)")
+    st.success(f"{CANCION_DAILY} ({daily_song.get('IN')})")
     st.subheader("Cancion Alternativa")
-    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')}) / (17.4)**")
+    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
 
     @st.cache_resource
@@ -229,7 +229,7 @@ with tab_arcaea:
     random.seed(today)
 
     daily_song_a = random.choice(songs_a)
-    alternative_song_a = random.choice([s for s in songs if s["title"] != daily_song_a["title"]])
+    alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
     
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
