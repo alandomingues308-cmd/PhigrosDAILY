@@ -70,8 +70,8 @@ with tab_phigros:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song = {"title": "BANGING STRIKE", "IN": 15.9, "AT": 16.8}
-    alternative_song = {"title": "QZKago Requiem", "IN": 16.3, "AT": 17.4}
+    daily_song = random.choice(songs)
+    alternative_song = random.choice([s for s in songs if s["title"] != daily_song["title"]])
     
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
@@ -228,8 +228,8 @@ with tab_arcaea:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song_a ={"title": "XTREME", "FTR": 10.5, "ETR": None, "Beyond": None}
-    alternative_song_a = {"title": "[X]", "FTR": 10.6, "ETR": None, "Beyond": None}
+    daily_song_a = random.choice(songs_a)
+    alternative_song_a = random.choice([s for s in songs if s["title"] != daily_song_a["title"]])
     
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
