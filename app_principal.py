@@ -218,7 +218,7 @@ with tab_phigros:
 with tab_arcaea:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
-    @st.cache_data
+    @st.cache_data 
     def load_arcaea_songs():
         with open("arcaea_songs.json", "r", encoding="utf-8-sig") as f:
             return json.load(f)
