@@ -223,6 +223,7 @@ with tab_arcaea:
         with open("arcaea_songs.json", "r", encoding="utf-8-sig") as f:
             return json.load(f)
 
+
     songs_a = load_arcaea_songs()
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
