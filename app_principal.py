@@ -75,8 +75,12 @@ with tab_phigros:
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
-    st.success(f"{CANCION_DAILY} ({daily_song.get('IN')})")
+    if daily_song_a["ETR"] is not None:
+        st.success(f"{CANCION_DAILY} IN: ({daily_song.get('IN')}) / AT: ({daily_song.get('AT')})")
+    else: st.success(f"{CANCION_DAILY} IN: ({daily_song.get('IN')}))
+    
     st.subheader("Cancion Alternativa")
+    
     st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
 
@@ -214,7 +218,7 @@ with tab_phigros:
 
     
                           
-                                                        # ====================== ARCAEA ======================
+       # ====================== ARCAEA ======================
 with tab_arcaea:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Arcaea")
 
