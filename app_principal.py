@@ -82,8 +82,8 @@ with tab_phigros:
     st.subheader("Cancion Alternativa")
 
     if alternative_song["AT"] is not None:
-        st.info(f"{CANCION_ALT}/ IN: ({alternative_song.get('IN')}) - AT: ({alternative_song.get('AT')})")
-    else: st.info(f"{CANCION_ALT}/ IN: ({alternative_song.get('IN')})")
+        st.info(f"{CANCION_ALT} /// IN: ({alternative_song.get('IN')}) - AT: ({alternative_song.get('AT')})")
+    else: st.info(f"{CANCION_ALT} /// IN: ({alternative_song.get('IN')})")
     
 
 
@@ -239,18 +239,18 @@ with tab_arcaea:
     alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
     
     if daily_song_a["ETR"] is not None:
-        st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
+        st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["BYD"] is not None:
-        st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]}) - (BYD: {daily_song_a["BYD"]})")
-    else:st.success(f"{daily_song_a['title']}/ (FTR: {daily_song_a["FTR"]})")
+        st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]}) - (BYD: {daily_song_a["BYD"]})")
+    else:st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]})")
 
     st.subheader("Cancion Alternativa")
     
     if alternative_song_a["ETR"] is not None:
-        st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
+        st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["BYD"] is not None:
-        st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["BYD"]})")
-    else:st.info(f"{alternative_song_a['title']}/ (FTR: {alternative_song_a["FTR"]})")
+        st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["BYD"]})")
+    else:st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]})")
 
     
     
