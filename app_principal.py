@@ -81,11 +81,10 @@ with tab_phigros:
     
     st.subheader("Cancion Alternativa")
 
-    if alternative_song["AT"] is not None:
+    if alternative_song["AT"] is not None o True:
         st.info(f"{CANCION_ALT} IN: ({alternative_song.get('IN')}) / AT: ({alternative_song.get('AT')})")
     else: st.info(f"{CANCION_ALT} IN: ({alternative_song.get('IN')})")
     
-    st.info(f"**{CANCION_ALT} ({alternative_song.get('IN', '')})**")
 
 
     @st.cache_resource
