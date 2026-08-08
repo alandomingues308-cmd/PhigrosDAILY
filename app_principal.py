@@ -76,8 +76,8 @@ with tab_phigros:
     CANCION_ALT = alternative_song["title"]
 
     if daily_song["AT"] is not None:
-        st.success(f"{CANCION_DAILY}/ IN: ({daily_song.get('IN')}) - AT: ({daily_song.get('AT')})")
-    else: st.success(f"{CANCION_DAILY}/ IN: ({daily_song.get('IN')})")
+        st.success(f"{CANCION_DAILY} /// IN: ({daily_song.get('IN')}) - AT: ({daily_song.get('AT')})")
+    else: st.success(f"{CANCION_DAILY} /// IN: ({daily_song.get('IN')})")
     
     st.subheader("Cancion Alternativa")
 
