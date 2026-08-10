@@ -71,7 +71,7 @@ with tab_phigros:
     random.seed(today)
 
     daily_song = {"title": "Another Me", "IN": 15.6, "AT": None}
-    alternative_song = {"title": "风屿", "IN": 15.1, "AT": None}
+    alternative_song = {"title": "风屿", "IN": 14, "AT": 15.1}
     
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
