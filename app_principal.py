@@ -227,16 +227,16 @@ with tab_phigros:
         with tab_historial:
             st.header("📅 Historial de Desafíos")
 
-    FECHA_CREACION = datetime(2026, 1, 1).date()
+            FECHA_CREACION = datetime(2026, 1, 1).date()
 
-    fecha_seleccionada = st.sidebar.date_input(
-        "Selecciona una fecha para ver el ranking:",
-        value=datetime.now(mx_tz).date(),
-        max_value=datetime.now(mx_tz).date(),
-        key="historial_fecha_phigros"
-    )
+            fecha_seleccionada = st.sidebar.date_input(
+                "Selecciona una fecha para ver el ranking:",
+                value=datetime.now(mx_tz).date(),
+                max_value=datetime.now(mx_tz).date(),
+                key="historial_fecha_phigros"
+             )
 
-    fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
+            fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
             st.subheader(f"🔍 Resultados del día: {fecha_str}")
             
             if fecha_seleccionada < FECHA_CREACION:
