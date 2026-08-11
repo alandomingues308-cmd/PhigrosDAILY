@@ -201,9 +201,16 @@ with tab_phigros:
     if todos_los_scores:
         df = pd.DataFrame(todos_los_scores)
         
-        # Filtramos para que solo trabaje con los datos de Phigros
-        if "juego" in df.columns:
-            df = df[df["juego"] == "Phigros"]
+        # Si la columna "juego" no existe, o si tiene valores vacíos/nulos, les asignamos "Phigros" por defecto
+        if "juego" not in df.columns:
+            df["juego"] = "Phigros"
+        else:
+            df["juego"] = df["juego"].fillna("Phigros")
+            # También cubrimos por si hay campos vacíos como string ""
+            df["juego"] = df["juego"].replace("", "Phigros")
+        
+        # Filtramos para quedarnos exclusivamente con Phigros
+        df = df[df["juego"] == "Phigros"]
         
         tab_diaria, tab_general, tab_historial = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales", "🔍 Historial por Fecha"])
         
@@ -272,6 +279,7 @@ with tab_phigros:
                             st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
                         else:
                             st.info(f"Aún no hay scores para la categoría **{tipo_objetivo}** en esta fecha.")
+
 
 
     
