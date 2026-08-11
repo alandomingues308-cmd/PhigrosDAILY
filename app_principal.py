@@ -198,7 +198,7 @@ with tab_phigros:
     scores_ref = db.collection("scores").stream()
     todos_los_scores = [doc.to_dict() for doc in scores_ref]
 
-        if todos_los_scores:
+    if todos_los_scores:
         df = pd.DataFrame(todos_los_scores)
         
         # Filtramos para que solo trabaje con los datos de Phigros
