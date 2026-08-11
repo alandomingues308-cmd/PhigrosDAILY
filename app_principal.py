@@ -237,7 +237,6 @@ with tab_phigros:
              )
 
             fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
-            st.subheader(f"🔍 Resultados del día: {fecha_str}")
             
             if fecha_seleccionada < FECHA_CREACION:
                 st.warning("⏳ Aún no existía esto :⁠^⁠)")
@@ -250,8 +249,7 @@ with tab_phigros:
                     random.seed(fecha_str)
                     hist_daily = random.choice(songs)
                     hist_alt = random.choice([s for s in songs if s["title"] != hist_daily["title"]])
-                    
-                    st.markdown(f"**Canción Daily:** {hist_daily['title']} | **Canción Alternative:** {hist_alt['title']}")
+                
                     
                     for song, label in [(hist_daily['title'], "🏆 Top Daily"), (hist_alt['title'], "🥈 Top Alternative")]:
                         df_temp = df_historial[df_historial["cancion"] == song].copy()
