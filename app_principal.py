@@ -225,43 +225,49 @@ with tab_phigros:
                 st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True, hide_index=True)
 
         with tab_historial:
-            st.header("📅 Historial de Desafíos")
+    st.header("📅 Historial de Desafíos")
 
-            FECHA_CREACION = datetime(2026, 7, 10).date()
+    FECHA_CREACION = datetime(2026, 7, 10).date()
 
-            fecha_seleccionada = st.date_input(
-                "Selecciona una fecha para ver el ranking:",
-                value=datetime.now(mx_tz).date(),
-                max_value=datetime.now(mx_tz).date(),
-                key="historial_fecha_phigros"
-            )
+    fecha_seleccionada = st.date_input(
+        "Selecciona una fecha para ver el ranking:",
+        value=datetime.now(mx_tz).date(),
+        max_value=datetime.now(mx_tz).date(),
+        key="historial_fecha_phigros"
+    )
 
-            fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
-            
-            fechas_existentes = df["fecha"].astype(str).unique() if not df.empty else []
+    fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
+    
+    fechas_existentes = df["fecha"].astype(str).unique() if not df.empty else []
 
-            if fecha_seleccionada < FECHA_CREACION:
-                st.warning("⏳ Aún no existíamos esto :⁠^⁠)")
-            elif fecha_str not in fechas_existentes:
-                st.info("❌ Nadie jugó este daily")
+    if fecha_seleccionada < FECHA_CREACION:
+        st.warning("⏳ Aún no existíamos esto :⁠^⁠)")
+    elif fecha_str not in fechas_existentes:
+        st.info("❌ Nadie jugó este daily")
+    else:
+        df_historial = df[df["fecha"].astype(str) == fecha_str].copy()
+        
+        if df_historial.empty:
+            st.info("❌ Nadie jugó este daily")
+        else:
+            # Si los registros antiguos no tienen el campo "tipo" o tienen valores nulos, asignamos "Daily" por defecto
+            if "tipo" not in df_historial.columns:
+                df_historial["tipo"] = "Daily"
             else:
-                df_historial = df[df["fecha"].astype(str) == fecha_str].copy()
+                df_historial["tipo"] = df_historial["tipo"].fillna("Daily")
+
+            for tipo_objetivo, label in [("Daily", "🏆 Top Daily"), ("Alternative", "🥈 Top Alternative")]:
+                df_tipo = df_historial[df_historial["tipo"] == tipo_objetivo].copy()
                 
-                if df_historial.empty:
-                    st.info("❌ Nadie jugó este daily")
+                if not df_tipo.empty:
+                    song_name = df_tipo["cancion"].iloc[0]
+                    
+                    st.markdown(f"### {label} ({song_name})")
+                    
+                    df_temp = df_tipo.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                    st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
                 else:
-                    for tipo_objetivo, label in [("Daily", "🏆 Top Daily"), ("Alternative", "🥈 Top Alternative")]:
-                        df_tipo = df_historial[df_historial["tipo"] == tipo_objetivo].copy()
-                        
-                        if not df_tipo.empty:
-                            song_name = df_tipo["cancion"].iloc[0]
-                            
-                            st.markdown(f"### {label} ({song_name})")
-                            
-                            df_temp = df_tipo.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
-                            st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
-                        else:
-                            st.info(f"Aún no hay scores para la categoría **{tipo_objetivo}** en esta fecha.")
+                    st.info(f"Aún no hay scores para la categoría **{tipo_objetivo}** en esta fecha.")
 
     
                           
