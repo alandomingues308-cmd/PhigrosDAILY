@@ -142,7 +142,6 @@ with tab_phigros:
             has_AT = cancion_seleccionada_P.get("AT") is not None
             diff_key_P = "IN"  # valor por defecto
 
-            # Solo mostrar selector si tiene ETR o beyond
             if has_AT:
                 st.subheader("Dificultad del Chart")
                 options = ["IN"]
@@ -185,7 +184,7 @@ with tab_phigros:
                 st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
                 st.balloons()
 
-    # Tablas (mismo código anterior)
+    # Tablas Phigros 
     st.write("---")
     st.header("📊 Tablas de Clasificación")
     scores_ref = db.collection("scores").stream()
@@ -290,7 +289,7 @@ with tab_arcaea:
 
             cancion_seleccionada = daily_song_a if opcion_a == "Daily" else alternative_song_a
 
-            # Verificar dificultades disponibles (según tu JSON)
+            # Verificar dificultades disponibles 
             has_eternal = cancion_seleccionada.get("ETR") is not None
             has_beyond = cancion_seleccionada.get("Beyond") is not None
 
