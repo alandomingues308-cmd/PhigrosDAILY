@@ -224,7 +224,7 @@ with tab_phigros:
             if len(df_filtrado) > 0:
                 st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True, hide_index=True)
 
-        with tab_historial:
+                with tab_historial:
             st.header("📅 Historial de Desafíos")
 
             FECHA_CREACION = datetime(2026, 1, 1).date()
@@ -234,31 +234,34 @@ with tab_phigros:
                 value=datetime.now(mx_tz).date(),
                 max_value=datetime.now(mx_tz).date(),
                 key="historial_fecha_phigros"
-             )
+            )
 
             fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
             
+            fechas_existentes = df["fecha"].astype(str).unique() if not df.empty else []
+
             if fecha_seleccionada < FECHA_CREACION:
-                st.warning("⏳ Aún no existía esto :⁠^⁠)")
+                st.warning("⏳ Aún no existíamos esto :⁠^⁠)")
+            elif fecha_str not in fechas_existentes:
+                st.info("❌ Nadie jugó este daily")
             else:
                 df_historial = df[df["fecha"].astype(str) == fecha_str].copy()
                 
                 if df_historial.empty:
                     st.info("❌ Nadie jugó este daily")
                 else:
-                    random.seed(fecha_str)
-                    hist_daily = random.choice(songs)
-                    hist_alt = random.choice([s for s in songs if s["title"] != hist_daily["title"]])
-                
-                    
-                    for song, label in [(hist_daily['title'], "🏆 Top Daily"), (hist_alt['title'], "🥈 Top Alternative")]:
-                        df_temp = df_historial[df_historial["cancion"] == song].copy()
-                        if not df_temp.empty:
-                            df_temp = df_temp.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
-                            st.markdown(f"### {label} ({song})")
+                    for tipo_objetivo, label in [("Daily", "🏆 Top Daily"), ("Alternative", "🥈 Top Alternative")]:
+                        df_tipo = df_historial[df_historial["tipo"] == tipo_objetivo].copy()
+                        
+                        if not df_tipo.empty:
+                            song_name = df_tipo["cancion"].iloc[0]
+                            
+                            st.markdown(f"### {label} ({song_name})")
+                            
+                            df_temp = df_tipo.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
                             st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
                         else:
-                            st.info(f"Aún no hay scores para {song} en esta fecha.")
+                            st.info(f"Aún no hay scores para la categoría **{tipo_objetivo}** en esta fecha.")
 
     
                           
