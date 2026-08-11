@@ -60,18 +60,7 @@ with tab_phigros:
     # ---------------------------------------------------------------------------
     # BARRA LATERAL: HISTORIAL DE FECHAS
     # ---------------------------------------------------------------------------
-    st.sidebar.header("📅 Historial de Desafíos")
-
-    FECHA_CREACION = datetime(2026, 1, 1).date()
-
-    fecha_seleccionada = st.sidebar.date_input(
-        "Selecciona una fecha para ver el ranking:",
-        value=datetime.now(mx_tz).date(),
-        max_value=datetime.now(mx_tz).date(),
-        key="historial_fecha_phigros"
-    )
-
-    fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
+    
 
     # ---------------------------------------------------------------------------
     # CÓDIGO PRINCIPAL
@@ -236,6 +225,18 @@ with tab_phigros:
                 st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True, hide_index=True)
 
         with tab_historial:
+            st.header("📅 Historial de Desafíos")
+
+    FECHA_CREACION = datetime(2026, 1, 1).date()
+
+    fecha_seleccionada = st.sidebar.date_input(
+        "Selecciona una fecha para ver el ranking:",
+        value=datetime.now(mx_tz).date(),
+        max_value=datetime.now(mx_tz).date(),
+        key="historial_fecha_phigros"
+    )
+
+    fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
             st.subheader(f"🔍 Resultados del día: {fecha_str}")
             
             if fecha_seleccionada < FECHA_CREACION:
