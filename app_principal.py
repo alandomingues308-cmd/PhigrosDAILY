@@ -198,8 +198,13 @@ with tab_phigros:
     scores_ref = db.collection("scores").stream()
     todos_los_scores = [doc.to_dict() for doc in scores_ref]
 
-    if todos_los_scores:
+        if todos_los_scores:
         df = pd.DataFrame(todos_los_scores)
+        
+        # Filtramos para que solo trabaje con los datos de Phigros
+        if "juego" in df.columns:
+            df = df[df["juego"] == "Phigros"]
+        
         tab_diaria, tab_general, tab_historial = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales", "🔍 Historial por Fecha"])
         
         with tab_diaria:
@@ -227,7 +232,7 @@ with tab_phigros:
         with tab_historial:
             st.header("📅 Historial de Desafíos")
 
-            FECHA_CREACION = datetime(2026, 7, 10).date()
+            FECHA_CREACION = datetime(2026, 1, 1).date()
 
             fecha_seleccionada = st.date_input(
                 "Selecciona una fecha para ver el ranking:",
@@ -241,7 +246,7 @@ with tab_phigros:
             fechas_existentes = df["fecha"].astype(str).unique() if not df.empty else []
 
             if fecha_seleccionada < FECHA_CREACION:
-                st.warning("⏳ Aún no existía esto :⁠^⁠)")
+                st.warning("⏳ Aún no existíamos esto :⁠^⁠)")
             elif fecha_str not in fechas_existentes:
                 st.info("❌ Nadie jugó este daily")
             else:
@@ -267,6 +272,7 @@ with tab_phigros:
                             st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
                         else:
                             st.info(f"Aún no hay scores para la categoría **{tipo_objetivo}** en esta fecha.")
+
 
     
                           
