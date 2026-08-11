@@ -241,7 +241,7 @@ with tab_phigros:
             fechas_existentes = df["fecha"].astype(str).unique() if not df.empty else []
 
             if fecha_seleccionada < FECHA_CREACION:
-                st.warning("⏳ Aún no existíamos esto :⁠^⁠)")
+                st.warning("⏳ Aún no existía esto :⁠^⁠)")
             elif fecha_str not in fechas_existentes:
                 st.info("❌ Nadie jugó este daily")
             else:
