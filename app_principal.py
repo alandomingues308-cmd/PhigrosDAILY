@@ -166,6 +166,135 @@ with tab_phigros:
 
                 def calcular_rks(acc, const): 
                     return round((((acc - 55) / 45) ** 2) * const, 2)
+with tab_phigros:
+    # ---------------------------------------------------------------------------
+    # BARRA LATERAL: HISTORIAL DE FECHAS
+    # ---------------------------------------------------------------------------
+    st.sidebar.header("📅 Historial de Desafíos")
+
+    FECHA_CREACION = datetime(2026, 1, 1).date()
+
+    fecha_seleccionada = st.sidebar.date_input(
+        "Selecciona una fecha para ver el ranking:",
+        value=datetime.now(mx_tz).date(),
+        max_value=datetime.now(mx_tz).date(),
+        key="historial_fecha_phigros"
+    )
+
+    fecha_str = fecha_seleccionada.strftime('%Y-%m-%d')
+
+    # ---------------------------------------------------------------------------
+    # CÓDIGO PRINCIPAL
+    # ---------------------------------------------------------------------------
+    st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
+
+    @st.cache_data
+    def load_songs():
+        with open("phigros_songs.json", "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+
+    songs = load_songs()
+    today = datetime.now(mx_tz).strftime("%Y-%m-%d")
+    random.seed(today)
+
+    daily_song = random.choice(songs)
+    alternative_song = random.choice([s for s in songs if s["title"] != daily_song["title"]])
+    
+    CANCION_DAILY = daily_song["title"]
+    CANCION_ALT = alternative_song["title"]
+
+    if daily_song["AT"] is not None:
+        st.success(f"{CANCION_DAILY} /// IN: ({daily_song.get('IN')}) - AT: ({daily_song.get('AT')})")
+    else: 
+        st.success(f"{CANCION_DAILY} /// IN: ({daily_song.get('IN')})")
+    
+    st.subheader("Cancion Alternativa")
+
+    if alternative_song["AT"] is not None:
+        st.info(f"{CANCION_ALT} /// IN: ({alternative_song.get('IN')}) - AT: ({alternative_song.get('AT')})")
+    else: 
+        st.info(f"{CANCION_ALT} /// IN: ({alternative_song.get('IN')})")
+
+    @st.cache_resource
+    def inicializar_ocr():
+        return easyocr.Reader(['en'])
+
+    reader = inicializar_ocr()
+
+    st.title("🏆 Sube tu mejor puntaje")
+    usuario_final = st.text_input("Coloca tu usuario", placeholder="Tu nombre de usuario", key="usuario_input_phigros")
+
+    uploaded_file = st.file_uploader("Sube la captura de pantalla de tus resultados:", 
+                                    type=["png", "jpg", "jpeg"], key="uploader_file_phigros")
+
+    if uploaded_file is not None and usuario_final.strip():
+        imagen_completa = Image.open(uploaded_file)
+        ancho, alto = imagen_completa.size
+        
+        with st.spinner("Analizando captura..."):
+            box_score = (int(ancho * 0.52), int(alto * 0.25), int(ancho * 0.85), int(alto * 0.45))
+            img_score = np.array(imagen_completa.crop(box_score))
+            ocr_score = reader.readtext(img_score, detail=0)
+            score_detectado = 0
+            for item in ocr_score:
+                nums = re.findall(r'\d+', item)
+                if nums:
+                    score_detectado = int("".join(nums))
+                    break
+
+            box_acc = (int(ancho * 0.75), int(alto * 0.50), int(ancho * 0.95), int(alto * 0.62))
+            img_acc = np.array(imagen_completa.crop(box_acc))
+            ocr_acc = reader.readtext(img_acc, detail=0)
+            accuracy_detectada = 0.0
+            for item in ocr_acc:
+                match = re.search(r'(\d+\.\d+)', item)
+                if match:
+                    accuracy_detectada = float(match.group(1))
+                    break
+
+            if score_detectado in (10000, 100000):
+                score_detectado = 1000000
+            if score_detectado == 1000000:
+                accuracy_detectada = 100.0
+
+            st.subheader("📝 Datos Extraídos")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Usuario", usuario_final)
+            col2.metric("Score", f"{score_detectado:,}")
+            col3.metric("Acc", f"{accuracy_detectada}%")
+
+            st.subheader("¿De qué canción es esta captura?")
+            opcion = st.radio("Selecciona:", ["Daily", "Alternative"], horizontal=True, key="opcion_cancion_phigros")
+
+            cancion_seleccionada_P = daily_song if opcion == "Daily" else alternative_song
+
+            has_AT = cancion_seleccionada_P.get("AT") is not None
+            diff_key_P = "IN"  
+
+            if has_AT:
+                st.subheader("Dificultad del Chart")
+                options = ["IN"]
+                if has_AT:
+                    options.append("AT")
+                
+                diff_option_P = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff_phigros")
+                diff_key_P = diff_option_P.split()[0]
+            else:
+                st.info("**Dificultad:** IN (automática)")
+                
+
+            if st.button("Registrar Puntaje", type="primary", key="btn_registrar_phigros"):
+                if opcion == "Daily":
+                    cancion_objetivo = CANCION_DAILY
+                    constante_activa = daily_song.get("IN") if diff_key_P == "IN" else daily_song.get("AT")
+                    tipo = "Daily"
+                else:
+                    cancion_objetivo = CANCION_ALT
+                    constante_activa = alternative_song.get("IN") if diff_key_P == "IN" else alternative_song.get("AT")
+                    tipo = "Alternative"
+
+                def calcular_rks(acc, const): 
+                    return round((((acc - 55) / 45) ** 2) * const, 2)
                 
                 rks = calcular_rks(accuracy_detectada, constante_activa)
 
@@ -184,7 +313,7 @@ with tab_phigros:
                 st.success(f"✅ ¡Registrado correctamente en **{tipo}**!")
                 st.balloons()
 
-    # Tablas Phigros 
+    # Tablas de Clasificación
     st.write("---")
     st.header("📊 Tablas de Clasificación")
     scores_ref = db.collection("scores").stream()
@@ -192,7 +321,7 @@ with tab_phigros:
 
     if todos_los_scores:
         df = pd.DataFrame(todos_los_scores)
-        tab_diaria, tab_general = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+        tab_diaria, tab_general, tab_historial = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales", "🔍 Historial por Fecha"])
         
         with tab_diaria:
             st.subheader(f"Desafío del Día - {today}")
@@ -202,7 +331,7 @@ with tab_phigros:
                 if not df_temp.empty:
                     df_temp = df_temp.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
                     st.markdown(f"### {label}")
-                    st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True,hide_index=True)
+                    st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
                 else:
                     st.info(f"Aún no hay scores para {song}")
 
@@ -214,8 +343,33 @@ with tab_phigros:
             df_filtrado = acum[acum["Canciones"] > 0]
 
             if len(df_filtrado) > 0:
-                st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True,hide_index=True)
-    
+                st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True, hide_index=True)
+
+        with tab_historial:
+            st.subheader(f"🔍 Resultados del día: {fecha_str}")
+            
+            if fecha_seleccionada < FECHA_CREACION:
+                st.warning("⏳ Aún no existía esto :⁠^⁠)")
+            else:
+                df_historial = df[df["fecha"].astype(str) == fecha_str].copy()
+                
+                if df_historial.empty:
+                    st.info("❌ Nadie jugó este daily")
+                else:
+                    random.seed(fecha_str)
+                    hist_daily = random.choice(songs)
+                    hist_alt = random.choice([s for s in songs if s["title"] != hist_daily["title"]])
+                    
+                    st.markdown(f"**Canción Daily:** {hist_daily['title']} | **Canción Alternative:** {hist_alt['title']}")
+                    
+                    for song, label in [(hist_daily['title'], "🏆 Top Daily"), (hist_alt['title'], "🥈 Top Alternative")]:
+                        df_temp = df_historial[df_historial["cancion"] == song].copy()
+                        if not df_temp.empty:
+                            df_temp = df_temp.sort_values(by=["rks", "timestamp"], ascending=[False, True]).drop_duplicates(subset=["usuario"], keep="first")
+                            st.markdown(f"### {label} ({song})")
+                            st.dataframe(df_temp[["usuario", "score", "accuracy", "rks"]], use_container_width=True, hide_index=True)
+                        else:
+                            st.info(f"Aún no hay scores para {song} en esta fecha.")
 
     
                           
