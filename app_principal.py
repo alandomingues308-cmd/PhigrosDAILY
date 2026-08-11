@@ -229,7 +229,7 @@ with tab_phigros:
 
             FECHA_CREACION = datetime(2026, 1, 1).date()
 
-            fecha_seleccionada = st.sidebar.date_input(
+            fecha_seleccionada = st.date_input(
                 "Selecciona una fecha para ver el ranking:",
                 value=datetime.now(mx_tz).date(),
                 max_value=datetime.now(mx_tz).date(),
