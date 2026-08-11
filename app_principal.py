@@ -224,7 +224,7 @@ with tab_phigros:
             if len(df_filtrado) > 0:
                 st.dataframe(df_filtrado.sort_values("RKS_Total", ascending=False)[["usuario", "RKS_Total", "Canciones"]], use_container_width=True, hide_index=True)
 
-                with tab_historial:
+        with tab_historial:
             st.header("📅 Historial de Desafíos")
 
             FECHA_CREACION = datetime(2026, 1, 1).date()
