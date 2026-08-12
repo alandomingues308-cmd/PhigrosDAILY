@@ -464,6 +464,8 @@ with tab_osu:
     st.success(f"{cancion_daily}")
     st.subheader("Cancion Alternativa")
     st.info(f"{cancion_alternative}")
+    usuario_final_o = st.text_input("Coloca tu usuario", placeholder="Tu nombre de usuario", key="usuario_input_phigros")
+    pp= st.number_input("Ingresa tu pp:", min_value=0, step=1, format="%d")
     
 
 
