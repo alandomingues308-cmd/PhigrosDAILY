@@ -464,7 +464,9 @@ st.title("🎵 Canción del Día - Osu")
 st.success(f"Daily: {cancion_daily}")
 st.subheader("Canción Alternativa")
 st.info(f"Alternative: {cancion_alternative}")
+st.write("---")
 
+st.title("🏆 Registra tu mejor puntaje y clasifica")
 usuario_final_o = st.text_input("Coloca tu usuario: ")
 pp = st.number_input("Ingresa tu pp:", min_value=0, step=1, format="%d")
 
