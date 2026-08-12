@@ -486,9 +486,9 @@ with tab_osu:
             # Guardar en Firestore bajo una colección de osu
             db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}").set(nuevo_score_osu)
             st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}**!")
-           st.balloons()
+            st.balloons()
         else:
-           st.warning("⚠️ Por favor, ingresa un nombre de usuario antes de enviar.")
+            st.warning("⚠️ Por favor, ingresa un nombre de usuario antes de enviar.")
  
     # --- TABLAS DE CLASIFICACIÓN ---
     st.write("---")
