@@ -529,19 +529,19 @@ if todos_los_scores:
             st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
 
         with tab_general:
-        st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
+            st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
         # Tomar el mejor score absoluto (Daily o Alternative) por cada usuario y fecha
-        best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
+            best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
         
-        acum = best.groupby("usuario").agg(
-            PP_Total=("pp", "sum"),
-            Canciones=("pp", "count")
-        ).reset_index()
+            acum = best.groupby("usuario").agg(
+                PP_Total=("pp", "sum"),
+                Canciones=("pp", "count")
+            ).reset_index()
         
-        acum["PP_Total"] = acum["PP_Total"].round(4)
-        df_filtrado = acum[acum["Canciones"] > 0]
+            acum["PP_Total"] = acum["PP_Total"].round(4)
+            df_filtrado = acum[acum["Canciones"] > 0]
         
-        if len(df_filtrado) > 0:
-            st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
-        else:
-            st.info("Aún no hay suficientes registros para la tabla general.")
+            if len(df_filtrado) > 0:
+                st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
+            else:
+                st.info("Aún no hay suficientes registros para la tabla general.")
