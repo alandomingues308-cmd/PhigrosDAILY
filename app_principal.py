@@ -24,6 +24,26 @@ def init_firestore():
 db = init_firestore()
 mx_tz = pytz.timezone('America/Caracas')
 
+# --- CONFIGURACIÓN DE CONTRASEÑA ADMIN ---
+PASSWORD_ADMIN = "ritmo"
+
+# --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
+st.sidebar.write("---")
+st.sidebar.header("🔐 Panel de Admin (osu!)")
+password_input = st.sidebar.text_input("Contraseña", type="password")
+
+if password_input == PASSWORD_ADMIN:
+    st.sidebar.success("Acceso concedido")
+    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"])
+    cancion_a_configurar = st.sidebar.text_input(f"Beatmap / Canción ({modo_config})")
+    
+    if st.sidebar.button(f"Guardar {modo_config}"):
+        db.collection("config").document("canciones_activas_osu").set({
+            modo_config.lower(): cancion_a_configurar,
+            "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
+        }, merge=True)
+        st.sidebar.success(f"¡{modo_config} actualizado correctamente!")
+
 # ====================== SIDEBAR - RENOMBRAR ======================
 st.sidebar.title("👤 Gestión de Usuario")
 
@@ -431,23 +451,6 @@ with tab_arcaea:
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
 with tab_osu:
-    
-    # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
-    st.sidebar.write("---")
-    st.sidebar.header("🔐 Panel de Admin (osu!)")
-    password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_osu")
-
-    if password_input == "tu_contraseña_segura":
-        st.sidebar.success("Acceso concedido")
-        modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="radio_osu_admin")
-        cancion_a_configurar = st.sidebar.text_input(f"Beatmap / Canción ({modo_config})", key="input_osu_admin")
-        
-        if st.sidebar.button(f"Guardar {modo_config}", key="btn_guardar_osu"):
-            db.collection("config").document("canciones_activas_osu").set({
-                modo_config.lower(): cancion_a_configurar,
-                "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
-            }, merge=True)
-            st.sidebar.success(f"¡{modo_config} actualizado correctamente!")
 
     # --- OBTENER CONFIGURACIÓN ACTUAL DESDE FIRESTORE ---
     config_ref = db.collection("config").document("canciones_activas_osu").get()
