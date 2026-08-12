@@ -505,7 +505,7 @@ if todos_los_scores:
     else:
         df_osu['fecha_date'] = pd.to_datetime(df_osu['timestamp']).dt.date
 
-    tab_diaria, tab_general, tab_historial = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales", "🔍 Historial por Fecha"])
+    tab_diaria, tab_general= st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
     
     with tab_diaria:
         st.subheader(f"Desafío del Día - {today}")
