@@ -25,7 +25,7 @@ db = init_firestore()
 mx_tz = pytz.timezone('America/Caracas')
 
 # --- CONFIGURACIÓN DE CONTRASEÑA ADMIN ---
-PASSWORD_ADMIN = "ritmo"
+PASSWORD_ADMIN = "ritmo123"
 
 # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
 st.sidebar.write("---")
