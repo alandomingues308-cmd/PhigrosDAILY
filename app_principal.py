@@ -55,16 +55,8 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
             rename_status.warning("Ingresa ambos usuarios correctamente")
 
 # ====================== PHIGROS =====================
-tab_phigros, tab_arcaea = st.tabs(["🎵 Phigros", "Arcaea"])
+tab_phigros, tab_arcaea, tap_osu = st.tabs(["🎵 Phigros", "Arcaea","Osu"])
 with tab_phigros:
-    # ---------------------------------------------------------------------------
-    # BARRA LATERAL: HISTORIAL DE FECHAS
-    # ---------------------------------------------------------------------------
-    
-
-    # ---------------------------------------------------------------------------
-    # CÓDIGO PRINCIPAL
-    # ---------------------------------------------------------------------------
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
 
     @st.cache_data
@@ -438,3 +430,46 @@ with tab_arcaea:
             acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
+with tab_osu:
+    
+    # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
+    st.sidebar.write("---")
+    st.sidebar.header("🔐 Panel de Admin (osu!)")
+    password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_osu")
+
+    if password_input == "tu_contraseña_segura":
+        st.sidebar.success("Acceso concedido")
+        modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="radio_osu_admin")
+        cancion_a_configurar = st.sidebar.text_input(f"Beatmap / Canción ({modo_config})", key="input_osu_admin")
+        
+        if st.sidebar.button(f"Guardar {modo_config}", key="btn_guardar_osu"):
+            db.collection("config").document("canciones_activas_osu").set({
+                modo_config.lower(): cancion_a_configurar,
+                "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
+            }, merge=True)
+            st.sidebar.success(f"¡{modo_config} actualizado correctamente!")
+
+    # --- OBTENER CONFIGURACIÓN ACTUAL DESDE FIRESTORE ---
+    config_ref = db.collection("config").document("canciones_activas_osu").get()
+    config_data = config_ref.to_dict() if config_ref.exists else {}
+
+    cancion_daily = config_data.get("daily", "Sin configurar")
+    cancion_alternative = config_data.get("alternative", "Sin configurar")
+
+    # --- INTERFAZ PRINCIPAL DE OSU! ---
+    st.title("osu! Daily / Alternative Selector")
+    st.write("---")
+
+    st.subheader("🎯 Mapas Activos Actuales")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(label="Beatmap Daily", value=cancion_daily)
+    with col2:
+        st.metric(label="Beatmap Alternative", value=cancion_alternative)
+
+    st.write("---")
+    tipo = st.selectbox("Selecciona el modo para registrar tu score en osu!", ["Daily", "Alternative"], key="select_tipo_osu")
+    cancion_objetivo = cancion_daily if tipo == "Daily" else cancion_alternative
+
+    st.info(f"Modo seleccionado: **{tipo}** | Mapa objetivo: **{cancion_objetivo}**")
+            
