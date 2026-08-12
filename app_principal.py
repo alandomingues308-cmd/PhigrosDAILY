@@ -460,90 +460,90 @@ with tab_osu:
     cancion_alternative = config_data.get("alternative", "Sin configurar")
 
     # --- INTERFAZ PRINCIPAL DE OSU! ---
-st.title("🎵 Canción del Día - Osu")
-st.success(f"Daily: {cancion_daily}")
-st.subheader("Canción Alternativa")
-st.info(f"Alternative: {cancion_alternative}")
-st.write("---")
+    st.title("🎵 Canción del Día - Osu")
+    st.success(f"Daily: {cancion_daily}")
+    st.subheader("Canción Alternativa")
+    st.info(f"Alternative: {cancion_alternative}")
+    st.write("---")
 
-st.title("🏆 Registra tu mejor puntaje y clasifica")
-usuario_final_o = st.text_input("Coloca tu usuario: ")
-pp = st.number_input("Ingresa tu pp:", min_value=0, step=1, format="%d")
+    st.title("🏆 Registra tu mejor puntaje y clasifica")
+    usuario_final_o = st.text_input("Coloca tu usuario: ")
+    pp = st.number_input("Ingresa tu pp:", min_value=0, step=1, format="%d")
 
-# Selección de modalidad para enviar el puntaje
-tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
-cancion_objetivo = cancion_daily if tipo_envio == "Daily" else cancion_alternative
+    # Selección de modalidad para enviar el puntaje
+    tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
+    cancion_objetivo = cancion_daily if tipo_envio == "Daily" else cancion_alternative
 
-if st.button("Subir puntuación"):
-    if usuario_final_o:
-        nuevo_score_osu = {
-            "usuario": usuario_final_o,
-            "pp": pp,
-            "tipo": tipo_envio,
-            "cancion": cancion_objetivo,
-            "timestamp": datetime.now().isoformat()
-        }
-        # Guardar en Firestore bajo una colección de osu
-        db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}").set(nuevo_score_osu)
-        st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}**!")
-        st.balloons()
-    else:
-        st.warning("⚠️ Por favor, ingresa un nombre de usuario antes de enviar.")
-
-# --- TABLAS DE CLASIFICACIÓN ---
-st.write("---")
-st.header("📊 Tablas de Clasificación")
-
-# Obtener los scores de osu! desde Firestore
-scores_ref = db.collection("scores_osu").stream()
-todos_los_scores = [doc.to_dict() for doc in scores_ref]
-
-if todos_los_scores:
-    df_osu = pd.DataFrame(todos_los_scores)
-    
-    # Asegurar formato de fecha para los filtros y pestañas
-    if "fecha" in df_osu.columns:
-        df_osu['fecha_date'] = pd.to_datetime(df_osu['fecha']).dt.date
-    else:
-        df_osu['fecha_date'] = pd.to_datetime(df_osu['timestamp']).dt.date
-
-    tab_diaria, tab_general= st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
-    
-    with tab_diaria:
-        st.subheader(f"Desafío del Día - {today}")
-        
-        # 🏆 Top Daily
-        st.markdown("### 🏆 Top Daily")
-        df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
-        if not df_daily.empty:
-            df_daily_sorted = df_daily.sort_values(by="pp", ascending=False).reset_index(drop=True)
-            st.dataframe(df_daily_sorted[["usuario", "pp"]], use_container_width=True)
+    if st.button("Subir puntuación"):
+        if usuario_final_o:
+            nuevo_score_osu = {
+                "usuario": usuario_final_o,
+                "pp": pp,
+                "tipo": tipo_envio,
+                "cancion": cancion_objetivo,
+                "timestamp": datetime.now().isoformat()
+            }
+            # Guardar en Firestore bajo una colección de osu
+            db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}").set(nuevo_score_osu)
+            st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}**!")
+           st.balloons()
         else:
-            st.info(f"Aún no hay registros para el Daily actual: {cancion_daily}")
-            
-        # 🥈 Top Alternative
-        st.markdown("### 🥈 Top Alternative")
-        df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
-        if not df_alt.empty:
-            df_alt_sorted = df_alt.sort_values(by="pp", ascending=False).reset_index(drop=True)
-            st.dataframe(df_alt_sorted[["usuario", "pp"]], use_container_width=True)
-        else:
-            st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
+           st.warning("⚠️ Por favor, ingresa un nombre de usuario antes de enviar.")
+ 
+    # --- TABLAS DE CLASIFICACIÓN ---
+    st.write("---")
+    st.header("📊 Tablas de Clasificación")
 
-        with tab_general:
-            st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
-        # Tomar el mejor score absoluto (Daily o Alternative) por cada usuario y fecha
-            best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
+   # Obtener los scores de osu! desde Firestore
+    scores_ref = db.collection("scores_osu").stream()
+    todos_los_scores = [doc.to_dict() for doc in scores_ref]
+
+    if todos_los_scores:
+        df_osu = pd.DataFrame(todos_los_scores)
+    
+        # Asegurar formato de fecha para los filtros y pestañas
+        if "fecha" in df_osu.columns:
+            df_osu['fecha_date'] = pd.to_datetime(df_osu['fecha']).dt.date
+        else:
+            df_osu['fecha_date'] = pd.to_datetime(df_osu['timestamp']).dt.date
+
+        tab_diaria, tab_general= st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+    
+        with tab_diaria:
+            st.subheader(f"Desafío del Día - {today}")
         
-            acum = best.groupby("usuario").agg(
-                PP_Total=("pp", "sum"),
-                Canciones=("pp", "count")
-            ).reset_index()
-        
-            acum["PP_Total"] = acum["PP_Total"].round(4)
-            df_filtrado = acum[acum["Canciones"] > 0]
-        
-            if len(df_filtrado) > 0:
-                st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
+            # 🏆 Top Daily
+            st.markdown("### 🏆 Top Daily")
+            df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
+            if not df_daily.empty:
+                df_daily_sorted = df_daily.sort_values(by="pp", ascending=False).reset_index(drop=True)
+                st.dataframe(df_daily_sorted[["usuario", "pp"]], use_container_width=True)
             else:
-                st.info("Aún no hay suficientes registros para la tabla general.")
+                st.info(f"Aún no hay registros para el Daily actual: {cancion_daily}")
+            
+            # 🥈 Top Alternative
+            st.markdown("### 🥈 Top Alternative")
+            df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
+            if not df_alt.empty:
+               df_alt_sorted = df_alt.sort_values(by="pp", ascending=False).reset_index(drop=True)
+               st.dataframe(df_alt_sorted[["usuario", "pp"]], use_container_width=True)
+            else:
+               st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
+
+            with tab_general:
+                st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
+        # Tomar el mejor score absoluto (Daily o Alternative) por cada usuario y fecha
+                best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
+        
+                acum = best.groupby("usuario").agg(
+                    PP_Total=("pp", "sum"),
+                    Canciones=("pp", "count")
+                ).reset_index()
+        
+                acum["PP_Total"] = acum["PP_Total"].round(4)
+                df_filtrado = acum[acum["Canciones"] > 0]
+        
+                if len(df_filtrado) > 0:
+                    st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
+                else:
+                    st.info("Aún no hay suficientes registros para la tabla general.")
