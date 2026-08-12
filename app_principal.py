@@ -457,19 +457,13 @@ with tab_osu:
     cancion_alternative = config_data.get("alternative", "Sin configurar")
 
     # --- INTERFAZ PRINCIPAL DE OSU! ---
-    st.title("osu! Daily / Alternative Selector")
-    st.write("---")
+    st.title(f"🎵 Canción del Día - Osu")
+    st.success(f"{cancion_daily}")
+    st.subheader("Cancion Alternativa")
+    st.info(f"{cancion_alternative}")
+    
 
-    st.subheader("🎯 Mapas Activos Actuales")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric(label="Beatmap Daily", value=cancion_daily)
-    with col2:
-        st.metric(label="Beatmap Alternative", value=cancion_alternative)
 
-    st.write("---")
-    tipo = st.selectbox("Selecciona el modo para registrar tu score en osu!", ["Daily", "Alternative"], key="select_tipo_osu")
-    cancion_objetivo = cancion_daily if tipo == "Daily" else cancion_alternative
 
-    st.info(f"Modo seleccionado: **{tipo}** | Mapa objetivo: **{cancion_objetivo}**")
+    
             
