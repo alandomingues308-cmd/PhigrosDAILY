@@ -499,22 +499,50 @@ todos_los_scores = [doc.to_dict() for doc in scores_ref]
 if todos_los_scores:
     df_osu = pd.DataFrame(todos_los_scores)
     
-    # 🏆 Top Daily
-    st.subheader("🏆 Top Daily")
-    df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
-    if not df_daily.empty:
-        df_daily_sorted = df_daily.sort_values(by="pp", ascending=False).reset_index(drop=True)
-        st.dataframe(df_daily_sorted[["usuario", "pp"]], use_container_width=True)
+    # Asegurar formato de fecha para los filtros y pestañas
+    if "fecha" in df_osu.columns:
+        df_osu['fecha_date'] = pd.to_datetime(df_osu['fecha']).dt.date
     else:
-        st.info("Aún no hay registros para el Daily actual.")
+        df_osu['fecha_date'] = pd.to_datetime(df_osu['timestamp']).dt.date
+
+    tab_diaria, tab_general, tab_historial = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales", "🔍 Historial por Fecha"])
+    
+    with tab_diaria:
+        st.subheader(f"Desafío del Día - {today}")
         
-    # 🥈 Top Alternative
-    st.subheader("🥈 Top Alternative")
-    df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
-    if not df_alt.empty:
-        df_alt_sorted = df_alt.sort_values(by="pp", ascending=False).reset_index(drop=True)
-        st.dataframe(df_alt_sorted[["usuario", "pp"]], use_container_width=True)
-    else:
-        st.info("Aún no hay registros para el Alternative actual.")
-else:
-    st.info("No hay registros en la base de datos de osu! todavía.")
+        # 🏆 Top Daily
+        st.markdown("### 🏆 Top Daily")
+        df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
+        if not df_daily.empty:
+            df_daily_sorted = df_daily.sort_values(by="pp", ascending=False).reset_index(drop=True)
+            st.dataframe(df_daily_sorted[["usuario", "pp"]], use_container_width=True)
+        else:
+            st.info(f"Aún no hay registros para el Daily actual: {cancion_daily}")
+            
+        # 🥈 Top Alternative
+        st.markdown("### 🥈 Top Alternative")
+        df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
+        if not df_alt.empty:
+            df_alt_sorted = df_alt.sort_values(by="pp", ascending=False).reset_index(drop=True)
+            st.dataframe(df_alt_sorted[["usuario", "pp"]], use_container_width=True)
+        else:
+            st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
+
+    with tab_general:
+        st.write("Solo se suma tu mejor puntaje del día (Daily o Alternative)")
+        best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date', 'tipo'])
+        
+        acum = best.groupby("usuario").agg(
+            PP_Total=("pp", "sum"),
+            Canciones=("pp", "count")
+        ).reset_index()
+        
+        acum["PP_Total"] = acum["PP_Total"].round(4)
+        df_filtrado = acum[acum["Canciones"] > 0]
+        
+        if len(df_filtrado) > 0:
+            st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
+        else:
+            st.info("Aún no hay suficientes registros para la tabla general.")
+
+
