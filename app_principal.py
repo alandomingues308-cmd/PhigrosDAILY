@@ -240,7 +240,7 @@ with tab_phigros:
         with tab_historial:
             st.header("📅 Historial de Desafíos")
 
-            FECHA_CREACION = datetime(2026, 1, 1).date()
+            FECHA_CREACION = datetime(2026, 7, 10).date()
 
             fecha_seleccionada = st.date_input(
                 "Selecciona una fecha para ver el ranking:",
