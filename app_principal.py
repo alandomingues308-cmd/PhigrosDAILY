@@ -227,6 +227,7 @@ with tab_phigros:
                     st.info(f"Aún no hay scores para {song}")
 
         with tab_general:
+            st.write("solo se suma tu mejor puntaje del dia (Daily o Alternative)")
             df['fecha'] = pd.to_datetime(df['fecha']).dt.date
             best = df.sort_values(by=['usuario','fecha','rks'], ascending=[True,True,False]).drop_duplicates(subset=['usuario','fecha'])
             acum = best.groupby("usuario").agg(RKS_Total=("rks","sum"), Canciones=("rks","count")).reset_index()
