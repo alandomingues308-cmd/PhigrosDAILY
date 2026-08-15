@@ -40,37 +40,69 @@ if password_input == PASSWORD_ADMIN:
     url_beatmap = st.sidebar.text_input(f"Enlace del beatmap ({modo_config})", key=f"url_{modo_config}")
     
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-        match_osu = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
+        match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
+        match_id_alt = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
         
-        if match_osu:
-            b_id = match_osu.group(1)
+        set_id = match_set.group(1) if match_set else None
+        
+        if set_id or match_id_alt:
             nombre_cancion_final = ""
+            beatmaps_list = []
+            
             try:
-                # Descargar el archivo .osu para extraer metadatos limpios
-                res_meta = requests.get(f"https://osu.ppy.sh/osu/{b_id}", timeout=10)
-                if res_meta.status_code == 200:
-                    content_str = res_meta.content.decode('utf-8', errors='ignore')
-                    title_match = re.search(r'^Title:(.+)$', content_str, re.MULTILINE)
-                    
-                    song_title = title_match.group(1).strip() if title_match else ""
-                    
-                    if song_title:
-                        nombre_cancion_final = f" {song_title}"
+                # Intentar extraer todas las dificultades del beatmapset
+                if set_id:
+                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                    res_page = requests.get(f"https://osu.ppy.sh/beatmapsets/{set_id}", headers=headers, timeout=10)
+                    if res_page.status_code == 200:
+                        import html
+                        match_inertia = re.search(r'data-page="([^"]+)"', res_page.text)
+                        if match_inertia:
+                            json_str = html.unescape(match_inertia.group(1))
+                            page_data = json.loads(json_str)
+                            b_set = page_data.get("props", {}).get("beatmapset", {})
+                            
+                            title = b_set.get("title", "")
+                            nombre_cancion_final = f"{title}" if title else ""
+                            
+                            raw_maps = b_set.get("beatmaps", [])
+                            for bm in raw_maps:
+                                beatmaps_list.append({
+                                    "id": bm.get("id"),
+                                    "version": bm.get("version", "Normal")
+                                })
+                
+                # Fallback si se pasó un enlace directo de dificultad
+                if not nombre_cancion_final and match_id_alt:
+                    fallback_id = match_id_alt.group(1)
+                    res_meta = requests.get(f"https://osu.ppy.sh/osu/{fallback_id}", timeout=10)
+                    if res_meta.status_code == 200:
+                        content_str = res_meta.content.decode('utf-8', errors='ignore')
+                        title_match = re.search(r'^Title:(.+)$', content_str, re.MULTILINE)
+                        version_match = re.search(r'^Version:(.+)$', content_str, re.MULTILINE)
+                        
+                        song_title = title_match.group(1).strip() if title_match else "Desconocido"
+                        song_version = version_match.group(1).strip() if version_match else "Normal"
+                        
+                        nombre_cancion_final = song_title
+                        beatmaps_list = [{"id": int(fallback_id), "version": song_version}]
             except Exception:
                 pass
             
-            # Si por alguna razón falló la lectura automática, permitimos un nombre limpio por defecto basado en el ID o evitamos mostrar IDs feos
             if not nombre_cancion_final:
-                nombre_cancion_final = f"Mapa de Osu ({b_id})"
+                nombre_cancion_final = "Mapa de Osu"
+            if not beatmaps_list:
+                beatmaps_list = [{"id": 0, "version": "Normal"}]
 
             db.collection("config").document("canciones_activas_osu").set({
                 modo_config.lower(): nombre_cancion_final,
-                f"{modo_config.lower()}_url": url_beatmap,
+                f"{modo_config.lower()}_beatmaps": beatmaps_list,
                 "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
             }, merge=True)
-            st.sidebar.success(f"¡{modo_config} actualizado correctamente!")
+            st.sidebar.success(f"¡{modo_config} guardado ({len(beatmaps_list)} dificultades)!")
         else:
             st.sidebar.error("Enlace de osu! inválido.")
+
 
 
 
@@ -489,8 +521,8 @@ with tab_osu:
 
     cancion_daily = config_data.get("daily", "Sin configurar")
     cancion_alternative = config_data.get("alternative", "Sin configurar")
-    url_daily = config_data.get("daily_url", "")
-    url_alternative = config_data.get("alternative_url", "")
+    daily_bm_list = config_data.get("daily_beatmaps", [])
+    alt_bm_list = config_data.get("alternative_beatmaps", [])
 
     # --- INTERFAZ PRINCIPAL DE OSU! ---
     st.title("🎵 Canción del Día - Osu")
@@ -502,10 +534,21 @@ with tab_osu:
     st.title("🏆 Registra tu mejor puntaje y clasifica")
     usuario_final_o = st.text_input("Coloca tu usuario: ", key="user_osu_input")
     
-    # Selección de modalidad para enviar el puntaje
     tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
-    url_objetivo = url_daily if tipo_envio == "Daily" else url_alternative
-    cancion_objetivo = cancion_daily if tipo_envio == "Daily" else cancion_alternative
+    
+    # Obtener las dificultades disponibles para el modo seleccionado
+    current_bm_list = daily_bm_list if tipo_envio == "Daily" else alt_bm_list
+    
+    beatmap_id_seleccionado = None
+    dificultad_nombre = "Normal"
+
+    if current_bm_list:
+        opciones_diff = {bm["version"]: bm["id"] for bm in current_bm_list}
+        diff_elegida = st.selectbox("Selecciona la dificultad en la que jugaste:", list(opciones_diff.keys()), key=f"diff_sel_{tipo_envio}")
+        beatmap_id_seleccionado = opciones_diff[diff_elegida]
+        dificultad_nombre = diff_elegida
+    else:
+        st.warning("⚠️ No hay dificultades configuradas para este modo. Pídele al administrador que guarde el enlace.")
 
     col_acc, col_miss = st.columns(2)
     with col_acc:
@@ -516,45 +559,43 @@ with tab_osu:
     if st.button("Subir puntuación", key="btn_subir_osu"):
         if not usuario_final_o.strip():
             st.warning("⚠️ Por favor, ingresa un nombre de usuario antes de enviar.")
-        elif not url_objetivo:
-            st.error("⚠️ No hay un enlace configurado para este modo por el administrador.")
+        elif not beatmap_id_seleccionado:
+            st.error("⚠️ Selecciona una dificultad válida.")
         else:
-            match_b = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_objetivo)
-            if match_b:
-                beatmap_id = match_b.group(1)
-                try:
-                    url_descarga = f"https://osu.ppy.sh/osu/{beatmap_id}"
-                    respuesta = requests.get(url_descarga, timeout=10)
+            try:
+                url_descarga = f"https://osu.ppy.sh/osu/{beatmap_id_seleccionado}"
+                respuesta = requests.get(url_descarga, timeout=10)
+                
+                if respuesta.status_code == 200 and b"osu file format" in respuesta.content:
+                    import rosu_pp_py as rosu
+                    beatmap = rosu.Beatmap(bytes=respuesta.content)
+                    beatmap.convert(rosu.GameMode.Mania)
                     
-                    if respuesta.status_code == 200 and b"osu file format" in respuesta.content:
-                        import rosu_pp_py as rosu
-                        beatmap = rosu.Beatmap(bytes=respuesta.content)
-                        beatmap.convert(rosu.GameMode.Mania)
-                        
-                        perf = rosu.Performance(
-                            accuracy=precision_osu,
-                            misses=misses_osu
-                        )
-                        resultado = perf.calculate(beatmap)
-                        pp_calculado = round(resultado.pp, 2)
-                        
-                        nuevo_score_osu = {
-                            "usuario": usuario_final_o,
-                            "pp": pp_calculado,
-                            "tipo": tipo_envio,
-                            "cancion": cancion_objetivo,
-                            "timestamp": datetime.now().isoformat(),
-                            "fecha": today
-                        }
-                        db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score_osu)
-                        st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}** con **{pp_calculado} PP**!")
-                        st.balloons()
-                    else:
-                        st.error("No se pudo descargar el archivo del beatmap para calcular el PP.")
-                except Exception as e:
-                    st.error(f"Error al calcular PP: {e}")
-            else:
-                st.error("La URL guardada para este mapa no es válida.")
+                    perf = rosu.Performance(
+                        accuracy=precision_osu,
+                        misses=misses_osu
+                    )
+                    resultado = perf.calculate(beatmap)
+                    pp_calculado = round(resultado.pp, 2)
+                    
+                    cancion_objetivo = cancion_daily if tipo_envio == "Daily" else cancion_alternative
+                    
+                    nuevo_score_osu = {
+                        "usuario": usuario_final_o,
+                        "pp": pp_calculado,
+                        "tipo": tipo_envio,
+                        "cancion": cancion_objetivo,
+                        "dificultad": dificultad_nombre,
+                        "timestamp": datetime.now().isoformat(),
+                        "fecha": today
+                    }
+                    db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score_osu)
+                    st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}** ({dificultad_nombre}) con **{pp_calculado} PP**!")
+                    st.balloons()
+                else:
+                    st.error("No se pudo descargar el archivo del beatmap seleccionado.")
+            except Exception as e:
+                st.error(f"Error al calcular PP: {e}")
  
     # --- TABLAS DE CLASIFICACIÓN ---
     st.write("---")
@@ -580,7 +621,8 @@ with tab_osu:
             df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
             if not df_daily.empty:
                 df_daily_sorted = df_daily.sort_values(by="pp", ascending=False).reset_index(drop=True)
-                st.dataframe(df_daily_sorted[["usuario", "pp"]], use_container_width=True)
+                cols_show = ["usuario", "pp", "dificultad"] if "dificultad" in df_daily_sorted.columns else ["usuario", "pp"]
+                st.dataframe(df_daily_sorted[cols_show], use_container_width=True)
             else:
                 st.info(f"Aún no hay registros para el Daily actual: {cancion_daily}")
             
@@ -588,7 +630,8 @@ with tab_osu:
             df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
             if not df_alt.empty:
                df_alt_sorted = df_alt.sort_values(by="pp", ascending=False).reset_index(drop=True)
-               st.dataframe(df_alt_sorted[["usuario", "pp"]], use_container_width=True)
+               cols_show_alt = ["usuario", "pp", "dificultad"] if "dificultad" in df_alt_sorted.columns else ["usuario", "pp"]
+               st.dataframe(df_alt_sorted[cols_show_alt], use_container_width=True)
             else:
                st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
 
