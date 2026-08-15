@@ -39,9 +39,9 @@ if password_input == PASSWORD_ADMIN:
     url_beatmap = st.sidebar.text_input(f"Enlace del beatmap ({modo_config})", key=f"url_{modo_config}")
     
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-                match_osu = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
-
-    if match_osu:
+        match_osu = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
+        
+        if match_osu:
             b_id = match_osu.group(1)
             try:
                 # Petición rápida para extraer el título real del archivo .osu
@@ -68,8 +68,9 @@ if password_input == PASSWORD_ADMIN:
                 "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
             }, merge=True)
             st.sidebar.success(f"¡{modo_config} actualizado a: {nombre_cancion_final}!")
-    else:
+        else:
             st.sidebar.error("Enlace de osu! inválido.")
+
 
 
 # ====================== SIDEBAR - RENOMBRAR ======================
