@@ -39,7 +39,8 @@ if password_input == PASSWORD_ADMIN:
     url_beatmap = st.sidebar.text_input(f"Enlace del beatmap ({modo_config})", key=f"url_{modo_config}")
     
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-        match_osu = re.search(r"/(?:mania|osu|taiko|catch|b)/(\d+)", url_beatmap)
+                match_osu = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
+
         if match_osu:
             b_id = match_osu.group(1)
             try:
@@ -515,7 +516,8 @@ with tab_osu:
         elif not url_objetivo:
             st.error("⚠️ No hay un enlace configurado para este modo por el administrador.")
         else:
-            match_b = re.search(r"/(?:mania|osu|taiko|catch|b)/(\d+)", url_objetivo)
+                        match_b = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_objetivo)
+
             if match_b:
                 beatmap_id = match_b.group(1)
                 try:
