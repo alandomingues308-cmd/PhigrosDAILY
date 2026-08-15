@@ -518,7 +518,7 @@ with tab_osu:
         else:
                         match_b = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_objetivo)
 
-            if match_b:
+        if match_b:
                 beatmap_id = match_b.group(1)
                 try:
                     url_descarga = f"https://osu.ppy.sh/osu/{beatmap_id}"
@@ -551,7 +551,7 @@ with tab_osu:
                         st.error("No se pudo descargar el archivo del beatmap para calcular el PP.")
                 except Exception as e:
                     st.error(f"Error al calcular PP: {e}")
-            else:
+        else:
                 st.error("La URL guardada para este mapa no es válida.")
  
     # --- TABLAS DE CLASIFICACIÓN ---
