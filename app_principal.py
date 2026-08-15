@@ -37,10 +37,9 @@ password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_
 if password_input == PASSWORD_ADMIN:
     st.sidebar.success("Acceso concedido")
     modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
-    url_beatmap = st.sidebar.text_input(f"Enlace del beatmap ({modo_config})", key=f"url_{modo_config}")
+    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
     
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-        # Extraer el ID del beatmapset o de una dificultad individual
         match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
         match_id_alt = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
         
@@ -51,9 +50,9 @@ if password_input == PASSWORD_ADMIN:
             beatmaps_list = []
             
             try:
-                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                 
-                # Si tenemos el ID del set, intentamos raspar la página completa para obtener todas las dificultades
+                # Si se proporciona un enlace de beatmapset, extraemos todas las dificultades de mania
                 if set_id:
                     res_page = requests.get(f"https://osu.ppy.sh/beatmapsets/{set_id}", headers=headers, timeout=10)
                     if res_page.status_code == 200:
@@ -70,13 +69,14 @@ if password_input == PASSWORD_ADMIN:
                             
                             raw_maps = b_set.get("beatmaps", [])
                             for bm in raw_maps:
-                                # Filtramos preferiblemente por mania si aplica, o guardamos todas las del set
-                                beatmaps_list.append({
-                                    "id": bm.get("id"),
-                                    "version": bm.get("version", "Normal")
-                                })
+                                # Filtramos estrictamente por osu!mania (mode_int == 3)
+                                if bm.get("mode_int") == 3:
+                                    beatmaps_list.append({
+                                        "id": bm.get("id"),
+                                        "version": bm.get("version", "Normal")
+                                    })
                 
-                # Si no se pudo o solo se pasó un enlace directo, usamos la dificultad del enlace como respaldo
+                # Si no hay lista de mania o se pasó un enlace directo de una sola dificultad
                 if not beatmaps_list and match_id_alt:
                     fallback_id = match_id_alt.group(1)
                     res_meta = requests.get(f"https://osu.ppy.sh/osu/{fallback_id}", headers=headers, timeout=10)
@@ -105,9 +105,10 @@ if password_input == PASSWORD_ADMIN:
                 f"{modo_config.lower()}_beatmaps": beatmaps_list,
                 "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
             }, merge=True)
-            st.sidebar.success(f"¡{modo_config} guardado ({len(beatmaps_list)} dificultades)!")
+            st.sidebar.success(f"¡{modo_config} guardado ({len(beatmaps_list)} dificultades de Mania)!")
         else:
             st.sidebar.error("Enlace de osu! inválido.")
+
 
 
 
@@ -540,7 +541,7 @@ with tab_osu:
     
     tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
     
-    # Obtener las dificultades disponibles guardadas para el modo seleccionado
+    # Obtener el listado de dificultades disponibles para el modo seleccionado
     current_bm_list = daily_bm_list if tipo_envio == "Daily" else alt_bm_list
     
     beatmap_id_seleccionado = None
@@ -552,7 +553,7 @@ with tab_osu:
         beatmap_id_seleccionado = opciones_diff[diff_elegida]
         dificultad_nombre = diff_elegida
     else:
-        st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del mapa.")
+        st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del beatmapset.")
 
     col_acc, col_miss = st.columns(2)
     with col_acc:
