@@ -68,7 +68,7 @@ if password_input == PASSWORD_ADMIN:
                 "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
             }, merge=True)
             st.sidebar.success(f"¡{modo_config} actualizado a: {nombre_cancion_final}!")
-        else:
+    else:
             st.sidebar.error("Enlace de osu! inválido.")
 
 
