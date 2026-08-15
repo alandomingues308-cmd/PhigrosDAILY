@@ -543,7 +543,7 @@ with tab_osu:
 
     # --- AUTODETECCIÓN POR CAPTURA DE PANTALLA ---
     st.subheader("sube tu captura o coloca manualmente los datos (la detección por captura puede fallar si no se percibe con claridad los miss,bad,etc)")
-    archivo_captura = st.file_uploader("Sube tu captura de resultados de osu!mania", type=["png", "jpg", "jpeg"], key="screenshot_uploader")
+    archivo_captura = st.file_uploader("", type=["png", "jpg", "jpeg"], key="screenshot_uploader")
 
     # Valores por defecto
     val_geki, val_300, val_katu, val_100, val_50, val_miss = 0, 0, 0, 0, 0, 0
