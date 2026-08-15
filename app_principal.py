@@ -26,13 +26,8 @@ def init_firestore():
 db = init_firestore()
 mx_tz = pytz.timezone('America/Caracas')
 
-# --- CONFIGURACIÓN DE CONTRASEÑA ADMIN ---
+# --- CONTRASEÑA ADMIN ---
 PASSWORD_ADMIN = "ritmo123"
-
-# --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
-# Necesitarás estas variables al inicio de tu script:
-# CLIENT_ID = 'tu_id'
-# CLIENT_SECRET = 'tu_secret'
 
 # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
 st.sidebar.write("---")
@@ -44,7 +39,6 @@ if password_input == PASSWORD_ADMIN:
     modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
     url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
     
-    # Credenciales configuradas
     CLIENT_ID = '65710'
     CLIENT_SECRET = 'l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0'
 
@@ -70,7 +64,6 @@ if password_input == PASSWORD_ADMIN:
                 res = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers)
                 data = res.json()
                 
-                # Verificar si la respuesta es válida
                 if 'artist' in data:
                     nombre_cancion_final = f"{data['artist']} - {data['title']}"
                     beatmaps_list = []
@@ -503,6 +496,9 @@ with tab_arcaea:
             acum = best.groupby("usuario").agg(Potencial_Total=("potencial","sum"), Canciones=("potencial","count")).reset_index()
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
+
+       #================== OSU =====================
+
 with tab_osu:
 
     # --- OBTENER CONFIGURACIÓN ACTUAL DESDE FIRESTORE ---
