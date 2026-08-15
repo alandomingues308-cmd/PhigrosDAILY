@@ -12,6 +12,7 @@ import pytz
 import random
 import json
 import rosu_pp_py as rosu
+import request 
 
 # ====================== CONFIGURACIÓN ======================
 st.set_page_config(page_title="Daily Challenge", layout="wide")
