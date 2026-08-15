@@ -51,12 +51,8 @@ if password_input == PASSWORD_ADMIN:
                 if res_meta.status_code == 200:
                     content_str = res_meta.content.decode('utf-8', errors='ignore')
                     title_match = re.search(r'^Title:(.+)$', content_str, re.MULTILINE)
-                    artist_match = re.search(r'^Artist:(.+)$', content_str, re.MULTILINE)
-                    version_match = re.search(r'^Version:(.+)$', content_str, re.MULTILINE)
                     
                     song_title = title_match.group(1).strip() if title_match else ""
-                    song_artist = artist_match.group(1).strip() if artist_match else ""
-                    song_version = version_match.group(1).strip() if version_match else ""
                     
                     if song_title:
                         nombre_cancion_final = f" {song_title}"
