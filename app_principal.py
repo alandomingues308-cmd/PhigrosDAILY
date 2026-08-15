@@ -41,7 +41,7 @@ if password_input == PASSWORD_ADMIN:
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
                 match_osu = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
 
-        if match_osu:
+    if match_osu:
             b_id = match_osu.group(1)
             try:
                 # Petición rápida para extraer el título real del archivo .osu
