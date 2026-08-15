@@ -542,7 +542,7 @@ with tab_osu:
         st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del beatmapset.")
 
     # --- AUTODETECCIÓN POR CAPTURA DE PANTALLA ---
-    st.write("sube tu captura o coloca manualmente los datos (la detección por captura puede fallar si no se percibe con claridad los miss,bad,etc)")
+    st.subheader("sube tu captura o coloca manualmente los datos (la detección por captura puede fallar si no se percibe con claridad los miss,bad,etc)")
     archivo_captura = st.file_uploader("Sube tu captura de resultados de osu!mania", type=["png", "jpg", "jpeg"], key="screenshot_uploader")
 
     # Valores por defecto
