@@ -112,6 +112,7 @@ if password_input == PASSWORD_ADMIN:
 
 
 
+
 # ====================== SIDEBAR - RENOMBRAR ======================
 st.sidebar.title("👤 Gestión de Usuario")
 
