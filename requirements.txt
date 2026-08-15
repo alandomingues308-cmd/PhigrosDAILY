@@ -6,4 +6,5 @@ Pillow
 pytz
 google-cloud-firestore
 google-auth
+rosu-pp-py
 
