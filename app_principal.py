@@ -498,9 +498,9 @@ with tab_osu:
 
     # --- INTERFAZ PRINCIPAL DE OSU! ---
     st.title("🎵 Canción del Día - Osu")
-    st.success(f"Daily: {cancion_daily}")
+    st.success(f"{cancion_daily}")
     st.subheader("Canción Alternativa")
-    st.info(f"Alternative: {cancion_alternative}")
+    st.info(f"{cancion_alternative}")
     st.write("---")
 
     st.title("🏆 Registra tu mejor puntaje y clasifica")
