@@ -11,6 +11,7 @@ from google.oauth2 import service_account
 import pytz
 import random
 import json
+import rosu-pp-py as rosu
 
 # ====================== CONFIGURACIÓN ======================
 st.set_page_config(page_title="Daily Challenge", layout="wide")
