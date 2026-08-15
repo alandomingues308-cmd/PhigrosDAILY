@@ -31,19 +31,45 @@ PASSWORD_ADMIN = "ritmo123"
 # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
 st.sidebar.write("---")
 st.sidebar.header("🔐 Panel de Admin (osu!)")
-password_input = st.sidebar.text_input("Contraseña", type="password")
+password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_admin_osu")
 
 if password_input == PASSWORD_ADMIN:
     st.sidebar.success("Acceso concedido")
-    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"])
-    cancion_a_configurar = st.sidebar.text_input(f"Beatmap / Canción ({modo_config})")
+    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
+    url_beatmap = st.sidebar.text_input(f"Enlace del beatmap ({modo_config})", key=f"url_{modo_config}")
     
-    if st.sidebar.button(f"Guardar {modo_config}"):
-        db.collection("config").document("canciones_activas_osu").set({
-            modo_config.lower(): cancion_a_configurar,
-            "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
-        }, merge=True)
-        st.sidebar.success(f"¡{modo_config} actualizado correctamente!")
+    if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
+        match_osu = re.search(r"/(?:mania|osu|taiko|catch|b)/(\d+)", url_beatmap)
+        if match_osu:
+            b_id = match_osu.group(1)
+            try:
+                # Petición rápida para extraer el título real del archivo .osu
+                res_meta = requests.get(f"https://osu.ppy.sh/osu/{b_id}", timeout=10)
+                if res_meta.status_code == 200:
+                    content_str = res_meta.content.decode('utf-8', errors='ignore')
+                    title_match = re.search(r'^Title:(.+)$', content_str, re.MULTILINE)
+                    artist_match = re.search(r'^Artist:(.+)$', content_str, re.MULTILINE)
+                    version_match = re.search(r'^Version:(.+)$', content_str, re.MULTILINE)
+                    
+                    song_title = title_match.group(1).strip() if title_match else "Desconocido"
+                    song_artist = artist_match.group(1).strip() if artist_match else ""
+                    song_version = version_match.group(1).strip() if version_match else ""
+                    
+                    nombre_cancion_final = f"{song_artist} - {song_title} [{song_version}]"
+                else:
+                    nombre_cancion_final = f"Beatmap ID: {b_id}"
+            except Exception:
+                nombre_cancion_final = f"Beatmap ID: {b_id}"
+
+            db.collection("config").document("canciones_activas_osu").set({
+                modo_config.lower(): nombre_cancion_final,
+                f"{modo_config.lower()}_url": url_beatmap,
+                "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
+            }, merge=True)
+            st.sidebar.success(f"¡{modo_config} actualizado a: {nombre_cancion_final}!")
+        else:
+            st.sidebar.error("Enlace de osu! inválido.")
+
 
 # ====================== SIDEBAR - RENOMBRAR ======================
 st.sidebar.title("👤 Gestión de Usuario")
@@ -459,61 +485,93 @@ with tab_osu:
 
     cancion_daily = config_data.get("daily", "Sin configurar")
     cancion_alternative = config_data.get("alternative", "Sin configurar")
+    url_daily = config_data.get("daily_url", "")
+    url_alternative = config_data.get("alternative_url", "")
 
     # --- INTERFAZ PRINCIPAL DE OSU! ---
     st.title("🎵 Canción del Día - Osu")
-    st.success(f"{cancion_daily}")
+    st.success(f"Daily: {cancion_daily}")
     st.subheader("Canción Alternativa")
-    st.info(f"{cancion_alternative}")
+    st.info(f"Alternative: {cancion_alternative}")
     st.write("---")
 
     st.title("🏆 Registra tu mejor puntaje y clasifica")
-    usuario_final_o = st.text_input("Coloca tu usuario: ")
-    pp = st.number_input("Ingresa tu pp:", min_value=0, step=1, format="%d")
-
+    usuario_final_o = st.text_input("Coloca tu usuario: ", key="user_osu_input")
+    
     # Selección de modalidad para enviar el puntaje
     tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
+    url_objetivo = url_daily if tipo_envio == "Daily" else url_alternative
     cancion_objetivo = cancion_daily if tipo_envio == "Daily" else cancion_alternative
 
-    if st.button("Subir puntuación"):
-        if usuario_final_o:
-            nuevo_score_osu = {
-                "usuario": usuario_final_o,
-                "pp": pp,
-                "tipo": tipo_envio,
-                "cancion": cancion_objetivo,
-                "timestamp": datetime.now().isoformat()
-            }
-            # Guardar en Firestore bajo una colección de osu
-            db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}").set(nuevo_score_osu)
-            st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}**!")
-            st.balloons()
-        else:
+    col_acc, col_miss = st.columns(2)
+    with col_acc:
+        precision_osu = st.number_input("Precisión (%)", min_value=0.0, max_value=100.0, value=95.0, step=0.01, key="osu_acc")
+    with col_miss:
+        misses_osu = st.number_input("Misses", min_value=0, max_value=5000, value=0, step=1, key="osu_miss")
+
+    if st.button("Subir puntuación", key="btn_subir_osu"):
+        if not usuario_final_o.strip():
             st.warning("⚠️ Por favor, ingresa un nombre de usuario antes de enviar.")
+        elif not url_objetivo:
+            st.error("⚠️ No hay un enlace configurado para este modo por el administrador.")
+        else:
+            match_b = re.search(r"/(?:mania|osu|taiko|catch|b)/(\d+)", url_objetivo)
+            if match_b:
+                beatmap_id = match_b.group(1)
+                try:
+                    url_descarga = f"https://osu.ppy.sh/osu/{beatmap_id}"
+                    respuesta = requests.get(url_descarga, timeout=10)
+                    
+                    if respuesta.status_code == 200 and b"osu file format" in respuesta.content:
+                        import rosu_pp_py as rosu
+                        beatmap = rosu.Beatmap(bytes=respuesta.content)
+                        beatmap.convert(rosu.GameMode.Mania)
+                        
+                        perf = rosu.Performance(
+                            accuracy=precision_osu,
+                            misses=misses_osu
+                        )
+                        resultado = perf.calculate(beatmap)
+                        pp_calculado = round(resultado.pp, 2)
+                        
+                        nuevo_score_osu = {
+                            "usuario": usuario_final_o,
+                            "pp": pp_calculado,
+                            "tipo": tipo_envio,
+                            "cancion": cancion_objetivo,
+                            "timestamp": datetime.now().isoformat(),
+                            "fecha": today
+                        }
+                        db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score_osu)
+                        st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}** con **{pp_calculado} PP**!")
+                        st.balloons()
+                    else:
+                        st.error("No se pudo descargar el archivo del beatmap para calcular el PP.")
+                except Exception as e:
+                    st.error(f"Error al calcular PP: {e}")
+            else:
+                st.error("La URL guardada para este mapa no es válida.")
  
     # --- TABLAS DE CLASIFICACIÓN ---
     st.write("---")
     st.header("📊 Tablas de Clasificación")
 
-   # Obtener los scores de osu! desde Firestore
     scores_ref = db.collection("scores_osu").stream()
     todos_los_scores = [doc.to_dict() for doc in scores_ref]
 
     if todos_los_scores:
         df_osu = pd.DataFrame(todos_los_scores)
     
-        # Asegurar formato de fecha para los filtros y pestañas
         if "fecha" in df_osu.columns:
             df_osu['fecha_date'] = pd.to_datetime(df_osu['fecha']).dt.date
         else:
             df_osu['fecha_date'] = pd.to_datetime(df_osu['timestamp']).dt.date
 
-        tab_diaria, tab_general= st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+        tab_diaria_o, tab_general_o = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
     
-        with tab_diaria:
+        with tab_diaria_o:
             st.subheader(f"Desafío del Día - {today}")
         
-            # 🏆 Top Daily
             st.markdown("### 🏆 Top Daily")
             df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
             if not df_daily.empty:
@@ -522,7 +580,6 @@ with tab_osu:
             else:
                 st.info(f"Aún no hay registros para el Daily actual: {cancion_daily}")
             
-            # 🥈 Top Alternative
             st.markdown("### 🥈 Top Alternative")
             df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
             if not df_alt.empty:
@@ -531,20 +588,21 @@ with tab_osu:
             else:
                st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
 
-            with tab_general:
-                st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
-        # Tomar el mejor score absoluto (Daily o Alternative) por cada usuario y fecha
-                best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
-        
-                acum = best.groupby("usuario").agg(
-                    PP_Total=("pp", "sum"),
-                    Canciones=("pp", "count")
-                ).reset_index()
-        
-                acum["PP_Total"] = acum["PP_Total"].round(4)
-                df_filtrado = acum[acum["Canciones"] > 0]
-        
-                if len(df_filtrado) > 0:
-                    st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
-                else:
-                    st.info("Aún no hay suficientes registros para la tabla general.")
+        with tab_general_o:
+            st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
+            best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
+    
+            acum = best.groupby("usuario").agg(
+                PP_Total=("pp", "sum"),
+                Canciones=("pp", "count")
+            ).reset_index()
+    
+            acum["PP_Total"] = acum["PP_Total"].round(4)
+            df_filtrado = acum[acum["Canciones"] > 0]
+    
+            if len(df_filtrado) > 0:
+                st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
+            else:
+                st.info("Aún no hay suficientes registros para la tabla general.")
+    else:
+        st.info("No hay registros en la base de datos de osu! todavía.")
