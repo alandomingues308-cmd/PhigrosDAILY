@@ -35,47 +35,65 @@ PASSWORD_ADMIN = "ritmo123"
 # CLIENT_SECRET = 'tu_secret'
 
 def get_osu_token():
-    url = "https://osu.ppy.sh/oauth/token"
-    data = {
-        'client_id': 65710,
-        'client_secret': l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0,
-        'grant_type': 'client_credentials',
-        'scope': 'public'
-    }
-    r = requests.post(url, data=data)
-    return r.json().get('access_token')
+# --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
+st.sidebar.write("---")
+st.sidebar.header("🔐 Panel de Admin (osu!)")
+password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_admin_osu")
 
-# --- DENTRO DEL PANEL DE ADMINISTRACIÓN ---
-if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-    match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
-    set_id = match_set.group(1) if match_set else None
+if password_input == PASSWORD_ADMIN:
+    st.sidebar.success("Acceso concedido")
+    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
+    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
     
-    if set_id:
-        try:
-            token = get_osu_token()
-            headers = {"Authorization": f"Bearer {token}"}
-            # Llamada directa a la API oficial
-            res = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers)
-            data = res.json()
-            
-            nombre_cancion_final = f"{data['artist']} - {data['title']}"
-            beatmaps_list = []
-            
-            # Filtramos solo por modo mania (mode = 'mania')
-            for bm in data.get('beatmaps', []):
-                if bm['mode'] == 'mania':
-                    beatmaps_list.append({
-                        "id": bm['id'],
-                        "version": bm['version']
-                    })
-            
-            db.collection("config").document("canciones_activas_osu").set({
-                modo_config.lower(): nombre_cancion_final,
-                f"{modo_config.lower()}_beatmaps": beatmaps_list
-            }, merge=True)
-            st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades!")
-        except Exception as e:
-            st.sidebar.error(f"Error al conectar con API: {e}")
+    # Credenciales configuradas
+    CLIENT_ID = '65710'
+    CLIENT_SECRET = 'l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0'
+
+    def get_osu_token():
+        url = "https://osu.ppy.sh/oauth/token"
+        data = {
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'grant_type': 'client_credentials',
+            'scope': 'public'
+        }
+        r = requests.post(url, data=data)
+        return r.json().get('access_token')
+
+    if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
+        match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
+        set_id = match_set.group(1) if match_set else None
+        
+        if set_id:
+            try:
+                token = get_osu_token()
+                headers = {"Authorization": f"Bearer {token}"}
+                res = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers)
+                data = res.json()
+                
+                # Verificar si la respuesta es válida
+                if 'artist' in data:
+                    nombre_cancion_final = f"{data['artist']} - {data['title']}"
+                    beatmaps_list = []
+                    
+                    for bm in data.get('beatmaps', []):
+                        if bm['mode'] == 'mania':
+                            beatmaps_list.append({
+                                "id": bm['id'],
+                                "version": bm['version']
+                            })
+                    
+                    db.collection("config").document("canciones_activas_osu").set({
+                        modo_config.lower(): nombre_cancion_final,
+                        f"{modo_config.lower()}_beatmaps": beatmaps_list
+                    }, merge=True)
+                    st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
+                else:
+                    st.sidebar.error("No se pudo obtener información del beatmapset. Verifica el ID.")
+            except Exception as e:
+                st.sidebar.error(f"Error al conectar con API: {e}")
+        else:
+            st.sidebar.error("Enlace de osu! inválido (debe ser un beatmapset).")
 
 
 
