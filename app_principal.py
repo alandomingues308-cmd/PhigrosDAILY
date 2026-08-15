@@ -34,7 +34,6 @@ PASSWORD_ADMIN = "ritmo123"
 # CLIENT_ID = 'tu_id'
 # CLIENT_SECRET = 'tu_secret'
 
-def get_osu_token():
 # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
 st.sidebar.write("---")
 st.sidebar.header("🔐 Panel de Admin (osu!)")
@@ -94,7 +93,6 @@ if password_input == PASSWORD_ADMIN:
                 st.sidebar.error(f"Error al conectar con API: {e}")
         else:
             st.sidebar.error("Enlace de osu! inválido (debe ser un beatmapset).")
-
 
 
 
