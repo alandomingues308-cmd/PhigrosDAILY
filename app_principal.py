@@ -542,7 +542,7 @@ with tab_osu:
         st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del beatmapset.")
 
     # --- AUTODETECCIÓN POR CAPTURA DE PANTALLA ---
-    st.markdown("### 📸 Autodetección por Captura (Opcional)")
+    st.write("sube tu captura o coloca manualmente los datos (la detección por captura puede fallar si no se percibe con claridad los miss,bad,etc)")
     archivo_captura = st.file_uploader("Sube tu captura de resultados de osu!mania", type=["png", "jpg", "jpeg"], key="screenshot_uploader")
 
     # Valores por defecto
@@ -567,8 +567,6 @@ with tab_osu:
         except Exception as e:
             st.error(f"No se pudo procesar la imagen automáticamente: {e}")
 
-    st.markdown("### 📊 Resultados detallados (Juicios)")
-    st.write("Puedes subirlos arriba para rellenar automáticamente o ajustarlos manualmente:")
 
     col1, col2, col3 = st.columns(3)
     with col1:
