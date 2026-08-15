@@ -30,84 +30,52 @@ mx_tz = pytz.timezone('America/Caracas')
 PASSWORD_ADMIN = "ritmo123"
 
 # --- PANEL DE ADMINISTRACIÓN (SIDEBAR) ---
-st.sidebar.write("---")
-st.sidebar.header("🔐 Panel de Admin (osu!)")
-password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_admin_osu")
+# Necesitarás estas variables al inicio de tu script:
+# CLIENT_ID = 'tu_id'
+# CLIENT_SECRET = 'tu_secret'
 
-if password_input == PASSWORD_ADMIN:
-    st.sidebar.success("Acceso concedido")
-    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
-    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
+def get_osu_token():
+    url = "https://osu.ppy.sh/oauth/token"
+    data = {
+        'client_id': 65710,
+        'client_secret': l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0,
+        'grant_type': 'client_credentials',
+        'scope': 'public'
+    }
+    r = requests.post(url, data=data)
+    return r.json().get('access_token')
+
+# --- DENTRO DEL PANEL DE ADMINISTRACIÓN ---
+if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
+    match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
+    set_id = match_set.group(1) if match_set else None
     
-    if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-        match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
-        match_id_alt = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
-        
-        set_id = match_set.group(1) if match_set else None
-        
-        if set_id or match_id_alt:
-            nombre_cancion_final = ""
+    if set_id:
+        try:
+            token = get_osu_token()
+            headers = {"Authorization": f"Bearer {token}"}
+            # Llamada directa a la API oficial
+            res = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers)
+            data = res.json()
+            
+            nombre_cancion_final = f"{data['artist']} - {data['title']}"
             beatmaps_list = []
             
-            try:
-                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-                
-                # Si se proporciona un enlace de beatmapset, extraemos todas las dificultades de mania
-                if set_id:
-                    res_page = requests.get(f"https://osu.ppy.sh/beatmapsets/{set_id}", headers=headers, timeout=10)
-                    if res_page.status_code == 200:
-                        import html, json
-                        match_inertia = re.search(r'data-page="([^"]+)"', res_page.text)
-                        if match_inertia:
-                            json_str = html.unescape(match_inertia.group(1))
-                            page_data = json.loads(json_str)
-                            b_set = page_data.get("props", {}).get("beatmapset", {})
-                            
-                            title = b_set.get("title", "")
-                            artist = b_set.get("artist", "")
-                            nombre_cancion_final = f"{artist} - {title}" if artist and title else (title or "Mapa de Osu")
-                            
-                            raw_maps = b_set.get("beatmaps", [])
-                            for bm in raw_maps:
-                                # Filtramos estrictamente por osu!mania (mode_int == 3)
-                                if bm.get("mode_int") == 3:
-                                    beatmaps_list.append({
-                                        "id": bm.get("id"),
-                                        "version": bm.get("version", "Normal")
-                                    })
-                
-                # Si no hay lista de mania o se pasó un enlace directo de una sola dificultad
-                if not beatmaps_list and match_id_alt:
-                    fallback_id = match_id_alt.group(1)
-                    res_meta = requests.get(f"https://osu.ppy.sh/osu/{fallback_id}", headers=headers, timeout=10)
-                    if res_meta.status_code == 200:
-                        content_str = res_meta.content.decode('utf-8', errors='ignore')
-                        title_match = re.search(r'^Title:(.+)$', content_str, re.MULTILINE)
-                        artist_match = re.search(r'^Artist:(.+)$', content_str, re.MULTILINE)
-                        version_match = re.search(r'^Version:(.+)$', content_str, re.MULTILINE)
-                        
-                        song_title = title_match.group(1).strip() if title_match else "Desconocido"
-                        song_artist = artist_match.group(1).strip() if artist_match else ""
-                        song_version = version_match.group(1).strip() if version_match else "Normal"
-                        
-                        nombre_cancion_final = f"{song_artist} - {song_title}"
-                        beatmaps_list = [{"id": int(fallback_id), "version": song_version}]
-            except Exception:
-                pass
+            # Filtramos solo por modo mania (mode = 'mania')
+            for bm in data.get('beatmaps', []):
+                if bm['mode'] == 'mania':
+                    beatmaps_list.append({
+                        "id": bm['id'],
+                        "version": bm['version']
+                    })
             
-            if not nombre_cancion_final:
-                nombre_cancion_final = "Mapa de Osu"
-            if not beatmaps_list and match_id_alt:
-                beatmaps_list = [{"id": int(match_id_alt.group(1)), "version": "Normal"}]
-
             db.collection("config").document("canciones_activas_osu").set({
                 modo_config.lower(): nombre_cancion_final,
-                f"{modo_config.lower()}_beatmaps": beatmaps_list,
-                "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
+                f"{modo_config.lower()}_beatmaps": beatmaps_list
             }, merge=True)
-            st.sidebar.success(f"¡{modo_config} guardado ({len(beatmaps_list)} dificultades de Mania)!")
-        else:
-            st.sidebar.error("Enlace de osu! inválido.")
+            st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades!")
+        except Exception as e:
+            st.sidebar.error(f"Error al conectar con API: {e}")
 
 
 
