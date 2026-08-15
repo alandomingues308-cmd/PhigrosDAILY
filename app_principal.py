@@ -59,7 +59,7 @@ if password_input == PASSWORD_ADMIN:
                     song_version = version_match.group(1).strip() if version_match else ""
                     
                     if song_title:
-                        nombre_cancion_final = f"{song_artist} - {song_title} [{song_version}]"
+                        nombre_cancion_final = f" {song_title}"
             except Exception:
                 pass
             
