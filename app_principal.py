@@ -540,11 +540,19 @@ with tab_osu:
     else:
         st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del beatmapset.")
 
-    col_acc, col_miss = st.columns(2)
-    with col_acc:
-        precision_osu = st.number_input("Precisión (%)", min_value=0.0, max_value=100.0, value=95.0, step=0.01, key="osu_acc")
-    with col_miss:
-        misses_osu = st.number_input("Misses", min_value=0, max_value=5000, value=0, step=1, key="osu_miss")
+    st.markdown("### 📊 Resultados detallados (Juicios)")
+    st.write("Introduce el número exacto de notas de cada tipo que muestra tu pantalla de resultados:")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        n_geki = st.number_input("Geki (Max 300)", min_value=0, max_value=10000, value=0, step=1, key="osu_geki")
+        n100 = st.number_input("100s", min_value=0, max_value=10000, value=0, step=1, key="osu_100")
+    with col2:
+        n300 = st.number_input("300s", min_value=0, max_value=10000, value=0, step=1, key="osu_300")
+        n50 = st.number_input("50s", min_value=0, max_value=10000, value=0, step=1, key="osu_50")
+    with col3:
+        n_katu = st.number_input("Katu (200s)", min_value=0, max_value=10000, value=0, step=1, key="osu_katu")
+        misses_osu = st.number_input("Misses", min_value=0, max_value=10000, value=0, step=1, key="osu_miss")
 
     if st.button("Subir puntuación", key="btn_subir_osu"):
         if not usuario_final_o.strip():
@@ -562,8 +570,13 @@ with tab_osu:
                     beatmap = rosu.Beatmap(bytes=respuesta.content)
                     beatmap.convert(rosu.GameMode.Mania)
                     
+                    # Cálculo preciso usando los juicios exactos de la librería
                     perf = rosu.Performance(
-                        accuracy=precision_osu,
+                        n_geki=n_geki,
+                        n300=n300,
+                        n_katu=n_katu,
+                        n100=n100,
+                        n50=n50,
                         misses=misses_osu
                     )
                     resultado = perf.calculate(beatmap)
@@ -581,7 +594,7 @@ with tab_osu:
                         "fecha": today
                     }
                     db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score_osu)
-                    st.success(f"✅ ¡Registrado en **{tipo_envio}** ({dificultad_nombre}) con **{pp_calculado} PP**!")
+                    st.success(f"✅ ¡Registrado en **{tipo_envio}** ({dificultad_nombre}) con **{pp_calculado} PP** reales!")
                     st.balloons()
                 else:
                     st.error("No se pudo descargar el archivo del beatmap seleccionado.")
