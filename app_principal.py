@@ -516,9 +516,21 @@ with tab_osu:
 
     # --- INTERFAZ PRINCIPAL DE OSU! ---
     st.title("🎵 Canción del Día - Osu")
+    
+    # Mostrar Daily y su enlace
     st.success(f"{cancion_daily}")
+    if daily_bm_list:
+        # Tomamos el ID de la primera dificultad para generar el enlace directo al mapa
+        url_daily = f"https://osu.ppy.sh/b/{daily_bm_list[0]['id']}"
+        st.markdown(f"[🔗 Toca aquí para descargar / ver el mapa **Daily**]({url_daily})")
+
+    # Mostrar Alternative y su enlace
     st.subheader("Canción Alternativa")
     st.info(f"{cancion_alternative}")
+    if alt_bm_list:
+        url_alt = f"https://osu.ppy.sh/b/{alt_bm_list[0]['id']}"
+        st.markdown(f"[🔗 Toca aquí para descargar / ver el mapa **Alternative**]({url_alt})")
+        
     st.write("---")
 
     st.title("🏆 Registra tu mejor puntaje y clasifica")
@@ -539,7 +551,7 @@ with tab_osu:
     else:
         st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del beatmapset.")
 
-    # --- ENTRADA SIMPLIFICADA ---
+    # --- ENTRADA SIMPLIFICADA (ESTIMACIÓN) ---
     col_acc, col_miss = st.columns(2)
     with col_acc:
         precision_osu = st.number_input("Precisión (%)", min_value=0.0, max_value=100.0, value=95.0, step=0.01, format="%.2f", key="osu_acc")
@@ -588,5 +600,60 @@ with tab_osu:
             except Exception as e:
                 st.error(f"Error al calcular PP: {e}")
  
-    # --- TABLAS DE CLASIFICACIÓN (Mismo código de tablas que tenías antes) ---
-    # ... (código de las tablas de clasificación)
+    # --- TABLAS DE CLASIFICACIÓN ---
+    st.write("---")
+    st.header("📊 Tablas de Clasificación")
+
+    scores_ref = db.collection("scores_osu").stream()
+    todos_los_scores = [doc.to_dict() for doc in scores_ref]
+
+    if todos_los_scores:
+        df_osu = pd.DataFrame(todos_los_scores)
+    
+        if "fecha" in df_osu.columns:
+            df_osu['fecha_date'] = pd.to_datetime(df_osu['fecha']).dt.date
+        else:
+            df_osu['fecha_date'] = pd.to_datetime(df_osu['timestamp']).dt.date
+
+        tab_diaria_o, tab_general_o = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+    
+        with tab_diaria_o:
+            st.subheader(f"Desafío del Día - {today}")
+        
+            st.markdown("### 🏆 Top Daily")
+            df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
+            if not df_daily.empty:
+                df_daily_sorted = df_daily.sort_values(by="pp", ascending=False).reset_index(drop=True)
+                cols_show = ["usuario", "pp", "dificultad"] if "dificultad" in df_daily_sorted.columns else ["usuario", "pp"]
+                st.dataframe(df_daily_sorted[cols_show], use_container_width=True)
+            else:
+                st.info(f"Aún no hay registros para el Daily actual: {cancion_daily}")
+            
+            st.markdown("### 🥈 Top Alternative")
+            df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
+            if not df_alt.empty:
+               df_alt_sorted = df_alt.sort_values(by="pp", ascending=False).reset_index(drop=True)
+               cols_show_alt = ["usuario", "pp", "dificultad"] if "dificultad" in df_alt_sorted.columns else ["usuario", "pp"]
+               st.dataframe(df_alt_sorted[cols_show_alt], use_container_width=True)
+            else:
+               st.info(f"Aún no hay registros para el Alternative actual: {cancion_alternative}")
+
+        with tab_general_o:
+            st.write("Solo se suma tu mejor puntaje de cada día (el mayor entre Daily y Alternative)")
+            best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
+    
+            acum = best.groupby("usuario").agg(
+                PP_Total=("pp", "sum"),
+                Canciones=("pp", "count")
+            ).reset_index()
+    
+            acum["PP_Total"] = acum["PP_Total"].round(4)
+            df_filtrado = acum[acum["Canciones"] > 0]
+    
+            if len(df_filtrado) > 0:
+                st.dataframe(df_filtrado.sort_values("PP_Total", ascending=False)[["usuario", "PP_Total", "Canciones"]], use_container_width=True)
+            else:
+                st.info("Aún no hay suficientes registros para la tabla general.")
+    else:
+        st.info("No hay registros en la base de datos de osu! todavía.")
+
