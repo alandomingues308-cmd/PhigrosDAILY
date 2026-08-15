@@ -44,8 +44,9 @@ if password_input == PASSWORD_ADMIN:
         
         if match_osu:
             b_id = match_osu.group(1)
+            nombre_cancion_final = ""
             try:
-                # Petición rápida para extraer el título real del archivo .osu
+                # Descargar el archivo .osu para extraer metadatos limpios
                 res_meta = requests.get(f"https://osu.ppy.sh/osu/{b_id}", timeout=10)
                 if res_meta.status_code == 200:
                     content_str = res_meta.content.decode('utf-8', errors='ignore')
@@ -53,24 +54,28 @@ if password_input == PASSWORD_ADMIN:
                     artist_match = re.search(r'^Artist:(.+)$', content_str, re.MULTILINE)
                     version_match = re.search(r'^Version:(.+)$', content_str, re.MULTILINE)
                     
-                    song_title = title_match.group(1).strip() if title_match else "Desconocido"
+                    song_title = title_match.group(1).strip() if title_match else ""
                     song_artist = artist_match.group(1).strip() if artist_match else ""
                     song_version = version_match.group(1).strip() if version_match else ""
                     
-                    nombre_cancion_final = f"{song_artist} - {song_title} [{song_version}]"
-                else:
-                    nombre_cancion_final = f"Beatmap ID: {b_id}"
+                    if song_title:
+                        nombre_cancion_final = f"{song_artist} - {song_title} [{song_version}]"
             except Exception:
-                nombre_cancion_final = f"Beatmap ID: {b_id}"
+                pass
+            
+            # Si por alguna razón falló la lectura automática, permitimos un nombre limpio por defecto basado en el ID o evitamos mostrar IDs feos
+            if not nombre_cancion_final:
+                nombre_cancion_final = f"Mapa de Osu ({b_id})"
 
             db.collection("config").document("canciones_activas_osu").set({
                 modo_config.lower(): nombre_cancion_final,
                 f"{modo_config.lower()}_url": url_beatmap,
                 "fecha_actualizacion": datetime.now().strftime("%Y-%m-%d")
             }, merge=True)
-            st.sidebar.success(f"¡{modo_config} actualizado a: {nombre_cancion_final}!")
+            st.sidebar.success(f"¡{modo_config} actualizado correctamente!")
         else:
             st.sidebar.error("Enlace de osu! inválido.")
+
 
 
 
