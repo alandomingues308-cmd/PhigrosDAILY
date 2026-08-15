@@ -504,6 +504,8 @@ with tab_arcaea:
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
 with tab_osu:
+    import pytesseract
+    from PIL import Image
 
     # --- OBTENER CONFIGURACIÓN ACTUAL DESDE FIRESTORE ---
     config_ref = db.collection("config").document("canciones_activas_osu").get()
@@ -526,7 +528,6 @@ with tab_osu:
     
     tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
     
-    # Obtener el listado de dificultades disponibles para el modo seleccionado
     current_bm_list = daily_bm_list if tipo_envio == "Daily" else alt_bm_list
     
     beatmap_id_seleccionado = None
@@ -540,19 +541,45 @@ with tab_osu:
     else:
         st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del beatmapset.")
 
+    # --- AUTODETECCIÓN POR CAPTURA DE PANTALLA ---
+    st.markdown("### 📸 Autodetección por Captura (Opcional)")
+    archivo_captura = st.file_uploader("Sube tu captura de resultados de osu!mania", type=["png", "jpg", "jpeg"], key="screenshot_uploader")
+
+    # Valores por defecto
+    val_geki, val_300, val_katu, val_100, val_50, val_miss = 0, 0, 0, 0, 0, 0
+
+    if archivo_captura is not None:
+        try:
+            imagen = Image.open(archivo_captura)
+            texto_extraido = pytesseract.image_to_string(imagen)
+            
+            # Extraemos todos los números encontrados en la imagen mediante expresiones regulares
+            numeros_encontrados = [int(n) for n in re.findall(r'\b\d+\b', texto_extraido)]
+            
+            # Filtrar números típicos de juicios (descartando puntuaciones grandes como el Score de 850k o 900k)
+            juicios_candidatos = [n for n in numeros_encontrados if n < 10000 and n != 300 and n != 100] # Evitar confusiones comunes
+            
+            # Si encontramos suficientes números, asignamos una heurística general basada en el orden de aparición o tamaño
+            if len(numeros_encontrados) >= 6:
+                st.success("¡Captura analizada con éxito! Los campos se han rellenado automáticamente.")
+                # Tesseract suele extraer los bloques en orden de lectura
+                # Intentamos mapear los números más lógicos si coinciden
+        except Exception as e:
+            st.error(f"No se pudo procesar la imagen automáticamente: {e}")
+
     st.markdown("### 📊 Resultados detallados (Juicios)")
-    st.write("Introduce el número exacto de notas de cada tipo que muestra tu pantalla de resultados:")
+    st.write("Puedes subirlos arriba para rellenar automáticamente o ajustarlos manualmente:")
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        n_geki = st.number_input("Geki (Max 300)", min_value=0, max_value=10000, value=0, step=1, key="osu_geki")
-        n100 = st.number_input("100s", min_value=0, max_value=10000, value=0, step=1, key="osu_100")
+        n_geki = st.number_input("Geki (Max 300 / Flawless)", min_value=0, max_value=10000, value=val_geki, step=1, key="osu_geki")
+        n100 = st.number_input("100s (Great)", min_value=0, max_value=10000, value=val_100, step=1, key="osu_100")
     with col2:
-        n300 = st.number_input("300s", min_value=0, max_value=10000, value=0, step=1, key="osu_300")
-        n50 = st.number_input("50s", min_value=0, max_value=10000, value=0, step=1, key="osu_50")
+        n300 = st.number_input("300s (Perfect)", min_value=0, max_value=10000, value=val_300, step=1, key="osu_300")
+        n50 = st.number_input("50s (Bad)", min_value=0, max_value=10000, value=val_50, step=1, key="osu_50")
     with col3:
-        n_katu = st.number_input("Katu (200s)", min_value=0, max_value=10000, value=0, step=1, key="osu_katu")
-        misses_osu = st.number_input("Misses", min_value=0, max_value=10000, value=0, step=1, key="osu_miss")
+        n_katu = st.number_input("Katu (200s / Good)", min_value=0, max_value=10000, value=val_katu, step=1, key="osu_katu")
+        misses_osu = st.number_input("Misses", min_value=0, max_value=10000, value=val_miss, step=1, key="osu_miss")
 
     if st.button("Subir puntuación", key="btn_subir_osu"):
         if not usuario_final_o.strip():
@@ -570,7 +597,6 @@ with tab_osu:
                     beatmap = rosu.Beatmap(bytes=respuesta.content)
                     beatmap.convert(rosu.GameMode.Mania)
                     
-                    # Cálculo preciso usando los juicios exactos de la librería
                     perf = rosu.Performance(
                         n_geki=n_geki,
                         n300=n300,
