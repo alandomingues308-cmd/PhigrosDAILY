@@ -40,6 +40,7 @@ if password_input == PASSWORD_ADMIN:
     url_beatmap = st.sidebar.text_input(f"Enlace del beatmap ({modo_config})", key=f"url_{modo_config}")
     
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
+        # Extraer el ID del beatmapset o de una dificultad individual
         match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
         match_id_alt = re.search(r"(?:/(?:mania|osu|taiko|catch|b)/|#(?:mania|osu|taiko|catch)/)(\d+)", url_beatmap)
         
@@ -50,12 +51,13 @@ if password_input == PASSWORD_ADMIN:
             beatmaps_list = []
             
             try:
-                # Intentar extraer todas las dificultades del beatmapset
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+                
+                # Si tenemos el ID del set, intentamos raspar la página completa para obtener todas las dificultades
                 if set_id:
-                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                     res_page = requests.get(f"https://osu.ppy.sh/beatmapsets/{set_id}", headers=headers, timeout=10)
                     if res_page.status_code == 200:
-                        import html
+                        import html, json
                         match_inertia = re.search(r'data-page="([^"]+)"', res_page.text)
                         if match_inertia:
                             json_str = html.unescape(match_inertia.group(1))
@@ -63,36 +65,40 @@ if password_input == PASSWORD_ADMIN:
                             b_set = page_data.get("props", {}).get("beatmapset", {})
                             
                             title = b_set.get("title", "")
-                            nombre_cancion_final = f"{title}" if title else ""
+                            artist = b_set.get("artist", "")
+                            nombre_cancion_final = f"{artist} - {title}" if artist and title else (title or "Mapa de Osu")
                             
                             raw_maps = b_set.get("beatmaps", [])
                             for bm in raw_maps:
+                                # Filtramos preferiblemente por mania si aplica, o guardamos todas las del set
                                 beatmaps_list.append({
                                     "id": bm.get("id"),
                                     "version": bm.get("version", "Normal")
                                 })
                 
-                # Fallback si se pasó un enlace directo de dificultad
-                if not nombre_cancion_final and match_id_alt:
+                # Si no se pudo o solo se pasó un enlace directo, usamos la dificultad del enlace como respaldo
+                if not beatmaps_list and match_id_alt:
                     fallback_id = match_id_alt.group(1)
-                    res_meta = requests.get(f"https://osu.ppy.sh/osu/{fallback_id}", timeout=10)
+                    res_meta = requests.get(f"https://osu.ppy.sh/osu/{fallback_id}", headers=headers, timeout=10)
                     if res_meta.status_code == 200:
                         content_str = res_meta.content.decode('utf-8', errors='ignore')
                         title_match = re.search(r'^Title:(.+)$', content_str, re.MULTILINE)
+                        artist_match = re.search(r'^Artist:(.+)$', content_str, re.MULTILINE)
                         version_match = re.search(r'^Version:(.+)$', content_str, re.MULTILINE)
                         
                         song_title = title_match.group(1).strip() if title_match else "Desconocido"
+                        song_artist = artist_match.group(1).strip() if artist_match else ""
                         song_version = version_match.group(1).strip() if version_match else "Normal"
                         
-                        nombre_cancion_final = song_title
+                        nombre_cancion_final = f"{song_artist} - {song_title}"
                         beatmaps_list = [{"id": int(fallback_id), "version": song_version}]
             except Exception:
                 pass
             
             if not nombre_cancion_final:
                 nombre_cancion_final = "Mapa de Osu"
-            if not beatmaps_list:
-                beatmaps_list = [{"id": 0, "version": "Normal"}]
+            if not beatmaps_list and match_id_alt:
+                beatmaps_list = [{"id": int(match_id_alt.group(1)), "version": "Normal"}]
 
             db.collection("config").document("canciones_activas_osu").set({
                 modo_config.lower(): nombre_cancion_final,
@@ -102,8 +108,6 @@ if password_input == PASSWORD_ADMIN:
             st.sidebar.success(f"¡{modo_config} guardado ({len(beatmaps_list)} dificultades)!")
         else:
             st.sidebar.error("Enlace de osu! inválido.")
-
-
 
 
 
@@ -536,7 +540,7 @@ with tab_osu:
     
     tipo_envio = st.selectbox("Selecciona el modo para tu registro", ["Daily", "Alternative"], key="envio_osu")
     
-    # Obtener las dificultades disponibles para el modo seleccionado
+    # Obtener las dificultades disponibles guardadas para el modo seleccionado
     current_bm_list = daily_bm_list if tipo_envio == "Daily" else alt_bm_list
     
     beatmap_id_seleccionado = None
@@ -548,7 +552,7 @@ with tab_osu:
         beatmap_id_seleccionado = opciones_diff[diff_elegida]
         dificultad_nombre = diff_elegida
     else:
-        st.warning("⚠️ No hay dificultades configuradas para este modo. Pídele al administrador que guarde el enlace.")
+        st.warning("⚠️ No hay dificultades configuradas. El administrador debe guardar el enlace del mapa.")
 
     col_acc, col_miss = st.columns(2)
     with col_acc:
@@ -563,8 +567,9 @@ with tab_osu:
             st.error("⚠️ Selecciona una dificultad válida.")
         else:
             try:
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                 url_descarga = f"https://osu.ppy.sh/osu/{beatmap_id_seleccionado}"
-                respuesta = requests.get(url_descarga, timeout=10)
+                respuesta = requests.get(url_descarga, headers=headers, timeout=10)
                 
                 if respuesta.status_code == 200 and b"osu file format" in respuesta.content:
                     import rosu_pp_py as rosu
@@ -590,7 +595,7 @@ with tab_osu:
                         "fecha": today
                     }
                     db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score_osu)
-                    st.success(f"✅ ¡Registrado correctamente en **{tipo_envio}** ({dificultad_nombre}) con **{pp_calculado} PP**!")
+                    st.success(f"✅ ¡Registrado en **{tipo_envio}** ({dificultad_nombre}) con **{pp_calculado} PP**!")
                     st.balloons()
                 else:
                     st.error("No se pudo descargar el archivo del beatmap seleccionado.")
