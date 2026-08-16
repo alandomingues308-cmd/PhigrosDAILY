@@ -554,7 +554,7 @@ with tab_osu:
                 
                 attrs = rosu.Difficulty().calculate(mapa)
                 star_rating = attrs.stars
-                total_notes = len(mapa.hit_objects)
+                total_notes = mapa.n_objects
 
                 # 2. Tu Algoritmo
                 acc_decimal = accuracy / 100.0
