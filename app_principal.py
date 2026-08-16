@@ -503,6 +503,7 @@ with tab_osu:
     import rosu_pp_py as rosu
     import pandas as pd
     from datetime import datetime
+    import requests
 
     # --- OBTENER CONFIGURACIÓN ACTUAL ---
     config_ref = db.collection("config").document("canciones_activas_osu").get()
@@ -550,9 +551,9 @@ with tab_osu:
                 mapa = rosu.Beatmap(bytes=resp.content)
                 mapa.convert(rosu.GameMode.Mania)
                 
-                # Cálculo oficial y preciso de PP usando rosu-pp-py
-                perf = rosu.Performance(mapa)
-                result = perf.accuracy(accuracy).n320(count_320).calculate()
+                # Cálculo oficial corregido usando rosu-pp-py
+                perf = rosu.Performance()
+                result = perf.accuracy(accuracy).n320(count_320).calculate(mapa)
                 pp_final = result.pp
 
                 # Guardar en Firestore
