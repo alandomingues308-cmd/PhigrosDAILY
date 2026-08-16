@@ -551,9 +551,9 @@ with tab_osu:
                 mapa = rosu.Beatmap(bytes=resp.content)
                 mapa.convert(rosu.GameMode.Mania)
                 
-                # Cálculo oficial corregido usando rosu-pp-py
+                # Cálculo oficial usando .acc() en lugar de .accuracy()
                 perf = rosu.Performance()
-                result = perf.accuracy(accuracy).n320(count_320).calculate(mapa)
+                result = perf.acc(accuracy).n320(count_320).calculate(mapa)
                 pp_final = result.pp
 
                 # Guardar en Firestore
