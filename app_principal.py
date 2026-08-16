@@ -502,6 +502,8 @@ with tab_arcaea:
 with tab_osu:
     import math
     import rosu_pp_py as rosu
+    import pandas as pd
+    from datetime import datetime
 
     # --- OBTENER CONFIGURACIÓN ACTUAL ---
     config_ref = db.collection("config").document("canciones_activas_osu").get()
@@ -536,17 +538,14 @@ with tab_osu:
         diff_elegida = st.selectbox("Dificultad:", list(opciones_diff.keys()), key="diff_sel")
         beatmap_id = opciones_diff[diff_elegida]
 
-        # --- ENTRADAS DE USUARIO (Algoritmo personalizado) ---
         col1, col2 = st.columns(2)
         with col1:
             accuracy = st.number_input("Accuracy (%)", 0.0, 100.0, 95.0, 0.01)
         with col2:
-            # Por defecto estimamos 80% de las notas como 320
             count_320 = st.number_input("320 counts (MAX)", 0, 50000, 1500, 1)
 
         if st.button("Subir puntuación"):
             try:
-                # 1. Obtener datos técnicos del mapa
                 headers = {'User-Agent': 'Mozilla/5.0'}
                 resp = requests.get(f"https://osu.ppy.sh/osu/{beatmap_id}", headers=headers)
                 mapa = rosu.Beatmap(bytes=resp.content)
@@ -554,9 +553,9 @@ with tab_osu:
                 
                 attrs = rosu.Difficulty().calculate(mapa)
                 star_rating = attrs.stars
-                total_notes = mapa.n_objects
+                total_notes = mapa.n_objects # Corrección aplicada aquí
 
-                # 2. Tu Algoritmo
+                # Algoritmo personalizado
                 acc_decimal = accuracy / 100.0
                 restante_notas = total_notes - count_320
                 
@@ -577,7 +576,7 @@ with tab_osu:
                 if pp_final < 0 or score_estimado <= 500000:
                     pp_final = 0.0
 
-                # 3. Guardar en Firestore
+                # Guardar en Firestore
                 nuevo_score = {
                     "usuario": usuario_final_o,
                     "pp": round(pp_final, 2),
@@ -585,10 +584,48 @@ with tab_osu:
                     "cancion": cancion_daily if tipo_envio == "Daily" else cancion_alternative,
                     "dificultad": diff_elegida,
                     "timestamp": datetime.now().isoformat(),
-                    "fecha": today
+                    "fecha": today # Asegúrate de que 'today' esté definido globalmente o usa datetime.today().strftime('%Y-%m-%d')
                 }
                 db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score)
                 st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP**!")
                 st.balloons()
             except Exception as e:
                 st.error(f"Error técnico: {e}")
+ 
+    # --- TABLAS DE CLASIFICACIÓN ---
+    st.write("---")
+    st.header("📊 Tablas de Clasificación")
+
+    scores_ref = db.collection("scores_osu").stream()
+    todos_los_scores = [doc.to_dict() for doc in scores_ref]
+
+    if todos_los_scores:
+        df_osu = pd.DataFrame(todos_los_scores)
+        df_osu['fecha_date'] = pd.to_datetime(df_osu['fecha']).dt.date
+
+        tab_diaria_o, tab_general_o = st.tabs(["📅 Desafío de Hoy", "🌍 Récords Generales"])
+    
+        with tab_diaria_o:
+            st.subheader(f"Desafío del Día - {today}")
+            
+            st.markdown("### 🏆 Top Daily")
+            df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
+            if not df_daily.empty:
+                st.dataframe(df_daily.sort_values(by="pp", ascending=False)[["usuario", "pp", "dificultad"]], use_container_width=True)
+            else:
+                st.info("Aún no hay registros para el Daily actual.")
+            
+            st.markdown("### 🥈 Top Alternative")
+            df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
+            if not df_alt.empty:
+                st.dataframe(df_alt.sort_values(by="pp", ascending=False)[["usuario", "pp", "dificultad"]], use_container_width=True)
+            else:
+                st.info("Aún no hay registros para el Alternative actual.")
+
+        with tab_general_o:
+            best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
+            acum = best.groupby("usuario").agg(PP_Total=("pp", "sum"), Canciones=("pp", "count")).reset_index()
+            acum["PP_Total"] = acum["PP_Total"].round(2)
+            st.dataframe(acum.sort_values("PP_Total", ascending=False), use_container_width=True)
+    else:
+        st.info("No hay registros en la base de datos de osu! todavía.")
