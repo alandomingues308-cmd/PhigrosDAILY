@@ -500,7 +500,6 @@ with tab_arcaea:
        #================== OSU =====================
 
 with tab_osu:
-    import math
     import rosu_pp_py as rosu
     import pandas as pd
     from datetime import datetime
@@ -551,30 +550,10 @@ with tab_osu:
                 mapa = rosu.Beatmap(bytes=resp.content)
                 mapa.convert(rosu.GameMode.Mania)
                 
-                attrs = rosu.Difficulty().calculate(mapa)
-                star_rating = attrs.stars
-                total_notes = mapa.n_objects
-
-                # Algoritmo personalizado
-                acc_decimal = accuracy / 100.0
-                restante_notas = total_notes - count_320
-                
-                if acc_decimal >= 0.5:
-                    score_estimado = 1000000 * ((count_320 * 1.0 + restante_notas * (acc_decimal * 0.85)) / total_notes)
-                else:
-                    score_estimado = 1000000 * acc_decimal
-
-                score_factor = max(0.0, (score_estimado - 500000) / 500000)
-                score_multiplier = math.pow(score_factor, 1.1)
-                length_bonus = 0.95 + 0.4 * min(1.0, total_notes / 2000.0)
-                if total_notes > 2000:
-                    length_bonus += 0.08 * math.log10(total_notes / 2000.0)
-                
-                difficulty_multiplier = (star_rating * 4.2) * 2.15
-                pp_final = difficulty_multiplier * score_multiplier * length_bonus
-                
-                if pp_final < 0 or score_estimado <= 500000:
-                    pp_final = 0.0
+                # Cálculo oficial y preciso de PP usando rosu-pp-py
+                perf = rosu.Performance(mapa)
+                result = perf.accuracy(accuracy).n320(count_320).calculate()
+                pp_final = result.pp
 
                 # Guardar en Firestore
                 nuevo_score = {
@@ -584,10 +563,10 @@ with tab_osu:
                     "cancion": cancion_daily if tipo_envio == "Daily" else cancion_alternative,
                     "dificultad": diff_elegida,
                     "timestamp": datetime.now().isoformat(),
-                    "fecha": today # Asegúrate de que 'today' esté definido globalmente o usa datetime.today().strftime('%Y-%m-%d')
+                    "fecha": today
                 }
                 db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score)
-                st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP, {total_notes}, {star_rating},{accuracy},{count_320}**!")
+                st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP**!")
                 st.balloons()
             except Exception as e:
                 st.error(f"Error técnico: {e}")
