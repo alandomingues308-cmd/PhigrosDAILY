@@ -553,7 +553,7 @@ with tab_osu:
                 
                 attrs = rosu.Difficulty().calculate(mapa)
                 star_rating = attrs.stars
-                total_notes = mapa.n_objects # Corrección aplicada aquí
+                total_notes = mapa.n_objects
 
                 # Algoritmo personalizado
                 acc_decimal = accuracy / 100.0
@@ -587,7 +587,7 @@ with tab_osu:
                     "fecha": today # Asegúrate de que 'today' esté definido globalmente o usa datetime.today().strftime('%Y-%m-%d')
                 }
                 db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score)
-                st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP**!")
+                st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP, {total_notes}, {star_rating}**!")
                 st.balloons()
             except Exception as e:
                 st.error(f"Error técnico: {e}")
