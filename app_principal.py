@@ -551,10 +551,10 @@ with tab_osu:
                 mapa = rosu.Beatmap(bytes=resp.content)
                 mapa.convert(rosu.GameMode.Mania)
                 
-                # Inicializar Performance con los parámetros correspondientes
+                # Usar n_geki en lugar de n320 para los juicios MAX en Mania
                 perf = rosu.Performance(
                     accuracy=accuracy,
-                    n320=count_320
+                    n_geki=count_320
                 )
                 result = perf.calculate(mapa)
                 pp_final = result.pp
