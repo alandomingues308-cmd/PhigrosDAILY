@@ -134,7 +134,7 @@ with tab_phigros:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song = random.choice(songs)
+    daily_song = {"title": "Riven Pilgrimage", "FTR": 10.4, "ETR": null, "BYD": null,"INS":11.5}
     alternative_song = random.choice([s for s in songs if s["title"] != daily_song["title"]])
     
     CANCION_DAILY = daily_song["title"]
