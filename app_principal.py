@@ -364,6 +364,8 @@ with tab_arcaea:
         st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["BYD"] is not None:
         st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]}) - (BYD: {daily_song_a["BYD"]})")
+    elif daily_song_a["INS"] is not None:
+        st.info(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]}) - (INS: {daily_song_a["INS"]})")
     else:st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]})")
 
     st.subheader("Cancion Alternativa")
@@ -372,6 +374,8 @@ with tab_arcaea:
         st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["BYD"] is not None:
         st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["BYD"]})")
+    elif alternative_song_a["INS"] is not None:
+        st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (INS: {alternative_song_a["INS"]})")
     else:st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]})")
 
     
@@ -415,7 +419,8 @@ with tab_arcaea:
 
             # Verificar dificultades disponibles 
             has_eternal = cancion_seleccionada.get("ETR") is not None
-            has_beyond = cancion_seleccionada.get("Beyond") is not None
+            has_beyond = cancion_seleccionada.get("BYD") is not None
+            has_INS= cancione_seleccionada.get("INS") is not None
 
             diff_key = "FTR"  # valor por defecto
 
