@@ -425,13 +425,15 @@ with tab_arcaea:
             diff_key = "FTR"  # valor por defecto
 
             # Solo mostrar selector si tiene ETR o beyond
-            if has_eternal or has_beyond:
+            if has_eternal or has_beyond or has_INS: 
                 st.subheader("Dificultad del Chart")
                 options = ["FTR (Future)"]
                 if has_eternal:
                     options.append("ETR (Eternal)")
                 if has_beyond:
                     options.append("BYD (Beyond)")
+                if has_INS:
+                    options.append("INS (inscribed)")
             
                 
                 diff_option = st.radio("Selecciona la dificultad:", options, horizontal=True, key="ar_diff")
