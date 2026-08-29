@@ -420,7 +420,7 @@ with tab_arcaea:
             # Verificar dificultades disponibles 
             has_eternal = cancion_seleccionada.get("ETR") is not None
             has_beyond = cancion_seleccionada.get("BYD") is not None
-            has_INS= cancione_seleccionada.get("INS") is not None
+            has_INS= cancion_seleccionada.get("INS") is not None
 
             diff_key = "FTR"  # valor por defecto
 
