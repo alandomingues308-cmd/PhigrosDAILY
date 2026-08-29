@@ -360,18 +360,6 @@ with tab_arcaea:
     daily_song_a = random.choice(songs_a)
     alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
 
-    # --- 1. VERIFICAR DIFICULTADES DE AMBAS CANCIONES ANTES DEL SELECTOR ---
-has_eternal = False
-has_beyond = False
-has_ins = False
-
-# Evaluamos si alguna de las dos canciones tiene las dificultades
-for cancion in [daily_song_a, alternative_song_a]:
-    if cancion:
-        if cancion.get("ETR") is not None: has_eternal = True
-        if cancion.get("Beyond") is not None: has_beyond = True
-        if cancion.get("INS") is not None: has_ins = True
-            
     if daily_song_a["ETR"] is not None:
         st.success(f"{daily_song_a['title']} /// (FTR: {daily_song_a["FTR"]}) - (ETR: {daily_song_a["ETR"]})")
     elif daily_song_a["BYD"] is not None:
