@@ -386,7 +386,7 @@ for cancion in [daily_song_a, alternative_song_a]:
         st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (ETR: {alternative_song_a["ETR"]})")
     elif alternative_song_a["BYD"] is not None:
         st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (BYD: {alternative_song_a["BYD"]})")
-    elif has ins is not None:
+    elif has_ins is not None:
         st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]}) - (INS: {alternative_song_a["INS"]})")
     else:st.info(f"{alternative_song_a['title']} /// (FTR: {alternative_song_a["FTR"]})")
 
