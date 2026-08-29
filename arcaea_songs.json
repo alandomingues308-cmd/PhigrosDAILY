@@ -515,5 +515,11 @@
   {"title": "μ", "FTR": 9.7, "ETR": null, "BYD": null},
   {"title": "ΟΔΥΣΣΕΙΑ", "FTR": 9.5, "ETR": null, "BYD": null},
   {"title": "τ (tau)", "FTR": 9.7, "ETR": null, "BYD": null},
-  {"title": "ω4", "FTR": 10.8, "ETR": null, "BYD": null}
+  {"title": "ω4", "FTR": 10.8, "ETR": null, "BYD": null},
+  {"title": "Balor", "FTR": 9.5, "ETR": 10.1, "BYD": null},
+  {"title": "Dread area", "FTR": 10.3, "ETR": null, "BYD": null,"INS":11.4},
+  {"title": "un", "FTR": 9.9, "ETR": 10.9, "BYD": null},
+  {"title": "Riven Pilgrimage", "FTR": 10.4, "ETR": null, "BYD": null,"INS":11.5},
+  {"title": "Cataclysm Cry", "FTR": 10.6, "ETR": null, "BYD": null,"INS":11.8},
+  {"title": "DEINOS PHAINEIN", "FTR": 10.9, "ETR": null, "BYD": null,"INS":12.0},
 ]
