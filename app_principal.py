@@ -357,7 +357,7 @@ with tab_arcaea:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song_a = random.choice(songs_a)
+    daily_song_a = {"title": "Riven Pilgrimage", "FTR": 10.4, "ETR": None, "BYD": None,"INS":11.5}
     alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
 
     if daily_song_a["ETR"] is not None:
