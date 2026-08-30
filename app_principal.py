@@ -357,7 +357,7 @@ with tab_arcaea:
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
     random.seed(today)
 
-    daily_song_a = {"title": "Riven Pilgrimage", "FTR": 10.4, "ETR": None, "BYD": None,"INS":11.5}
+    daily_song_a = random.choice(songs_a)
     alternative_song_a = random.choice([s for s in songs_a if s["title"] != daily_song_a["title"]])
 
     if daily_song_a["ETR"] is not None:
@@ -558,7 +558,6 @@ with tab_osu:
                 mapa = rosu.Beatmap(bytes=resp.content)
                 mapa.convert(rosu.GameMode.Mania)
                 
-                # Usar n_geki en lugar de n320 para los juicios MAX en Mania
                 perf = rosu.Performance(
                     accuracy=accuracy,
                     n_geki=count_320
@@ -566,7 +565,6 @@ with tab_osu:
                 result = perf.calculate(mapa)
                 pp_final = result.pp
 
-                # Guardar en Firestore
                 nuevo_score = {
                     "usuario": usuario_final_o,
                     "pp": round(pp_final, 2),
