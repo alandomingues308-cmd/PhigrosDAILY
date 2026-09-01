@@ -122,54 +122,45 @@ with st.sidebar.expander("🔄 Renombrar Usuario (Antiguo → Nuevo)", expanded=
 
 # ====================== PHIGROS =====================
 tab_phigros, tab_arcaea, tab_osu = st.tabs(["🎵 Phigros", "Arcaea","Osu"])
+# --- 1. Variables y funciones globales 
+HISTORIAL_FILE = "historial_canciones.json"
+
+def cargar_historial():
+    if not os.path.exists(HISTORIAL_FILE):
+        return []
+    try:
+        with open(HISTORIAL_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def guardar_en_historial(titulos_nuevos):
+    historial = cargar_historial()
+    
+    if len(historial) >= 310:
+        historial = []
+
+    actualizado = False
+    for titulo in titulos_nuevos:
+        if titulo not in historial:
+            historial.append(titulo)
+            actualizado = True
+            
+    if actualizado or len(historial) == 0:
+        with open(HISTORIAL_FILE, "w", encoding="utf-8") as f:
+            json.dump(historial, f, ensure_ascii=False, indent=4)
+
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
-
-    @st.cache_data
-    def load_songs():
-        with open("phigros_songs.json", "r", encoding="utf-8-sig") as f:
-            return json.load(f)
-
-        HISTORIAL_FILE = "historial_canciones.json"
-
-    def cargar_historial():
-        if not os.path.exists(HISTORIAL_FILE):
-            return []
-        try:
-            with open(HISTORIAL_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return []
-
-    def guardar_en_historial(titulos_nuevos):
-        historial = cargar_historial()
-        
-        # Limpiar automáticamente si llega o supera las 310 canciones
-        if len(historial) >= 310:
-            historial = []
-
-        actualizado = False
-        for titulo in titulos_nuevos:
-            if titulo not in historial:
-                historial.append(titulo)
-                actualizado = True
-                
-        if actualizado or len(historial) == 0:
-            with open(HISTORIAL_FILE, "w", encoding="utf-8") as f:
-                json.dump(historial, f, ensure_ascii=False, indent=4)
-
+    
     songs = load_songs()
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 
-    # 1. Cargar el historial de canciones ya salidas
     historial_titulos = cargar_historial()
-
-    # 2. Filtrar las canciones disponibles que NO estén en el historial
     songs_disponibles = [s for s in songs if s["title"] not in historial_titulos]
     if not songs_disponibles:
-        songs_disponibles = songs  # Reseteo de seguridad por si se vacían
+        songs_disponibles = songs  
 
-    # 3. Selección aleatoria basada en la fecha
     random.seed(today)
     daily_song = random.choice(songs_disponibles)
     alternative_song = random.choice([s for s in songs_disponibles if s["title"] != daily_song["title"]])
@@ -177,9 +168,8 @@ with tab_phigros:
     CANCION_DAILY = daily_song["title"]
     CANCION_ALT = alternative_song["title"]
 
-    # 4. Guardar las canciones elegidas en el JSON genérico
     guardar_en_historial([CANCION_DAILY, CANCION_ALT])
-
+    
 
     if daily_song["AT"] is not None:
         st.success(f"{CANCION_DAILY} /// IN: ({daily_song.get('IN')}) - AT: ({daily_song.get('AT')})")
