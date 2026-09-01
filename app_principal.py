@@ -152,7 +152,13 @@ def guardar_en_historial(titulos_nuevos):
 
 with tab_phigros:
     st.title(f"🎵 Canción del Día {datetime.now(mx_tz).strftime('%Y-%m-%d')} - Phigros")
-    
+
+    @st.cache_data
+    def load_songs():
+        with open("phigros_songs.json","r",encoding="utf-8-sig") as f:
+            return json.load()
+            
+
     songs = load_songs()
     today = datetime.now(mx_tz).strftime("%Y-%m-%d")
 
