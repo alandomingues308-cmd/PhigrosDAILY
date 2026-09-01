@@ -126,11 +126,12 @@ tab_phigros, tab_arcaea, tab_osu = st.tabs(["🎵 Phigros", "Arcaea","Osu"])
 HISTORIAL_FILE = "historial_canciones.json"
 
 def cargar_historial():
-    if not os.path.exists(HISTORIAL_FILE):
-        return []
     try:
-        with open(HISTORIAL_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+        doc_ref = db.collection("config").document("historial_phigros")
+        doc = doc_ref.get()
+        if doc.exists:
+            return doc.to_dict().get("titulos", [])
+        return []
     except Exception:
         return []
 
@@ -145,6 +146,11 @@ def guardar_en_historial(titulos_nuevos):
         if titulo not in historial:
             historial.append(titulo)
             actualizado = True
+            
+    if actualizado or len(historial) == 0:
+        doc_ref = db.collection("config").document("historial_phigros")
+        doc_ref.set({"titulos": historial})
+
             
     if actualizado or len(historial) == 0:
         with open(HISTORIAL_FILE, "w", encoding="utf-8") as f:
