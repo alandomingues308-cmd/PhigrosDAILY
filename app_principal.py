@@ -156,7 +156,7 @@ with tab_phigros:
     @st.cache_data
     def load_songs():
         with open("phigros_songs.json","r",encoding="utf-8-sig") as f:
-            return json.load()
+            return json.load(f)
             
 
     songs = load_songs()
