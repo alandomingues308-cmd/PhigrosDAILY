@@ -635,18 +635,43 @@ with tab_osu:
         except Exception:
             st.write("aqui esta el error")
             
+    def obtener_beatmapset_valido(max_intentos=20):
+        for _ in range(max_intentos):
+            beatmapset_id = random.randint(100000, 2200000)  # rango más realista
+            try:
+                token = get_osu_token()
+                headers = {"Authorization": f"Bearer {token}"}
+                res = requests.get(
+                    f"https://osu.ppy.sh/api/v2/beatmapsets/{beatmapset_id}",
+                    headers=headers,
+                    timeout=8
+                )
+
+                if res.status_code != 200:
+                    continue
+
+                data = res.json()
+
+                # Solo aceptamos si tiene al menos una dificultad de Mania
+                tiene_mania = any(bm.get("mode") == "mania" for bm in data.get("beatmaps", []))
+            
+                if tiene_mania and "artist" in data:
+                    return f"https://osu.ppy.sh/beatmapsets/{beatmapset_id}"
+
+            except Exception:
+                continue
+
+        return None
+
     if ha_pasado_mas_de_24h("daily"):
-        ID= random.randint(1, 6000000)
-        modo_config = "daily"
-        url_beatmap = f"https://osu.ppy.sh/beatmapsets/{ID}"
-        osu_actual(url_beatmap,modo_config)
+        url = obtener_beatmapset_valido()
+        if url:
+            osu_actual(url, "daily")
 
     if ha_pasado_mas_de_24h("alternative"):
-        ID= random.randint(1, 6000000)
-        modo_config = "alternative"
-        url_beatmap = f"https://osu.ppy.sh/beatmapsets/{ID}"
-        osu_actual(url_beatmap,modo_config)
-
+        url = obtener_beatmapset_valido()
+        if url:
+            osu_actual(url, "alternative")
     
     # --- OBTENER CONFIGURACIÓN ACTUAL ---
     config_ref = db.collection("config").document("canciones_activas_osu").get()
