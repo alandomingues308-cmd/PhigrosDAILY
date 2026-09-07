@@ -90,7 +90,7 @@ if password_input == PASSWORD_ADMIN:
 
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
         osu_actual()
-        st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
+        #st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
         
                 
 
