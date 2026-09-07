@@ -635,13 +635,13 @@ with tab_osu:
         except Exception:
             return True  
             
-    if ha_pasado_mas_de_24h("daily"):
+    if ha_pasado_mas_de_24h("Daily"):
         ID= random.randint(1, 6000000)
         modo_config = "daily"
         url_beatmap = f"https://osu.ppy.sh/beatmapsets/{ID}"
         osu_actual(url_beatmap,modo_config)
 
-    if ha_pasado_mas_de_24h("alternative"):
+    if ha_pasado_mas_de_24h("Alternative"):
         ID= random.randint(1, 6000000)
         modo_config = "alternative"
         url_beatmap = f"https://osu.ppy.sh/beatmapsets/{ID}"
