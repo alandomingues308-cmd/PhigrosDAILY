@@ -74,10 +74,15 @@ if password_input == PASSWORD_ADMIN:
                                 "id": bm['id'],
                                 "version": bm['version']
                             })
+
+                    ahora = datetime.now(mx_tz)
+    
                     
                     db.collection("config").document("canciones_activas_osu").set({
                         modo_config.lower(): nombre_cancion_final,
                         f"{modo_config.lower()}_beatmaps": beatmaps_list
+                        f"{modo_config}_timestamp": ahora.isoformat()
+    
                     }, merge=True)
                     st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
                 else:
