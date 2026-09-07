@@ -564,7 +564,7 @@ with tab_arcaea:
             acum["Potencial_Total"] = acum["Potencial_Total"].round(4)
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
 
-              #================== OSU =====================
+                             #================== OSU =====================
 
 with tab_osu:
     import rosu_pp_py as rosu
@@ -580,7 +580,6 @@ with tab_osu:
     now = datetime.now(timezone.utc)
     last_updated_str = config_data.get("last_updated")
 
-    # Comprobar si nunca se ha configurado o si han transcurrido 24 horas o más
     necesita_actualizacion = False
     if not last_updated_str:
         necesita_actualizacion = True
@@ -592,20 +591,53 @@ with tab_osu:
         except ValueError:
             necesita_actualizacion = True
 
+    def obtener_info_beatmapset_completo(beatmap_id):
+        """Obtiene el título y todas las dificultades de modo Mania del conjunto."""
+        try:
+            token = get_osu_token()
+            headers = {"Authorization": f"Bearer {token}"}
+            
+            # 1. Obtener la info del beatmap para extraer el beatmapset_id
+            res_bm = requests.get(f"https://osu.ppy.sh/api/v2/beatmaps/{beatmap_id}", headers=headers, timeout=5)
+            if res_bm.status_code == 200:
+                data_bm = res_bm.json()
+                set_id = data_bm.get("beatmapset_id")
+                
+                # 2. Consultar el beatmapset para traer todas las dificultades
+                res_set = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers, timeout=5)
+                if res_set.status_code == 200:
+                    data_set = res_set.json()
+                    nombre = f"{data_set.get('artist', 'Desconocido')} - {data_set.get('title', 'Sin Título')}"
+                    
+                    beatmaps_mania = []
+                    for bm in data_set.get("beatmaps", []):
+                        if bm.get("mode") == "mania":
+                            beatmaps_mania.append({
+                                "id": bm["id"],
+                                "version": bm["version"]
+                            })
+                    
+                    if beatmaps_mania:
+                        return nombre, beatmaps_mania, set_id
+        except Exception:
+            pass
+            
+        # Respaldo en caso de error o que no exista el ID
+        return f"Beatmap ID: {beatmap_id}", [{"id": beatmap_id, "version": "Mania"}], 2609777
+
     if necesita_actualizacion:
-        # Seleccionar 2 números aleatorios únicos entre 1 y 6,000,000
         id_daily, id_alt = random.sample(range(1, 6000001), 2)
-    
-        # Formatear la información
-        cancion_daily = f"Beatmap ID: {id_daily}"
-        cancion_alternative = f"Beatmap ID: {id_alt}"
-    
-        # Guardar objetos estandarizados con ID y versión
+        
+        nombre_daily, list_daily, set_daily = obtener_info_beatmapset_completo(id_daily)
+        nombre_alt, list_alt, set_alt = obtener_info_beatmapset_completo(id_alt)
+
         config_data.update({
-            "daily": cancion_daily,
-            "alternative": cancion_alternative,
-            "daily_beatmaps": [{"id": id_daily, "version": "Mania"}],
-            "alternative_beatmaps": [{"id": id_alt, "version": "Mania"}],
+            "daily": nombre_daily,
+            "alternative": nombre_alt,
+            "daily_beatmaps": list_daily,
+            "alternative_beatmaps": list_alt,
+            "set_id_daily": set_daily,
+            "set_id_alt": set_alt,
             "last_updated": now.isoformat()
         })
       
@@ -616,19 +648,19 @@ with tab_osu:
     cancion_alternative = config_data.get("alternative", "Sin configurar")
     daily_bm_list = config_data.get("daily_beatmaps", [])
     alt_bm_list = config_data.get("alternative_beatmaps", [])
+    set_daily_id = config_data.get("set_id_daily", 2609777)
+    set_alt_id = config_data.get("set_id_alt", 2609777)
 
     # --- INTERFAZ ---
     st.title("🎵 Canción del Día - Osu")
     st.success(f"{cancion_daily}")
     if daily_bm_list:
-        bm_id_d = daily_bm_list[0]['id'] if isinstance(daily_bm_list[0], dict) else daily_bm_list[0]
-        st.markdown(f"[🔗 Descargar / Ver Daily](https://osu.ppy.sh/beatmapsets/2609777#mania/{bm_id_d})")
+        st.markdown(f"[🔗 Descargar / Ver Daily](https://osu.ppy.sh/beatmapsets/{set_daily_id})")
     
     st.subheader("Canción Alternativa")
     st.info(f"{cancion_alternative}")
     if alt_bm_list:
-        bm_id_a = alt_bm_list[0]['id'] if isinstance(alt_bm_list[0], dict) else alt_bm_list[0]
-        st.markdown(f"[🔗 Descargar / Ver Alternative](https://osu.ppy.sh/beatmapsets/2609777#mania/{bm_id_a})")
+        st.markdown(f"[🔗 Descargar / Ver Alternative](https://osu.ppy.sh/beatmapsets/{set_alt_id})")
     st.write("---")
 
     # --- REGISTRO Y CÁLCULO ---
@@ -681,7 +713,7 @@ with tab_osu:
                             "tipo": tipo_envio,
                             "cancion": cancion_daily if tipo_envio == "Daily" else cancion_alternative,
                             "dificultad": diff_elegida,
-                            "timestamp": datetime.now(mx_tz).isoformat(),
+                            "timestamp": datetime.now().isoformat(),
                             "fecha": today
                         }
                         db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score)
