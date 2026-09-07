@@ -35,18 +35,18 @@ st.sidebar.header("🔐 Panel de Admin (osu!)")
 password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_admin_osu")
 
 CLIENT_ID = '65710'
-    CLIENT_SECRET = 'l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0'
+CLIENT_SECRET = 'l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0'
 
-    def get_osu_token():
-        url = "https://osu.ppy.sh/oauth/token"
-        data = {
-            'client_id': CLIENT_ID,
-            'client_secret': CLIENT_SECRET,
-            'grant_type': 'client_credentials',
-            'scope': 'public'
-        }
-        r = requests.post(url, data=data)
-        return r.json().get('access_token')
+def get_osu_token():
+    url = "https://osu.ppy.sh/oauth/token"
+    data = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'grant_type': 'client_credentials',
+        'scope': 'public'
+    }
+    r = requests.post(url, data=data)
+    return r.json().get('access_token')
         
 if password_input == PASSWORD_ADMIN:
     st.sidebar.success("Acceso concedido")
