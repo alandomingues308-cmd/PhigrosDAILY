@@ -48,7 +48,7 @@ def get_osu_token():
     r = requests.post(url, data=data)
     return r.json().get('access_token')
 
-def osu_actual(url_beatmap: str, modo_config: str):
+def osu_actual(url_beatmap, modo_config: str):
     match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
     set_id = match_set.group(1) if match_set else None
 
