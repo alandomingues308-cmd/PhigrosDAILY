@@ -571,53 +571,52 @@ with tab_osu:
     import pandas as pd
     from datetime import datetime
     import requests
+    from datetime import datetime, timezone, timedelta
 
-from datetime import datetime, timezone, timedelta
+    # --- OBTENER CONFIGURACIÓN ACTUAL Y AUTOMATIZACIÓN ---
+    config_ref = db.collection("config").document("canciones_activas_osu")
+    config_doc = config_ref.get()
+    config_data = config_doc.to_dict() if config_doc.exists else {}
+ 
+    now = datetime.now(timezone.utc)
+    last_updated_str = config_data.get("last_updated")
 
-# --- OBTENER CONFIGURACIÓN ACTUAL Y AUTOMATIZACIÓN ---
-config_ref = db.collection("config").document("canciones_activas_osu")
-config_doc = config_ref.get()
-config_data = config_doc.to_dict() if config_doc.exists else {}
-
-now = datetime.now(timezone.utc)
-last_updated_str = config_data.get("last_updated")
-
-# Comprobar si nunca se ha configurado o si han transcurrido 24 horas o más
-necesita_actualizacion = False
-if not last_updated_str:
-    necesita_actualizacion = True
-else:
-    try:
-        last_updated = datetime.fromisoformat(last_updated_str)
-        if now - last_updated >= timedelta(hours=24):
-            necesita_actualizacion = True
-    except ValueError:
+    # Comprobar si nunca se ha configurado o si han transcurrido 24 horas o más
+    necesita_actualizacion = False
+    if not last_updated_str:
         necesita_actualizacion = True
+    else:
+        try:
+            last_updated = datetime.fromisoformat(last_updated_str)
+            if now - last_updated >= timedelta(hours=24):
+                necesita_actualizacion = True
+        except ValueError:
+            necesita_actualizacion = True
 
-if necesita_actualizacion:
-    # Seleccionar 2 números aleatorios únicos entre 1 y 6,000,000
-    id_daily, id_alt = random.sample(range(1, 6000001), 2)
+    if necesita_actualizacion:
+        # Seleccionar 2 números aleatorios únicos entre 1 y 6,000,000
+        id_daily, id_alt = random.sample(range(1, 6000001), 2)
     
-    # Formatear la información
-    cancion_daily = f"Beatmap ID: {id_daily}"
-    cancion_alternative = f"Beatmap ID: {id_alt}"
+        # Formatear la información
+        cancion_daily = f"Beatmap ID: {id_daily}"
+        cancion_alternative = f"Beatmap ID: {id_alt}"
     
-    # Actualizar el diccionario y guardar en Firestore
-    config_data.update({
-        "daily": cancion_daily,
-        "alternative": cancion_alternative,
-        "daily_beatmaps": [id_daily],
-        "alternative_beatmaps": [id_alt],
-        "last_updated": now.isoformat()
-    })
-    
-    config_ref.set(config_data, merge=True)
+        # Actualizar el diccionario y guardar en Firestore
+        config_data.update({
+            "daily": cancion_daily,
+            "alternative": cancion_alternative,
+            "daily_beatmaps": [id_daily],
+            "alternative_beatmaps": [id_alt],
+            "last_updated": now.isoformat()
+        })
+      
+        config_ref.set(config_data, merge=True)
 
-# Variables principales obtenidas del estado actualizado
-cancion_daily = config_data.get("daily", "Sin configurar")
-cancion_alternative = config_data.get("alternative", "Sin configurar")
-daily_bm_list = config_data.get("daily_beatmaps", [])
-alt_bm_list = config_data.get("alternative_beatmaps", [])
+    # Variables principales obtenidas del estado actualizado
+    cancion_daily = config_data.get("daily", "Sin configurar")
+    cancion_alternative = config_data.get("alternative", "Sin configurar")
+    daily_bm_list = config_data.get("daily_beatmaps", [])
+    alt_bm_list = config_data.get("alternative_beatmaps", [])
 
 
     # --- INTERFAZ ---
