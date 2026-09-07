@@ -612,9 +612,9 @@ with tab_osu:
             st.sidebar.write(f"Error en ha_pasado_mas_de_24h ({modo}): {e}")
             return True
             
-    def obtener_beatmapset_valido(max_intentos=20):
+    def obtener_beatmapset_valido(max_intentos=50):
         for _ in range(max_intentos):
-            beatmapset_id = random.randint(100000, 2200000)  # rango más realista
+            beatmapset_id = random.randint(1, 6000000)  
             try:
                 token = get_osu_token()
                 headers = {"Authorization": f"Bearer {token}"}
