@@ -34,12 +34,7 @@ st.sidebar.write("---")
 st.sidebar.header("🔐 Panel de Admin (osu!)")
 password_input = st.sidebar.text_input("Contraseña", type="password", key="pwd_admin_osu")
 
-if password_input == PASSWORD_ADMIN:
-    st.sidebar.success("Acceso concedido")
-    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
-    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
-    
-    CLIENT_ID = '65710'
+CLIENT_ID = '65710'
     CLIENT_SECRET = 'l6nKIojPmG72RM7LsuHYVyH9PpCrSJAkqPen7Ax0'
 
     def get_osu_token():
@@ -52,6 +47,12 @@ if password_input == PASSWORD_ADMIN:
         }
         r = requests.post(url, data=data)
         return r.json().get('access_token')
+        
+if password_input == PASSWORD_ADMIN:
+    st.sidebar.success("Acceso concedido")
+    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
+    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
+    
 
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
         match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
