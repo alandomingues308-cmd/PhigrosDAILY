@@ -47,14 +47,8 @@ def get_osu_token():
     }
     r = requests.post(url, data=data)
     return r.json().get('access_token')
-        
-if password_input == PASSWORD_ADMIN:
-    st.sidebar.success("Acceso concedido")
-    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
-    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
-    
 
-    if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
+def osu_actual():
         match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
         set_id = match_set.group(1) if match_set else None
         
@@ -85,14 +79,17 @@ if password_input == PASSWORD_ADMIN:
                         f"{modo_config}_timestamp": ahora.isoformat()
     
                     }, merge=True)
-                    st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
-                else:
-                    st.sidebar.error("No se pudo obtener información del beatmapset. Verifica el ID.")
-            except Exception as e:
-                st.sidebar.error(f"Error al conectar con API: {e}")
-        else:
-            st.sidebar.error("Enlace de osu! inválido (debe ser un beatmapset).")
 
+if password_input == PASSWORD_ADMIN:
+    st.sidebar.success("Acceso concedido")
+    modo_config = st.sidebar.radio("¿Qué modo configurar?", ["Daily", "Alternative"], key="modo_cfg_osu")
+    url_beatmap = st.sidebar.text_input(f"Enlace del beatmapset ({modo_config})", key=f"url_{modo_config}")
+    
+
+    if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
+        osu_actual()
+        st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
+                
 
 
 
