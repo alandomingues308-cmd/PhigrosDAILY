@@ -611,13 +611,13 @@ with tab_osu:
         ID= random.randint(1, 6000000)
         modo_config = "daily"
         url_beatmap = f"https://osu.ppy.sh/beatmapsets/1538061#mania/{ID}"
-        osu_actual()
+        osu_actual(url_beatmap,modo_config)
 
     if ha_pasado_mas_de_24h("alternative"):
         ID= random.randint(1, 6000000)
         modo_config = "alternative"
         url_beatmap = f"https://osu.ppy.sh/beatmapsets/1538061#mania/{ID}"
-        osu_actual()
+        osu_actual(url_beatmap,modo_config)
 
     
     # --- OBTENER CONFIGURACIÓN ACTUAL ---
