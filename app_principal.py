@@ -49,7 +49,9 @@ def get_osu_token():
     return r.json().get('access_token')
 
 def osu_actual():
-        
+    match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
+    set_id = match_set.group(1) if match_set else None
+
         if true:
             try:
                 token = get_osu_token()
@@ -87,8 +89,6 @@ if password_input == PASSWORD_ADMIN:
     
 
     if st.sidebar.button(f"Guardar {modo_config}", key=f"btn_save_{modo_config}"):
-        match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
-        set_id = match_set.group(1) if match_set else None
         osu_actual()
         st.sidebar.success(f"¡Configurado con {len(beatmaps_list)} dificultades de Mania!")
         
@@ -571,13 +571,55 @@ with tab_arcaea:
             st.dataframe(acum.sort_values("Potencial_Total", ascending=False)[["usuario","Potencial_Total","Canciones"]], use_container_width=True, hide_index=True)
 
                              #================== OSU =====================
-
 with tab_osu:
     import rosu_pp_py as rosu
     import pandas as pd
     from datetime import datetime
     import requests
 
+    def ha_pasado_mas_de_24h(modo: str) -> bool:
+    
+        doc = db.collection("config").document("canciones_activas_osu").get()
+    
+        if not doc.exists:
+            return True   # no hay nada configurado → se considera "caducado"
+    
+        data = doc.to_dict()
+        ts_str = data.get(f"{modo}_timestamp")
+    
+        if not ts_str:
+            return True   
+    
+        try:
+        # Convertir el string ISO a datetime aware
+            timestamp_guardado = datetime.fromisoformat(ts_str)
+        
+            if timestamp_guardado.tzinfo is None:
+                timestamp_guardado = mx_tz.localize(timestamp_guardado)
+            else:
+                timestamp_guardado = timestamp_guardado.astimezone(mx_tz)
+        
+            ahora = datetime.now(mx_tz)
+            diferencia = ahora - timestamp_guardado
+        
+            return diferencia > timedelta(hours=24)
+    
+        except Exception:
+            return True  
+            
+    if ha_pasado_mas_de_24h("daily"):
+        ID= random.sample(range(1, 6000001))
+        modo_config = "daily"
+        url_beatmap = f"https://osu.ppy.sh/beatmapsets/1538061#mania/{ID}"
+        osu_actual()
+
+    if ha_pasado_mas_de_24h("alternative"):
+        ID= random.sample(range(1, 6000001))
+        modo_config = "alternative"
+        url_beatmap = f"https://osu.ppy.sh/beatmapsets/1538061#mania/{ID}"
+        osu_actual()
+
+    
     # --- OBTENER CONFIGURACIÓN ACTUAL ---
     config_ref = db.collection("config").document("canciones_activas_osu").get()
     config_data = config_ref.to_dict() if config_ref.exists else {}
@@ -586,43 +628,6 @@ with tab_osu:
     cancion_alternative = config_data.get("alternative", "Sin configurar")
     daily_bm_list = config_data.get("daily_beatmaps", [])
     alt_bm_list = config_data.get("alternative_beatmaps", [])
-
-    def ha_pasado_mas_de_24h(modo: str) -> bool:
-    """
-    modo = "daily" o "alternative"
-    Devuelve True si el timestamp no existe o si ya pasaron más de 24 horas.
-    """
-    doc = db.collection("config").document("canciones_activas_osu").get()
-    
-    if not doc.exists:
-        return True   # no hay nada configurado → se considera "caducado"
-    
-    data = doc.to_dict()
-    ts_str = data.get(f"{modo}_timestamp")
-    
-    if not ts_str:
-        return True   
-    
-    try:
-        # Convertir el string ISO a datetime aware
-        timestamp_guardado = datetime.fromisoformat(ts_str)
-        
-        if timestamp_guardado.tzinfo is None:
-            timestamp_guardado = mx_tz.localize(timestamp_guardado)
-        else:
-            timestamp_guardado = timestamp_guardado.astimezone(mx_tz)
-        
-        ahora = datetime.now(mx_tz)
-        diferencia = ahora - timestamp_guardado
-        
-        return diferencia > timedelta(hours=24)
-    
-    except Exception:
-        return True  
-
-if ha_pasado_mas_de_24h("daily"):
-    
-    
 
     # --- INTERFAZ ---
     st.title("🎵 Canción del Día - Osu")
