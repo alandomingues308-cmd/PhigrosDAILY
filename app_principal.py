@@ -52,7 +52,7 @@ def osu_actual():
     match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
     set_id = match_set.group(1) if match_set else None
 
-    if true:
+    if sed_id:
             try:
                 token = get_osu_token()
                 headers = {"Authorization": f"Bearer {token}"}
