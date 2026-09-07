@@ -606,34 +606,38 @@ with tab_osu:
     import requests
 
     def ha_pasado_mas_de_24h(modo: str) -> bool:
-    
-        doc = db.collection("config").document("canciones_activas_osu").get()
-    
-        if not doc.exists:
-            return True   # no hay nada configurado → se considera "caducado"
-    
-        data = doc.to_dict()
-        ts_str = data.get(f"{modo}_timestamp")
-    
-        if not ts_str:
-            return True   
-    
         try:
-        # Convertir el string ISO a datetime aware
+            doc = db.collection("config").document("canciones_activas_osu").get()
+
+            if not doc.exists:
+                return True
+
+            data = doc.to_dict()
+            ts_str = data.get(f"{modo}_timestamp")
+
+            if not ts_str:
+                return True
+
+            # Limpiamos el formato por si acaso
+            ts_str = ts_str.replace("Z", "+00:00")
+
             timestamp_guardado = datetime.fromisoformat(ts_str)
-        
+
+            # Nos aseguramos de que tenga zona horaria
             if timestamp_guardado.tzinfo is None:
                 timestamp_guardado = mx_tz.localize(timestamp_guardado)
             else:
                 timestamp_guardado = timestamp_guardado.astimezone(mx_tz)
-        
+
             ahora = datetime.now(mx_tz)
             diferencia = ahora - timestamp_guardado
-        
+
             return diferencia > timedelta(hours=24)
-    
-        except Exception:
-            st.write("aqui esta el error")
+
+        except Exception as e:
+        # Si algo falla, consideramos que ya pasó el tiempo (para que intente actualizar)
+            st.sidebar.write(f"Error en ha_pasado_mas_de_24h ({modo}): {e}")
+            return True
             
     def obtener_beatmapset_valido(max_intentos=20):
         for _ in range(max_intentos):
