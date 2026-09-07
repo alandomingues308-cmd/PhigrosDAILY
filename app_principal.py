@@ -633,7 +633,7 @@ with tab_osu:
             return diferencia > timedelta(hours=24)
     
         except Exception:
-            return True  
+            st.write("aqui esta el error")
             
     if ha_pasado_mas_de_24h("Daily"):
         ID= random.randint(1, 6000000)
