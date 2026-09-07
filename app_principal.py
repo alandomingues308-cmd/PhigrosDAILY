@@ -612,7 +612,7 @@ with tab_osu:
             st.sidebar.write(f"Error en ha_pasado_mas_de_24h ({modo}): {e}")
             return True
             
-    def obtener_beatmapset_valido(max_intentos=50):
+    def obtener_beatmapset(max_intentos=50):
         for _ in range(max_intentos):
             beatmapset_id = random.randint(1, 6000000)  
             try:
@@ -629,7 +629,7 @@ with tab_osu:
 
                 data = res.json()
 
-                # Solo aceptamos si tiene al menos una dificultad de Mania
+                # Solo se elige si la canción tiene al menos una dificultad de Mania
                 tiene_mania = any(bm.get("mode") == "mania" for bm in data.get("beatmaps", []))
             
                 if tiene_mania and "artist" in data:
@@ -641,12 +641,12 @@ with tab_osu:
         return None
 
     if ha_pasado_mas_de_24h("daily"):
-        url = obtener_beatmapset_valido()
+        url = obtener_beatmapset()
         if url:
             osu_actual(url, "daily")
 
     if ha_pasado_mas_de_24h("alternative"):
-        url = obtener_beatmapset_valido()
+        url = obtener_beatmapset()
         if url:
             osu_actual(url, "alternative")
     
