@@ -80,7 +80,7 @@ if password_input == PASSWORD_ADMIN:
                     
                     db.collection("config").document("canciones_activas_osu").set({
                         modo_config.lower(): nombre_cancion_final,
-                        f"{modo_config.lower()}_beatmaps": beatmaps_list
+                        f"{modo_config.lower()}_beatmaps": beatmaps_list,
                         f"{modo_config}_timestamp": ahora.isoformat()
     
                     }, merge=True)
