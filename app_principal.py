@@ -608,13 +608,13 @@ with tab_osu:
             return True  
             
     if ha_pasado_mas_de_24h("daily"):
-        ID= random.sample(range(1, 6000001))
+        ID= random.randint(range(1, 6000001))
         modo_config = "daily"
         url_beatmap = f"https://osu.ppy.sh/beatmapsets/1538061#mania/{ID}"
         osu_actual()
 
     if ha_pasado_mas_de_24h("alternative"):
-        ID= random.sample(range(1, 6000001))
+        ID= random.randint(range(1, 6000001))
         modo_config = "alternative"
         url_beatmap = f"https://osu.ppy.sh/beatmapsets/1538061#mania/{ID}"
         osu_actual()
