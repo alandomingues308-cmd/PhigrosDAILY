@@ -48,66 +48,39 @@ def get_osu_token():
     r = requests.post(url, data=data)
     return r.json().get('access_token')
 
-def osu_actual(url_beatmap: str, modo_config: str):
-    st.sidebar.write(f"URL recibida: {url_beatmap}")  # ← debug
-    
+def osu_actual(url_beatmap, modo_config: str):
     match_set = re.search(r"beatmapsets/(\d+)", url_beatmap)
     set_id = match_set.group(1) if match_set else None
 
-    if not set_id:
-        st.sidebar.error("No se encontró un beatmapset ID válido en el enlace")
-        return
+    if set_id:
+            try:
+                token = get_osu_token()
+                headers = {"Authorization": f"Bearer {token}"}
+                res = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers)
+                data = res.json()
+                
+                if 'artist' in data:
+                    nombre_cancion_final = f"{data['artist']} - {data['title']}"
+                    beatmaps_list = []
+                    
+                    for bm in data.get('beatmaps', []):
+                        if bm['mode'] == 'mania':
+                            beatmaps_list.append({
+                                "id": bm['id'],
+                                "version": bm['version']
+                            })
 
-    st.sidebar.write(f"Set ID encontrado: {set_id}")  # ← debug
-
-    try:
-        token = get_osu_token()
-        if not token:
-            st.sidebar.error("No se pudo obtener el token de osu!")
-            return
-
-        headers = {"Authorization": f"Bearer {token}"}
-        res = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers)
-        
-        st.sidebar.write(f"Status code: {res.status_code}")  # ← debug
-        
-        data = res.json()
-
-        if 'artist' not in data:
-            st.sidebar.error("La API no devolvió información del beatmapset")
-            st.sidebar.json(data)  # muestra lo que devolvió
-            return
-
-        nombre_cancion_final = f"{data['artist']} - {data['title']}"
-        beatmaps_list = []
-
-        for bm in data.get('beatmaps', []):
-            if bm['mode'] == 'mania':
-                beatmaps_list.append({
-                    "id": bm['id'],
-                    "version": bm['version']
-                })
-
-        st.sidebar.write(f"Dificultades Mania encontradas: {len(beatmaps_list)}")  # ← debug
-
-        if len(beatmaps_list) == 0:
-            st.sidebar.warning("Este beatmapset no tiene dificultades de Mania")
-            return
-
-        ahora = datetime.now(mx_tz)
-        modo_key = modo_config.lower()
-
-        db.collection("config").document("canciones_activas_osu").set({
-            modo_key: nombre_cancion_final,
-            f"{modo_key}_beatmaps": beatmaps_list,
-            f"{modo_key}_timestamp": ahora.isoformat()
-        }, merge=True)
-
-        st.sidebar.success(f"¡Guardado correctamente! ({nombre_cancion_final})")
-
-    except Exception as e:
-        st.sidebar.error(f"Error: {e}")
-
+                    ahora = datetime.now(mx_tz)
+    
+                    
+                    db.collection("config").document("canciones_activas_osu").set({
+                        modo_config.lower(): nombre_cancion_final,
+                        f"{modo_config.lower()}_beatmaps": beatmaps_list,
+                        f"{modo_config.lower()}_timestamp": ahora.isoformat()
+    
+                    }, merge=True)
+            except Exception as e:
+                st.sidebar.error(f"Error al conectar con API: {e}")
 
 
 if password_input == PASSWORD_ADMIN:
