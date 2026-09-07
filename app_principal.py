@@ -569,98 +569,28 @@ with tab_arcaea:
 with tab_osu:
     import rosu_pp_py as rosu
     import pandas as pd
-    from datetime import datetime, timezone, timedelta
+    from datetime import datetime
     import requests
 
-    # --- OBTENER CONFIGURACIÓN ACTUAL Y AUTOMATIZACIÓN ---
-    config_ref = db.collection("config").document("canciones_activas_osu")
-    config_doc = config_ref.get()
-    config_data = config_doc.to_dict() if config_doc.exists else {}
+    # --- OBTENER CONFIGURACIÓN ACTUAL ---
+    config_ref = db.collection("config").document("canciones_activas_osu").get()
+    config_data = config_ref.to_dict() if config_ref.exists else {}
 
-    now = datetime.now(timezone.utc)
-    last_updated_str = config_data.get("last_updated")
-
-    necesita_actualizacion = False
-    if not last_updated_str:
-        necesita_actualizacion = True
-    else:
-        try:
-            last_updated = datetime.fromisoformat(last_updated_str)
-            if now - last_updated >= timedelta(hours=24):
-                necesita_actualizacion = True
-        except ValueError:
-            necesita_actualizacion = True
-
-    def obtener_info_beatmapset_completo(beatmap_id):
-        """Obtiene el título y todas las dificultades de modo Mania del conjunto."""
-        try:
-            token = get_osu_token()
-            headers = {"Authorization": f"Bearer {token}"}
-            
-            # 1. Obtener la info del beatmap para extraer el beatmapset_id
-            res_bm = requests.get(f"https://osu.ppy.sh/api/v2/beatmaps/{beatmap_id}", headers=headers, timeout=5)
-            if res_bm.status_code == 200:
-                data_bm = res_bm.json()
-                set_id = data_bm.get("beatmapset_id")
-                
-                # 2. Consultar el beatmapset para traer todas las dificultades
-                res_set = requests.get(f"https://osu.ppy.sh/api/v2/beatmapsets/{set_id}", headers=headers, timeout=5)
-                if res_set.status_code == 200:
-                    data_set = res_set.json()
-                    nombre = f"{data_set.get('artist', 'Desconocido')} - {data_set.get('title', 'Sin Título')}"
-                    
-                    beatmaps_mania = []
-                    for bm in data_set.get("beatmaps", []):
-                        if bm.get("mode") == "mania":
-                            beatmaps_mania.append({
-                                "id": bm["id"],
-                                "version": bm["version"]
-                            })
-                    
-                    if beatmaps_mania:
-                        return nombre, beatmaps_mania, set_id
-        except Exception:
-            pass
-            
-        # Respaldo en caso de error o que no exista el ID
-        return f"Beatmap ID: {beatmap_id}", [{"id": beatmap_id, "version": "Mania"}], 2609777
-
-    if necesita_actualizacion:
-        id_daily, id_alt = random.sample(range(1, 6000001), 2)
-        
-        nombre_daily, list_daily, set_daily = obtener_info_beatmapset_completo(id_daily)
-        nombre_alt, list_alt, set_alt = obtener_info_beatmapset_completo(id_alt)
-
-        config_data.update({
-            "daily": nombre_daily,
-            "alternative": nombre_alt,
-            "daily_beatmaps": list_daily,
-            "alternative_beatmaps": list_alt,
-            "set_id_daily": set_daily,
-            "set_id_alt": set_alt,
-            "last_updated": now.isoformat()
-        })
-      
-        config_ref.set(config_data, merge=True)
-
-    # Variables principales obtenidas del estado actualizado
     cancion_daily = config_data.get("daily", "Sin configurar")
     cancion_alternative = config_data.get("alternative", "Sin configurar")
     daily_bm_list = config_data.get("daily_beatmaps", [])
     alt_bm_list = config_data.get("alternative_beatmaps", [])
-    set_daily_id = config_data.get("set_id_daily", 2609777)
-    set_alt_id = config_data.get("set_id_alt", 2609777)
 
     # --- INTERFAZ ---
     st.title("🎵 Canción del Día - Osu")
     st.success(f"{cancion_daily}")
     if daily_bm_list:
-        st.markdown(f"[🔗 Descargar / Ver Daily](https://osu.ppy.sh/beatmapsets/{set_daily_id})")
+        st.markdown(f"[🔗 Descargar / Ver Daily](https://osu.ppy.sh/b/{daily_bm_list[0]['id']})")
     
     st.subheader("Canción Alternativa")
     st.info(f"{cancion_alternative}")
     if alt_bm_list:
-        st.markdown(f"[🔗 Descargar / Ver Alternative](https://osu.ppy.sh/beatmapsets/{set_alt_id})")
+        st.markdown(f"[🔗 Descargar / Ver Alternative](https://osu.ppy.sh/b/{alt_bm_list[0]['id']})")
     st.write("---")
 
     # --- REGISTRO Y CÁLCULO ---
@@ -671,13 +601,7 @@ with tab_osu:
     current_bm_list = daily_bm_list if tipo_envio == "Daily" else alt_bm_list
     
     if current_bm_list:
-        opciones_diff = {}
-        for bm in current_bm_list:
-            if isinstance(bm, dict):
-                opciones_diff[bm.get("version", "Mania")] = bm.get("id")
-            else:
-                opciones_diff["Mania"] = bm
-
+        opciones_diff = {bm["version"]: bm["id"] for bm in current_bm_list}
         diff_elegida = st.selectbox("Dificultad:", list(opciones_diff.keys()), key="diff_sel")
         beatmap_id = opciones_diff[diff_elegida]
 
@@ -688,40 +612,34 @@ with tab_osu:
             count_320 = st.number_input("320 counts (MAX)", 0, 50000, 1500, 1)
 
         if st.button("Subir puntuación"):
-            if not usuario_final_o.strip():
-                st.warning("Ingresa un nombre de usuario válido.")
-            else:
-                try:
-                    headers = {'User-Agent': 'Mozilla/5.0'}
-                    resp = requests.get(f"https://osu.ppy.sh/osu/{beatmap_id}", headers=headers)
-                    if resp.status_code != 200 or not resp.content:
-                        st.error("No se pudo obtener la información técnica del beatmap. Es posible que el ID aleatorio no exista en los servidores de osu!.")
-                    else:
-                        mapa = rosu.Beatmap(bytes=resp.content)
-                        mapa.convert(rosu.GameMode.Mania)
-                        
-                        perf = rosu.Performance(
-                            accuracy=accuracy,
-                            n_geki=count_320
-                        )
-                        result = perf.calculate(mapa)
-                        pp_final = result.pp
+            try:
+                headers = {'User-Agent': 'Mozilla/5.0'}
+                resp = requests.get(f"https://osu.ppy.sh/osu/{beatmap_id}", headers=headers)
+                mapa = rosu.Beatmap(bytes=resp.content)
+                mapa.convert(rosu.GameMode.Mania)
+                
+                perf = rosu.Performance(
+                    accuracy=accuracy,
+                    n_geki=count_320
+                )
+                result = perf.calculate(mapa)
+                pp_final = result.pp
 
-                        nuevo_score = {
-                            "usuario": usuario_final_o,
-                            "pp": round(pp_final, 2),
-                            "tipo": tipo_envio,
-                            "cancion": cancion_daily if tipo_envio == "Daily" else cancion_alternative,
-                            "dificultad": diff_elegida,
-                            "timestamp": datetime.now().isoformat(),
-                            "fecha": today
-                        }
-                        db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score)
-                        st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP**!")
-                        st.balloons()
-                except Exception as e:
-                    st.error(f"Error técnico al calcular el puntaje: {e}")
-
+                nuevo_score = {
+                    "usuario": usuario_final_o,
+                    "pp": round(pp_final, 2),
+                    "tipo": tipo_envio,
+                    "cancion": cancion_daily if tipo_envio == "Daily" else cancion_alternative,
+                    "dificultad": diff_elegida,
+                    "timestamp": datetime.now().isoformat(),
+                    "fecha": today
+                }
+                db.collection("scores_osu").document(f"{usuario_final_o}_{tipo_envio}_{today}").set(nuevo_score)
+                st.success(f"✅ ¡Registrado con **{round(pp_final, 2)} PP**!")
+                st.balloons()
+            except Exception as e:
+                st.error(f"Error técnico: {e}")
+ 
     # --- TABLAS DE CLASIFICACIÓN ---
     st.write("---")
     st.header("📊 Tablas de Clasificación")
@@ -741,14 +659,14 @@ with tab_osu:
             st.markdown("### 🏆 Top Daily")
             df_daily = df_osu[(df_osu["tipo"] == "Daily") & (df_osu["cancion"] == cancion_daily)]
             if not df_daily.empty:
-                st.dataframe(df_daily.sort_values(by="pp", ascending=False)[["usuario", "pp", "dificultad"]], use_container_width=True, hide_index=True)
+                st.dataframe(df_daily.sort_values(by="pp", ascending=False)[["usuario", "pp", "dificultad"]], use_container_width=True)
             else:
                 st.info("Aún no hay registros para el Daily actual.")
             
             st.markdown("### 🥈 Top Alternative")
             df_alt = df_osu[(df_osu["tipo"] == "Alternative") & (df_osu["cancion"] == cancion_alternative)]
             if not df_alt.empty:
-                st.dataframe(df_alt.sort_values(by="pp", ascending=False)[["usuario", "pp", "dificultad"]], use_container_width=True, hide_index=True)
+                st.dataframe(df_alt.sort_values(by="pp", ascending=False)[["usuario", "pp", "dificultad"]], use_container_width=True)
             else:
                 st.info("Aún no hay registros para el Alternative actual.")
 
@@ -756,7 +674,8 @@ with tab_osu:
             best = df_osu.sort_values(by=['usuario', 'fecha_date', 'pp'], ascending=[True, True, False]).drop_duplicates(subset=['usuario', 'fecha_date'])
             acum = best.groupby("usuario").agg(PP_Total=("pp", "sum"), Canciones=("pp", "count")).reset_index()
             acum["PP_Total"] = acum["PP_Total"].round(2)
-            st.dataframe(acum.sort_values("PP_Total", ascending=False), use_container_width=True, hide_index=True)
+            st.dataframe(acum.sort_values("PP_Total", ascending=False), use_container_width=True)
     else:
         st.info("No hay registros en la base de datos de osu! todavía.")
-        
+
+                    
