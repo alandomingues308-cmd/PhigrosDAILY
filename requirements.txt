@@ -8,7 +8,6 @@ google-cloud-firestore
 google-auth
 rosu-pp-py
 requests
-pytesseract
 opencv-python-headless
 
 
