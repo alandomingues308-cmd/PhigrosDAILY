@@ -67,4 +67,114 @@
         }
 
         .cake:hover {
-            transform: scale(1.2) rotate(5
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .btn {
+            background-color: #0077b6;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.4);
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background-color: #00b4d8;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.6);
+        }
+
+        #mensaje-sorpresa {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #48cae4;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 10px rgba(72, 202, 228, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Pastel interactivo -->
+        <div class="cake" onclick="lanzarConfeti()" title="¡Haz clic en el pastel!">🎂</div>
+        
+        <h1 id="titulo-cumple">¡Feliz Cumpleaños!</h1>
+        <p>Que este día esté lleno de alegría, sorpresas y momentos inolvidables. ¡Haz clic en los botones para celebrar!</p>
+
+        <!-- Botones de interacción -->
+        <div>
+            <button class="btn" onclick="lanzarConfeti()">🎉 ¡Lanzar Confeti!</button>
+            <button class="btn" onclick="mostrarMensaje()">✨ Mensaje Especial</button>
+        </div>
+
+        <!-- Área de mensajes dinámicos -->
+        <div id="mensaje-sorpresa"></div>
+    </div>
+
+    <script>
+        // Array de frases de felicitación
+        const frases = [
+            "🌟 ¡Te deseo un año lleno de metas cumplidas y mucha felicidad!",
+            "🚀 Que la vida te sorprenda hoy y siempre con grandes momentos.",
+            "🎈 ¡A por un año más de grandes aventuras y sonrisas!",
+            "🎁 Que todos tus deseos se hagan realidad en este nuevo año de vida.",
+            "🥂 ¡Brindemos por ti y por todo lo maravilloso que está por venir!"
+        ];
+
+        function lanzarConfeti() {
+            // Efecto de confeti con tonos azules y celestes combinados
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#00b4d8', '#0077b6', '#90e0ef', '#48cae4', '#ffffff']
+            });
+        }
+
+        function mostrarMensaje() {
+            const contenedorMensaje = document.getElementById("mensaje-sorpresa");
+            const fraseAleatoria = frases[Math.floor(Math.random() * frases.length)];
+            
+            contenedorMensaje.style.opacity = 0;
+            setTimeout(() => {
+                contenedorMensaje.textContent = fraseAleatoria;
+                contenedorMensaje.style.opacity = 1;
+                contenedorMensaje.style.transition = "opacity 0.5s ease-in-out";
+            }, 200);
+
+            // Confeti lateral con tonos azules
+            confetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#00b4d8', '#90e0ef', '#caf0f8']
+            });
+            confetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#0077b6', '#00b4d8', '#ffffff']
+            });
+        }
+    </script>
+
+</body>
+</html>
