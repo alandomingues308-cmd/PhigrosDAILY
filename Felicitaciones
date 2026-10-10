@@ -115,7 +115,7 @@
         <div class="cake" onclick="lanzarConfeti()" title="¡Haz clic en el pastel!">🎂</div>
         
         <h1 id="titulo-cumple">¡Feliz Cumpleaños!</h1>
-        <p>Que este día esté lleno de alegría, sorpresas y momentos inolvidables. ¡Haz clic en los botones para celebrar!</p>
+        <p>Feliz cumpleaños atrasado, presiona los botones</p>
 
         <!-- Botones de interacción -->
         <div>
@@ -130,11 +130,13 @@
     <script>
         // Array de frases de felicitación
         const frases = [
-            "🌟 ¡Te deseo un año lleno de metas cumplidas y mucha felicidad!",
-            "🚀 Que la vida te sorprenda hoy y siempre con grandes momentos.",
-            "🎈 ¡A por un año más de grandes aventuras y sonrisas!",
-            "🎁 Que todos tus deseos se hagan realidad en este nuevo año de vida.",
-            "🥂 ¡Brindemos por ti y por todo lo maravilloso que está por venir!"
+            "🌟 Dejate embarrar en el pastel",
+            "🎁 Feliz cumpleaños (Alan)",
+            "🎈 Felicitaciones punchis (Anónimo)",
+            "🎁 Feliz cumpleaños puto! (Diego)",
+            "🥂 No te emborraches",
+
+
         ];
 
         function lanzarConfeti() {
