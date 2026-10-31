@@ -189,11 +189,7 @@ with tab_phigros:
       # Guardamos en el historial y fijamos en Firestore para el resto del día
     guardar_en_historial([CANCION_DAILY, CANCION_ALT])
         
-    daily_ref.set({
-        "fecha": today,
-        "daily": CANCION_DAILY,
-        "alternative": CANCION_ALT
-     })
+
     
 
     if daily_song["AT"] is not None:
