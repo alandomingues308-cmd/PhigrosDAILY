@@ -181,7 +181,7 @@ with tab_phigros:
     if not songs_disponibles:
         songs_disponibles = songs  
     random.seed(today)
-    daily_song = {"title": "Ad astra per aspera", "IN": 16.3, "AT": null}
+    daily_song = {"title": "Ad astra per aspera", "IN": 16.3, "AT": None}
     alternative_song = {"title": "Desultory Signals", "IN": 17, "AT": 18}
 
     CANCION_DAILY = daily_song["title"]
