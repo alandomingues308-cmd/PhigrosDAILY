@@ -176,21 +176,6 @@ with tab_phigros:
 
     songs = load_songs()
 
-    # 1. Consultar si ya existe el Daily de hoy en Firestore
-    daily_ref = db.collection("config").document("canciones_activas_phigros")
-    daily_doc = daily_ref.get()
-
-    if daily_doc.exists and daily_doc.to_dict().get("fecha") == today:
-        # Si ya fue elegido hoy, lo cargamos directamente de la base de datos
-        data_hoy = daily_doc.to_dict()
-        CANCION_DAILY = data_hoy["daily"]
-        CANCION_ALT = data_hoy["alternative"]
-        
-        # Obtenemos los diccionarios completos de las canciones
-        daily_song = next(s for s in songs if s["title"] == CANCION_DAILY)
-        alternative_song = next(s for s in songs if s["title"] == CANCION_ALT)
-    else:
-        # Si es un día nuevo, se elige aleatoriamente respetando el historial
         historial_titulos = cargar_historial()
         songs_disponibles = [s for s in songs if s["title"] not in historial_titulos]
         if not songs_disponibles:
