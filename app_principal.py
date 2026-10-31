@@ -176,25 +176,23 @@ with tab_phigros:
 
     songs = load_songs()
 
-        historial_titulos = cargar_historial()
-        songs_disponibles = [s for s in songs if s["title"] not in historial_titulos]
-        if not songs_disponibles:
-            songs_disponibles = songs  
+     historial_titulos = cargar_historial()
+     songs_disponibles = [s for s in songs if s["title"] not in historial_titulos]
+     if not songs_disponibles:
+           songs_disponibles = songs  
+      random.seed(today)
+      daily_song = {"title": "Ad astra per aspera", "IN": 16.3, "AT": null}
+      alternative_song = {"title": "Desultory Signals", "IN": 17, "AT": 18}
 
-        random.seed(today)
-        daily_song = {"title": "Ad astra per aspera", "IN": 16.3, "AT": null}
-        alternative_song = {"title": "Desultory Signals", "IN": 17, "AT": 18}
-
-        CANCION_DAILY = daily_song["title"]
-        CANCION_ALT = alternative_song["title"]
-
-        # Guardamos en el historial y fijamos en Firestore para el resto del día
-        guardar_en_historial([CANCION_DAILY, CANCION_ALT])
+      CANCION_DAILY = daily_song["title"]
+    CANCION_ALT = alternative_song["title"]
+      # Guardamos en el historial y fijamos en Firestore para el resto del día
+      guardar_en_historial([CANCION_DAILY, CANCION_ALT])
         
-        daily_ref.set({
-            "fecha": today,
-            "daily": CANCION_DAILY,
-            "alternative": CANCION_ALT
+       daily_ref.set({
+         "fecha": today,
+         "daily": CANCION_DAILY,
+         "alternative": CANCION_ALT
         })
     
 
