@@ -14,6 +14,8 @@ import json
 import rosu_pp_py as rosu
 import requests 
 
+st.title("Feliz cumpleaños yo :⁠-⁠) 🎉")
+
 # ====================== CONFIGURACIÓN ======================
 st.set_page_config(page_title="Daily Challenge", layout="wide")
 
